@@ -48,6 +48,7 @@ set "F1_TITLE=启用全局 node_modules"
 set "F1_STEP1=[1/4] 获取全局 node_modules 路径..."
 set "F1_STEP2=[2/4] 设置 NODE_PATH 环境变量..."
 set "F1_STEP3=[3/4] 禁用所有项目的本地 node_modules..."
+set "F1_STEP4=[4/4] 清理现有本地 node_modules 目录..."
 set "F1_SUCCESS=全局 node_modules 已启用!"
 set "F1_INFO=请先运行 [5] 安装依赖"
 
@@ -117,6 +118,7 @@ set "F1_TITLE=Enable Global node_modules"
 set "F1_STEP1=[1/4] Getting global node_modules path..."
 set "F1_STEP2=[2/4] Setting NODE_PATH environment variable..."
 set "F1_STEP3=[3/4] Disabling local node_modules for all projects..."
+set "F1_STEP4=[4/4] Cleaning existing local node_modules directories..."
 set "F1_SUCCESS=Global node_modules Enabled!"
 set "F1_INFO=Run [5] to install dependencies first time"
 
@@ -224,6 +226,7 @@ if "!LANG_SECTION!"=="en" (
     set "F1_STEP1=[1/4] Getting global node_modules path..."
     set "F1_STEP2=[2/4] Setting NODE_PATH environment variable..."
     set "F1_STEP3=[3/4] Disabling local node_modules for all projects..."
+    set "F1_STEP4=[4/4] Cleaning existing local node_modules directories..."
     set "F1_SUCCESS=Global node_modules Enabled!"
     set "F1_INFO=Run [5] to install dependencies first time"
 
@@ -293,7 +296,8 @@ set "F1_TITLE=启用全局 node_modules"
 set "F1_STEP1=[1/4] 获取全局 node_modules 路径..."
 set "F1_STEP2=[2/4] 设置 NODE_PATH 环境变量..."
 set "F1_STEP3=[3/4] 禁用所有项目的本地 node_modules..."
-set "F1_SUCCESS=全局 node_modules 已启用!"
+    set "F1_STEP4=[4/4] 清理现有本地 node_modules 目录..."
+    set "F1_SUCCESS=全局 node_modules 已启用!"
 set "F1_INFO=请先运行 [5] 安装依赖"
 
 set "F2_TITLE=重置 Node 配置"
@@ -420,6 +424,7 @@ echo Path: !GLOBAL_NODE_MODULES!
 echo.
 echo !F1_STEP2!
 setx NODE_PATH "!GLOBAL_NODE_MODULES!" >nul 2>&1
+set "NODE_PATH=!GLOBAL_NODE_MODULES!"
 
 echo.
 echo !F1_STEP3!
@@ -427,12 +432,23 @@ for /d %%d in (!REPO_ROOT!\*) do (
     if exist "%%d\package.json" (
         echo Configured: %%~nd
         (
-            echo # Disable local dependencies
-            echo global=true
             echo prefix=!GLOBAL_NODE_MODULES!
-            echo no-package-lock=true
-            echo silent=true
+            echo cache=!GLOBAL_NODE_MODULES!\.npm-cache
+            echo tmp=!TEMP!
+            echo global=true
+            echo prefer-global=true
         ) > "%%d\.npmrc"
+    )
+)
+
+echo.
+echo !F1_STEP4!
+for /d %%d in (!REPO_ROOT!\*) do (
+    if exist "%%d\package.json" (
+        if exist "%%d\node_modules" (
+            echo Cleaning: %%~nd
+            rd /s /q "%%d\node_modules" 2>nul
+        )
     )
 )
 
@@ -440,6 +456,9 @@ echo.
 echo ======================================================================
 echo !OK! !F1_SUCCESS!
 echo !F1_INFO!
+echo.
+echo Global Path: !GLOBAL_NODE_MODULES!
+echo NODE_PATH: !NODE_PATH!
 echo ======================================================================
 echo.
 pause
