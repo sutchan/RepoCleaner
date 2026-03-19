@@ -20,7 +20,7 @@
 
 ## ✨ 功能介绍
 
-本助手用于管理 `E:\Github\` 目录下的所有项目，自动解决以下痛点：
+本助手用于管理 GitHub 项目目录，自动解决以下痛点：
 
 | 问题 | 解决方案 |
 |------|----------|
@@ -40,10 +40,11 @@
 
 ### 使用步骤
 
-1. **将 `RepoCleaner.bat` 放在 `E:\Github\` 目录**
+1. **将 `RepoCleaner.bat` 放在项目根目录**
 2. **双击运行**
-3. **按数字菜单选择功能**
-4. **一次配置，所有项目永久干净**
+3. **选择仓库根目录**（支持自动检测、手动输入、保存配置）
+4. **按数字菜单选择功能**
+5. **一次配置，所有项目永久干净**
 
 ### 🌟 推荐使用流程
 
@@ -88,14 +89,11 @@
 一次性安装以下常用开发库：
 
 ```
-react react-dom
+react react-dom next
 vue @vue/cli
-next
 axios express
 pnpm yarn
-cross-env dotenv
-nodemon pm2
-rimraf mkdirp
+cross-env dotenv nodemon pm2 rimraf mkdirp
 ```
 
 ### 功能6：一键清理所有项目缓存
@@ -115,22 +113,32 @@ rimraf mkdirp
 
 ---
 
+## ⚙️ 智能配置
+
+### 目录选择方式
+
+运行脚本时支持多种目录选择方式：
+
+| 方式 | 说明 |
+|------|------|
+| 命令行参数 | `RepoCleaner.bat "D:\Projects"` |
+| 配置文件 | 同目录下的 `config.ini` |
+| 交互选择 | 运行后手动选择目录 |
+
+### 配置文件示例
+
+```ini
+REPO_ROOT=E:\Github
+```
+
+---
+
 ## ⚠️ 注意事项
 
 1. **首次使用建议先运行 [5] 安装全局依赖**
 2. **功能3 会影响 NextJS 热更新速度**，开发完成后可恢复
 3. **功能6 删除后需要重新 `npm install`**，建议在确认不再开发时使用
-4. **本工具仅扫描 `E:\Github\` 目录**，如需修改请编辑 bat 文件第 8 行
-
----
-
-## 🔧 自定义配置
-
-如需修改目标目录，编辑 `RepoCleaner.bat` 第 8 行：
-
-```batch
-set "REPO_ROOT=E:\Github"
-```
+4. **默认扫描 `E:\Github\` 目录**，可通过交互菜单或配置文件修改
 
 ---
 
