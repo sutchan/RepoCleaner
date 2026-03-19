@@ -1,10 +1,16 @@
-# 🧰 Github 项目清洁助手 (RepoCleaner)
+# 🧰 GitHub 项目清洁助手 (RepoCleaner)
+
+<div align="center">
 
 [![Windows](https://img.shields.io/badge/Windows-0078D6?style=flat&logo=windows&logoColor=white)](https://github.com/sutchan/RepoCleaner)
 [![Batch](https://img.shields.io/badge/Batch-.bat-blue?style=flat)](https://github.com/sutchan/RepoCleaner)
 [![Version](https://img.shields.io/badge/Version-1.0.0-green?style=flat)](https://github.com/sutchan/RepoCleaner)
 [![License](https://img.shields.io/badge/License-MIT-orange?style=flat)](https://github.com/sutchan/RepoCleaner)
 [![Node](https://img.shields.io/badge/Node.js-339933?style=flat&logo=node.js&logoColor=white)](https://nodejs.org)
+[![Disk](https://img.shields.io/badge/Saves-10GB%2B-red?style=flat)](https://github.com/sutchan/RepoCleaner)
+[![Auto](https://img.shields.io/badge/Auto-Clean-4CAF50?style=flat)](https://github.com/sutchan/RepoCleaner)
+
+</div>
 
 > 一键让所有前端项目保持干净：无冗余 node_modules、无 .next 缓存、无打包垃圾
 
