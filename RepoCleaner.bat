@@ -1,18 +1,74 @@
 @echo off
 chcp 65001 >nul
 setlocal enabledelayedexpansion
-title 🛠️ Github 项目清洁工具箱 - 无node_modules / 无.next / 全自动
+title 🛠️ Github 项目清洁助手 RepoCleaner - 无node_modules / 无.next / 全自动
 mode con: cols=90 lines=38
 
-:: ====================== 你的仓库根目录 ======================
-set "REPO_ROOT=E:\Github"
+:: ====================== 仓库根目录配置 ======================
+set "DEFAULT_REPO_ROOT=E:\Github"
+
+if not "%~1"=="" (
+    set "REPO_ROOT=%~1"
+    goto :ROOT_SET
+)
+
+if exist "%~dp0config.ini" (
+    for /f "usebackq tokens=1,2 delims==" %%a in ("%~dp0config.ini") do (
+        if /i "%%a"=="REPO_ROOT" set "REPO_ROOT=%%b"
+    )
+    if defined REPO_ROOT goto :ROOT_SET
+)
+
+:INTERACTIVE_INPUT
+cls
+echo.
+echo ======================================================================
+echo                      📂 请选择仓库根目录
+echo ======================================================================
+echo.
+echo   [1] 使用当前目录: %CD%
+echo   [2] 使用父目录: %~dp0..\
+echo   [3] 手动输入路径
+echo   [4] 使用默认值: %DEFAULT_REPO_ROOT%
+echo.
+set /p "PATH_CHOICE=👉 请选择 [1-4]："
+
+if "%PATH_CHOICE%"=="1" set "REPO_ROOT=%CD%"
+if "%PATH_CHOICE%"=="2" set "REPO_ROOT=%~dp0..\"
+if "%PATH_CHOICE%"=="3" (
+    set /p "REPO_ROOT=👉 请输入仓库根目录完整路径："
+)
+if "%PATH_CHOICE%"=="4" set "REPO_ROOT=%DEFAULT_REPO_ROOT%"
+
+if not defined REPO_ROOT set "REPO_ROOT=%DEFAULT_REPO_ROOT%"
+
+if not exist "!REPO_ROOT!" (
+    echo.
+    echo    ❌ 错误：路径 "!REPO_ROOT!" 不存在！
+    echo    请重新选择...
+    echo.
+    pause
+    goto :INTERACTIVE_INPUT
+)
+
+echo.
+set /p "SAVE_CONFIG=👉 是否保存此路径为默认配置？[Y/N]："
+if /i "!SAVE_CONFIG!"=="Y" (
+    echo REPO_ROOT=!REPO_ROOT! > "%~dp0config.ini"
+    echo.
+    echo    ✅ 配置已保存到 config.ini
+    timeout /t 1 >nul
+)
+
+:ROOT_SET
+if "!REPO_ROOT:~-1!"=="\" set "REPO_ROOT=!REPO_ROOT:~0,-1!"
 
 :: ====================== 主菜单 ======================
 :MENU
 cls
 echo.
 echo         ======================================================================
-echo                               🧰 Github 项目清洁工具箱
+echo                               🧰 Github 项目清洁助手
 echo         ======================================================================
 echo.
 echo            📂 适用目录：%REPO_ROOT%
@@ -26,7 +82,7 @@ echo.
 echo         [5] 一键安装常用全局依赖      📦  React/Vue/Next/axios/工具
 echo         [6] 一键清理所有项目缓存      🧹  删除 node_modules/.next/dist
 echo.
-echo         [0] 退出工具箱
+echo         [0] 退出助手
 echo.
 echo         ======================================================================
 echo.
@@ -154,15 +210,7 @@ echo 安装列表：React、Vue、Next、Axios、Express、pnpm、yarn、rimraf 
 echo 等待安装完成...
 echo.
 
-npm install -g ^
-react react-dom ^
-vue @vue/cli ^
-next ^
-axios express ^
-pnpm yarn ^
-cross-env dotenv ^
-nodemon pm2 ^
-rimraf mkdirp
+npm install -g react react-dom vue @vue/cli next axios express pnpm yarn cross-env dotenv nodemon pm2 rimraf mkdirp
 
 echo.
 echo ======================================================================
