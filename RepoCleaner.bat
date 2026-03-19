@@ -210,7 +210,25 @@ echo 安装列表：React、Vue、Next、Axios、Express、pnpm、yarn、rimraf 
 echo 等待安装完成...
 echo.
 
-npm install -g react react-dom vue @vue/cli next axios express pnpm yarn cross-env dotenv nodemon pm2 rimraf mkdirp
+echo.
+echo [1/5] 安装 React 生态...
+npm install -g react react-dom next
+
+echo.
+echo [2/5] 安装 Vue 生态...
+npm install -g vue @vue/cli
+
+echo.
+echo [3/5] 安装网络请求库...
+npm install -g axios express
+
+echo.
+echo [4/5] 安装包管理器...
+npm install -g pnpm yarn
+
+echo.
+echo [5/5] 安装开发工具...
+npm install -g cross-env dotenv nodemon pm2 rimraf mkdirp
 
 echo.
 echo ======================================================================
