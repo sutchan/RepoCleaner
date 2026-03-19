@@ -5,8 +5,17 @@ title RepoCleaner - Github Project Cleaner
 
 :: ====================== Language Config ======================
 set "LANG_FILE=%~dp0lang.ini"
+set "CONFIG_FILE=%~dp0config.ini"
 set "LANG_SECTION=zh"
 
+:: Check config.ini for language preference first
+if exist "%CONFIG_FILE%" (
+    for /f "usebackq tokens=1,2 delims==" %%a in ("%CONFIG_FILE%") do (
+        if /i "%%a"=="LANG" set "LANG_SECTION=%%b"
+    )
+)
+
+:: Also check lang.ini for backward compatibility
 if exist "%LANG_FILE%" (
     for /f "usebackq tokens=1,2 delims==" %%a in ("%LANG_FILE%") do (
         if /i "%%a"=="LANG" set "LANG_SECTION=%%b"
@@ -175,6 +184,20 @@ if "%~1"=="" goto :ARGS_DONE
 
 if /i "%~1"=="-lang" (
     set "LANG_SECTION=%~2"
+    :: Save to config.ini (primary)
+    if exist "%CONFIG_FILE%" (
+        (
+            for /f "usebackq tokens=1,* delims==" %%a in ("%CONFIG_FILE%") do (
+                if /i "%%a"=="REPO_ROOT" echo REPO_ROOT=%%b
+                if /i "%%a"=="LANG" echo LANG=%~2
+            )
+            echo LANG=%~2
+        ) > "%CONFIG_FILE%.tmp"
+        move /y "%CONFIG_FILE%.tmp" "%CONFIG_FILE%" >nul 2>&1
+    ) else (
+        echo LANG=%~2 > "%CONFIG_FILE%"
+    )
+    :: Also save to lang.ini for backward compatibility
     echo LANG=%~2 > "%LANG_FILE%"
     shift
     shift
