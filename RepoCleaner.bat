@@ -41,8 +41,9 @@ set "MENU_OPTION3=清理 .next 缓存           - 禁用 NextJS 缓存"
 set "MENU_OPTION4=恢复 NextJS 缓存          - 启用正常编译"
 set "MENU_OPTION5=安装全局依赖              - React/Vue/Next/axios/工具"
 set "MENU_OPTION6=清理所有项目缓存          - 删除 node_modules/.next/dist"
+set "MENU_OPTION7=清理 Vite/构建缓存        - 删除 .vite/dist/.turbo"
 set "MENU_EXIT=退出"
-set "MENU_CHOOSE=请输入选项 [0-6]:"
+set "MENU_CHOOSE=请输入选项 [0-7]:"
 
 set "F1_TITLE=启用全局 node_modules"
 set "F1_STEP1=[1/4] 获取全局 node_modules 路径..."
@@ -80,6 +81,10 @@ set "F6_TITLE=清理所有项目缓存"
 set "F6_WARNING=警告: 这将永久删除所有缓存文件!"
 set "F6_SUCCESS=所有缓存已清理!"
 
+set "F7_TITLE=清理 Vite/构建缓存"
+set "F7_WARNING=警告: 这将删除 .vite/dist/.turbo 目录!"
+set "F7_SUCCESS=Vite/构建缓存已清理!"
+
 set "OK=[完成]"
 set "ERROR=[错误]"
 set "PAUSE=按任意键继续..."
@@ -111,8 +116,9 @@ set "MENU_OPTION3=Clean .next Cache             - Disable NextJS cache"
 set "MENU_OPTION4=Restore NextJS Cache          - Enable normal compilation"
 set "MENU_OPTION5=Install Global Dependencies   - React/Vue/Next/axios/tools"
 set "MENU_OPTION6=Clean All Project Cache       - Remove node_modules/.next/dist"
+set "MENU_OPTION7=Clean Vite/Build Cache        - Remove .vite/dist/.turbo"
 set "MENU_EXIT=Exit"
-set "MENU_CHOOSE=Enter choice [0-6]:"
+set "MENU_CHOOSE=Enter choice [0-7]:"
 
 set "F1_TITLE=Enable Global node_modules"
 set "F1_STEP1=[1/4] Getting global node_modules path..."
@@ -150,6 +156,10 @@ set "F6_TITLE=Cleaning All Project Cache"
 set "F6_WARNING=WARNING: This will permanently delete all cache files!"
 set "F6_SUCCESS=All Cache Cleaned!"
 
+set "F7_TITLE=Cleaning Vite/Build Cache"
+set "F7_WARNING=WARNING: This will delete .vite/dist/.turbo directories!"
+set "F7_SUCCESS=Vite/Build Cache Cleaned!"
+
 set "OK=[OK]"
 set "ERROR=[ERROR]"
 set "PAUSE=Press any key to continue..."
@@ -159,11 +169,111 @@ set "PAUSE=Press any key to continue..."
 :: ====================== Repository Root Config ======================
 set "DEFAULT_REPO_ROOT=E:\Github"
 
-if not "%~1"=="" (
-    set "REPO_ROOT=%~1"
-    goto :ROOT_SET
+:: ====================== Parse Command Line Arguments ======================
+:PARSE_ARGS
+if "%~1"=="" goto :ARGS_DONE
+
+if /i "%~1"=="-lang" (
+    set "LANG_SECTION=%~2"
+    echo LANG=%~2 > "%LANG_FILE%"
+    shift
+    shift
+    goto :PARSE_ARGS
 )
 
+if /i "%~1"=="-h" goto :SHOW_HELP
+if /i "%~1"=="--help" goto :SHOW_HELP
+
+if /i "%~1"=="1" goto :ARG_RUN_1
+if /i "%~1"=="2" goto :ARG_RUN_2
+if /i "%~1"=="3" goto :ARG_RUN_3
+if /i "%~1"=="4" goto :ARG_RUN_4
+if /i "%~1"=="5" goto :ARG_RUN_5
+if /i "%~1"=="6" goto :ARG_RUN_6
+if /i "%~1"=="7" goto :ARG_RUN_7
+
+:: Otherwise treat as path
+if exist "%~1" (
+    set "REPO_ROOT=%~1"
+    shift
+    goto :PARSE_ARGS
+)
+
+:ARGS_DONE
+if defined REPO_ROOT goto :ROOT_SET
+goto :CHECK_CONFIG
+
+:SHOW_HELP
+echo.
+echo RepoCleaner - GitHub Project Cleaner
+echo.
+echo Usage: RepoCleaner.bat [options] [path]
+echo.
+echo Options:
+echo   1-7       Run corresponding menu option directly
+echo   -lang en  Set language to English
+echo   -lang zh  Set language to Chinese
+echo   -h        Show this help
+echo.
+echo Examples:
+echo   RepoCleaner.bat                    # Interactive mode
+echo   RepoCleaner.bat E:\Github          # Set project root
+echo   RepoCleaner.bat 1                  # Enable global node_modules
+echo   RepoCleaner.bat -lang en           # Set English
+echo   RepoCleaner.bat 5 E:\Projects      # Install deps for path
+echo.
+exit /b 0
+
+:ARG_RUN_1
+set "ARG_MODE=1"
+if not "%~2"=="" (
+    if exist "%~2" set "REPO_ROOT=%~2"
+)
+goto :ROOT_SET
+
+:ARG_RUN_2
+set "ARG_MODE=2"
+if not "%~2"=="" (
+    if exist "%~2" set "REPO_ROOT=%~2"
+)
+goto :ROOT_SET
+
+:ARG_RUN_3
+set "ARG_MODE=3"
+if not "%~2"=="" (
+    if exist "%~2" set "REPO_ROOT=%~2"
+)
+goto :ROOT_SET
+
+:ARG_RUN_4
+set "ARG_MODE=4"
+if not "%~2"=="" (
+    if exist "%~2" set "REPO_ROOT=%~2"
+)
+goto :ROOT_SET
+
+:ARG_RUN_5
+set "ARG_MODE=5"
+if not "%~2"=="" (
+    if exist "%~2" set "REPO_ROOT=%~2"
+)
+goto :ROOT_SET
+
+:ARG_RUN_6
+set "ARG_MODE=6"
+if not "%~2"=="" (
+    if exist "%~2" set "REPO_ROOT=%~2"
+)
+goto :ROOT_SET
+
+:ARG_RUN_7
+set "ARG_MODE=7"
+if not "%~2"=="" (
+    if exist "%~2" set "REPO_ROOT=%~2"
+)
+goto :ROOT_SET
+
+:CHECK_CONFIG
 if exist "%~dp0config.ini" (
     for /f "usebackq tokens=1,2 delims==" %%a in ("%~dp0config.ini") do (
         if /i "%%a"=="REPO_ROOT" set "REPO_ROOT=%%b"
@@ -219,8 +329,9 @@ if "!LANG_SECTION!"=="en" (
     set "MENU_OPTION4=Restore NextJS Cache          - Enable normal compilation"
     set "MENU_OPTION5=Install Global Dependencies   - React/Vue/Next/axios/tools"
     set "MENU_OPTION6=Clean All Project Cache       - Remove node_modules/.next/dist"
+    set "MENU_OPTION7=Clean Vite/Build Cache        - Remove .vite/dist/.turbo"
     set "MENU_EXIT=Exit"
-    set "MENU_CHOOSE=Enter choice [0-6]:"
+    set "MENU_CHOOSE=Enter choice [0-7]:"
 
     set "F1_TITLE=Enable Global node_modules"
     set "F1_STEP1=[1/4] Getting global node_modules path..."
@@ -257,6 +368,10 @@ if "!LANG_SECTION!"=="en" (
     set "F6_TITLE=Cleaning All Project Cache"
     set "F6_WARNING=WARNING: This will permanently delete all cache files!"
     set "F6_SUCCESS=All Cache Cleaned!"
+
+    set "F7_TITLE=Cleaning Vite/Build Cache"
+    set "F7_WARNING=WARNING: This will delete .vite/dist/.turbo directories!"
+    set "F7_SUCCESS=Vite/Build Cache Cleaned!"
 
     set "OK=[OK]"
     set "ERROR=[ERROR]"
@@ -377,6 +492,17 @@ if /i "!SAVE_CONFIG!"=="Y" (
 :ROOT_SET
 if "!REPO_ROOT:~-1!"=="\" set "REPO_ROOT=!REPO_ROOT:~0,-1!"
 
+:: Check if running from command line argument
+if defined ARG_MODE (
+    if "%ARG_MODE%"=="1" goto GLOBAL_NODE
+    if "%ARG_MODE%"=="2" goto RESET_NODE
+    if "%ARG_MODE%"=="3" goto CLEAN_NEXT
+    if "%ARG_MODE%"=="4" goto RESET_NEXT
+    if "%ARG_MODE%"=="5" goto INSTALL_DEPS
+    if "%ARG_MODE%"=="6" goto CLEAN_ALL_CACHE
+    if "%ARG_MODE%"=="7" goto CLEAN_VITE_CACHE
+)
+
 :: ====================== Main Menu ======================
 :MENU
 cls
@@ -395,6 +521,7 @@ echo         [4] !MENU_OPTION4!
 echo.
 echo         [5] !MENU_OPTION5!
 echo         [6] !MENU_OPTION6!
+echo         [7] !MENU_OPTION7!
 echo.
 echo         [L] !LANG_1! / !LANG_2!
 echo         [0] !MENU_EXIT!
@@ -409,6 +536,7 @@ if "%CHOICE%"=="3" goto CLEAN_NEXT
 if "%CHOICE%"=="4" goto RESET_NEXT
 if "%CHOICE%"=="5" goto INSTALL_DEPS
 if "%CHOICE%"=="6" goto CLEAN_ALL_CACHE
+if "%CHOICE%"=="7" goto CLEAN_VITE_CACHE
 if /i "%CHOICE%"=="L" goto :LANG_MENU
 if "%CHOICE%"=="0" exit
 goto MENU
@@ -598,6 +726,36 @@ for /d %%d in (!REPO_ROOT!\*) do (
 echo.
 echo ======================================================================
 echo !OK! !F6_SUCCESS!
+echo ======================================================================
+echo.
+pause
+goto MENU
+
+:: ====================== Function 7: Clean Vite/Build Cache ======================
+:CLEAN_VITE_CACHE
+cls
+echo.
+echo ======================================================================
+echo        !F7_TITLE!
+echo ======================================================================
+echo.
+echo !F7_WARNING!
+echo.
+pause
+echo.
+
+for /d %%d in (!REPO_ROOT!\*) do (
+    echo Cleaning: %%~nd
+    rd /s /q "%%d\.vite" 2>nul
+    rd /s /q "%%d\dist" 2>nul
+    rd /s /q "%%d\.turbo" 2>nul
+    rd /s /q "%%d\coverage" 2>nul
+    rd /s /q "%%d\.nyc_output" 2>nul
+)
+
+echo.
+echo ======================================================================
+echo !OK! !F7_SUCCESS!
 echo ======================================================================
 echo.
 pause
