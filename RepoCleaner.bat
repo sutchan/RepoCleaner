@@ -42,7 +42,7 @@ set "PATH_ERROR=错误: 路径不存在! 请重试..."
 set "PATH_SAVE=是否保存为默认? [Y/N]:"
 set "PATH_SAVED=配置已保存到 config.ini"
 
-set "MENU_TITLE=RepoCleaner - GitHub 项目清理工具"
+set "MENU_TITLE=RepoCleaner - 项目清理工具"
 set "MENU_TARGET=目标目录:"
 set "MENU_OPTION1=启用全局 node_modules     - 无需本地 node_modules"
 set "MENU_OPTION2=重置 Node 配置            - 恢复默认设置"
@@ -228,7 +228,7 @@ goto :CHECK_CONFIG
 
 :SHOW_HELP
 echo.
-echo RepoCleaner - GitHub Project Cleaner
+echo RepoCleaner - Project Cleaner
 echo.
 echo Usage: RepoCleaner.bat [options] [path]
 echo.
@@ -419,7 +419,7 @@ set "PATH_ERROR=错误: 路径不存在! 请重试..."
 set "PATH_SAVE=是否保存为默认? [Y/N]:"
 set "PATH_SAVED=配置已保存到 config.ini"
 
-set "MENU_TITLE=RepoCleaner - GitHub 项目清理工具"
+set "MENU_TITLE=RepoCleaner - 项目清理工具"
 set "MENU_TARGET=目标目录:"
 set "MENU_OPTION1=启用全局 node_modules     - 无需本地 node_modules"
 set "MENU_OPTION2=重置 Node 配置            - 恢复默认设置"
