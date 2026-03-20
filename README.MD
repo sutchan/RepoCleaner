@@ -52,6 +52,7 @@
 |------|------|
 | 首次配置 | 运行 [1] 启用全局 node_modules → 运行 [5] 安装所有常用依赖 → 运行 [3] 禁用 .next 缓存 |
 | 空间不足 | 运行 [6] 清理所有缓存 |
+| Vite 项目 | 运行 [7] 清理 Vite/构建缓存 |
 
 ---
 
@@ -111,6 +112,18 @@ cross-env dotenv nodemon pm2 rimraf mkdirp
 | `yarn.lock` | yarn 锁文件 |
 | `pnpm-lock.yaml` | pnpm 锁文件 |
 
+### 功能7：清理 Vite/构建缓存
+
+清理以下内容：
+
+| 清理项 | 说明 |
+|--------|------|
+| `.vite` | Vite 缓存目录 |
+| `.turbo` | Turborepo 缓存 |
+| `.nuxt` | NuxtJS 缓存 |
+| `dist` | 打包输出目录 |
+| `build` | 构建输出目录 |
+
 ---
 
 ## ⚙️ 智能配置
@@ -125,11 +138,35 @@ cross-env dotenv nodemon pm2 rimraf mkdirp
 | 配置文件 | 同目录下的 `config.ini` |
 | 交互选择 | 运行后手动选择目录 |
 
+### 语言切换
+
+支持中文/英文界面切换：
+
+| 方式 | 说明 |
+|------|------|
+| 交互选择 | 运行后按 [L] 键切换语言 |
+| 命令行参数 | `RepoCleaner.bat -lang en` |
+| 配置文件 | 在 `config.ini` 中添加 `LANG=zh` 或 `LANG=en` |
+
 ### 配置文件示例
 
 ```ini
 REPO_ROOT=E:\Github
+LANG=zh
 ```
+
+### 命令行参数
+
+```bash
+RepoCleaner.bat [选项] [功能号] [目录路径]
+```
+
+| 参数 | 说明 |
+|------|------|
+| `-lang en\|zh` | 设置语言 |
+| `-h` 或 `--help` | 显示帮助信息 |
+| `1-7` | 直接运行对应功能 |
+| 目录路径 | 指定仓库根目录 |
 
 ---
 
@@ -145,3 +182,9 @@ REPO_ROOT=E:\Github
 ## 📄 License
 
 MIT License
+
+---
+
+## 📝 更新日志
+
+详细更新内容请查看 [CHANGELOG.md](./CHANGELOG.md)
