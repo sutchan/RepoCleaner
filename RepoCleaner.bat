@@ -237,23 +237,43 @@ goto :CHECK_CONFIG
 
 :SHOW_HELP
 echo.
-echo RepoCleaner - Project Cleaner
-echo.
-echo Usage: RepoCleaner.bat [options] [path]
-echo.
-echo Options:
-echo   1-7       Run corresponding menu option directly
-echo   -lang en  Set language to English
-echo   -lang zh  Set language to Chinese
-echo   -h        Show this help
-echo.
-echo Examples:
-echo   RepoCleaner.bat                    # Interactive mode
-echo   RepoCleaner.bat E:\Github          # Set project root
-echo   RepoCleaner.bat 1                  # Enable global node_modules
-echo   RepoCleaner.bat -lang en           # Set English
-echo   RepoCleaner.bat 5 E:\Projects      # Install deps for path
-echo.
+if "!LANG_SECTION!"=="en" (
+    echo RepoCleaner - Project Cleaner
+    echo.
+    echo Usage: RepoCleaner.bat [options] [path]
+    echo.
+    echo Options:
+    echo   1-7       Run corresponding menu option directly
+    echo   -lang en  Set language to English
+    echo   -lang zh  Set language to Chinese
+    echo   -h        Show this help
+    echo.
+    echo Examples:
+    echo   RepoCleaner.bat                    # Interactive mode
+    echo   RepoCleaner.bat E:\Github          # Set project root
+    echo   RepoCleaner.bat 1                  # Enable global node_modules
+    echo   RepoCleaner.bat -lang en           # Set English
+    echo   RepoCleaner.bat 5 E:\Projects      # Install deps for path
+    echo.
+) else (
+    echo RepoCleaner - 项目清理工具
+    echo.
+    echo 用法: RepoCleaner.bat [选项] [路径]
+    echo.
+    echo 选项:
+    echo   1-7       直接运行对应的菜单选项
+    echo   -lang en  设置为英文
+    echo   -lang zh  设置为中文
+    echo   -h        显示帮助信息
+    echo.
+    echo 示例:
+    echo   RepoCleaner.bat                    # 交互模式
+    echo   RepoCleaner.bat E:\Github          # 设置项目根目录
+    echo   RepoCleaner.bat 1                  # 启用全局 node_modules
+    echo   RepoCleaner.bat -lang en           # 设置英文
+    echo   RepoCleaner.bat 5 E:\Projects      # 为指定路径安装依赖
+    echo.
+)
 exit /b 0
 
 :ARG_RUN_1
@@ -455,7 +475,7 @@ for /d %%d in (!REPO_ROOT!\*) do (
         (
             echo prefix=!GLOBAL_NODE_MODULES!
             echo cache=!GLOBAL_NODE_MODULES!\.npm-cache
-            echo tmp=!TEMP!
+            echo tmp="!TEMP!"
             echo global=true
             echo prefer-global=true
         ) > "%%d\.npmrc"
