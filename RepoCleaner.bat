@@ -4,20 +4,12 @@ setlocal enabledelayedexpansion
 title RepoCleaner - Github Project Cleaner
 
 :: ====================== Language Config ======================
-set "LANG_FILE=%~dp0lang.ini"
 set "CONFIG_FILE=%~dp0config.ini"
 set "LANG_SECTION=zh"
 
-:: Check config.ini for language preference first
+:: Check config.ini for language preference
 if exist "%CONFIG_FILE%" (
     for /f "usebackq tokens=1,2 delims==" %%a in ("%CONFIG_FILE%") do (
-        if /i "%%a"=="LANG" set "LANG_SECTION=%%b"
-    )
-)
-
-:: Also check lang.ini for backward compatibility
-if exist "%LANG_FILE%" (
-    for /f "usebackq tokens=1,2 delims==" %%a in ("%LANG_FILE%") do (
         if /i "%%a"=="LANG" set "LANG_SECTION=%%b"
     )
 )
@@ -27,6 +19,16 @@ goto :LOAD_ZH
 
 :: ====================== Load Chinese ======================
 :LOAD_ZH
+call :SET_LANG_ZH
+goto :LANG_LOADED
+
+:: ====================== Load English ======================
+:LOAD_EN
+call :SET_LANG_EN
+goto :LANG_LOADED
+
+:: ====================== Language Subroutines ======================
+:SET_LANG_ZH
 set "LANG_TITLE=选择语言 / Select Language"
 set "LANG_1=English"
 set "LANG_2=中文"
@@ -97,11 +99,9 @@ set "F7_SUCCESS=Vite/构建缓存已清理!"
 set "OK=[完成]"
 set "ERROR=[错误]"
 set "PAUSE=按任意键继续..."
+goto :EOF
 
-goto :LANG_LOADED
-
-:: ====================== Load English ======================
-:LOAD_EN
+:SET_LANG_EN
 set "LANG_TITLE=Select Language / 选择语言"
 set "LANG_1=English"
 set "LANG_2=中文"
@@ -172,6 +172,29 @@ set "F7_SUCCESS=Vite/Build Cache Cleaned!"
 set "OK=[OK]"
 set "ERROR=[ERROR]"
 set "PAUSE=Press any key to continue..."
+goto :EOF
+
+:SAVE_CONFIG
+set "KEY=%~1"
+set "VALUE=%~2"
+set "CURRENT_REPO_ROOT="
+set "CURRENT_LANG="
+if exist "%CONFIG_FILE%" (
+    for /f "usebackq tokens=1,* delims==" %%a in ("%CONFIG_FILE%") do (
+        if /i "%%a"=="REPO_ROOT" set "CURRENT_REPO_ROOT=%%b"
+        if /i "%%a"=="LANG" set "CURRENT_LANG=%%b"
+    )
+)
+if /i "%KEY%"=="REPO_ROOT" (
+    set "CURRENT_REPO_ROOT=%VALUE%"
+) else if /i "%KEY%"=="LANG" (
+    set "CURRENT_LANG=%VALUE%"
+)
+(
+    if defined CURRENT_REPO_ROOT echo REPO_ROOT=!CURRENT_REPO_ROOT!
+    if defined CURRENT_LANG echo LANG=!CURRENT_LANG!
+) > "%CONFIG_FILE%"
+goto :EOF
 
 :LANG_LOADED
 
@@ -184,21 +207,7 @@ if "%~1"=="" goto :ARGS_DONE
 
 if /i "%~1"=="-lang" (
     set "LANG_SECTION=%~2"
-    :: Save to config.ini (primary)
-    if exist "%CONFIG_FILE%" (
-        (
-            for /f "usebackq tokens=1,* delims==" %%a in ("%CONFIG_FILE%") do (
-                if /i "%%a"=="REPO_ROOT" echo REPO_ROOT=%%b
-                if /i "%%a"=="LANG" echo LANG=%~2
-            )
-            echo LANG=%~2
-        ) > "%CONFIG_FILE%.tmp"
-        move /y "%CONFIG_FILE%.tmp" "%CONFIG_FILE%" >nul 2>&1
-    ) else (
-        echo LANG=%~2 > "%CONFIG_FILE%"
-    )
-    :: Also save to lang.ini for backward compatibility
-    echo LANG=%~2 > "%LANG_FILE%"
+    call :SAVE_CONFIG LANG "%~2"
     shift
     shift
     goto :PARSE_ARGS
@@ -319,156 +328,17 @@ set /p "LANG_CHOICE=!LANG_PROMPT!"
 
 if "!LANG_CHOICE!"=="1" (
     set "LANG_SECTION=en"
-    goto :LOAD_EN_SKIP
-)
-if "!LANG_CHOICE!"=="2" (
+) else if "!LANG_CHOICE!"=="2" (
     set "LANG_SECTION=zh"
-    goto :LOAD_ZH_SKIP
+) else (
+    set "LANG_SECTION=zh"
 )
-if not defined LANG_CHOICE set "LANG_SECTION=zh"
 
-:LOAD_EN_SKIP
 if "!LANG_SECTION!"=="en" (
-    set "LANG_TITLE=Select Language / 选择语言"
-    set "LANG_1=English"
-    set "LANG_2=中文"
-    set "LANG_PROMPT=Enter choice [1-2]:"
-
-    set "PATH_TITLE=Select Repository Root Directory"
-    set "PATH_1=Use Current Directory:"
-    set "PATH_2=Use Parent Directory:"
-    set "PATH_3=Manual Input Path"
-    set "PATH_4=Use Default:"
-    set "PATH_PROMPT=Enter choice [1-4]:"
-    set "PATH_ERROR=ERROR: Path does not exist! Please try again..."
-    set "PATH_SAVE=Save as default? [Y/N]:"
-    set "PATH_SAVED=Config saved to config.ini"
-
-    set "MENU_TITLE=RepoCleaner - Github Project Cleaner"
-    set "MENU_TARGET=Target:"
-    set "MENU_OPTION1=Enable Global node_modules     - No local node_modules"
-    set "MENU_OPTION2=Reset Node Config             - Restore default settings"
-    set "MENU_OPTION3=Clean .next Cache             - Disable NextJS cache"
-    set "MENU_OPTION4=Restore NextJS Cache          - Enable normal compilation"
-    set "MENU_OPTION5=Install Global Dependencies   - React/Vue/Next/axios/tools"
-    set "MENU_OPTION6=Clean All Project Cache       - Remove node_modules/.next/dist"
-    set "MENU_OPTION7=Clean Vite/Build Cache        - Remove .vite/dist/.turbo"
-    set "MENU_EXIT=Exit"
-    set "MENU_CHOOSE=Enter choice [0-7]:"
-
-    set "F1_TITLE=Enable Global node_modules"
-    set "F1_STEP1=[1/4] Getting global node_modules path..."
-    set "F1_STEP2=[2/4] Setting NODE_PATH environment variable..."
-    set "F1_STEP3=[3/4] Disabling local node_modules for all projects..."
-    set "F1_STEP4=[4/4] Cleaning existing local node_modules directories..."
-    set "F1_SUCCESS=Global node_modules Enabled!"
-    set "F1_INFO=Run [5] to install dependencies first time"
-
-    set "F2_TITLE=Reset Node Config"
-    set "F2_STEP1=Removing NODE_PATH environment variable..."
-    set "F2_STEP2=Cleaning project .npmrc configs..."
-    set "F2_SUCCESS=Node Config Reset!"
-
-    set "F3_TITLE=Clean .next Cache"
-    set "F3_STEP1=Scanning and cleaning NextJS cache..."
-    set "F3_SUCCESS=.next Cache Cleaned and Disabled!"
-
-    set "F4_TITLE=Restore NextJS Cache"
-    set "F4_STEP1=Restoring NextJS cache functionality..."
-    set "F4_SUCCESS=NextJS Cache Restored!"
-
-    set "F5_TITLE=Installing Common Global Dependencies"
-    set "F5_LIST=Install List: React, Vue, Next, Axios, Express, pnpm, yarn, rimraf, etc."
-    set "F5_WAIT=Please wait..."
-    set "F5_STEP1=[1/5] Installing React ecosystem..."
-    set "F5_STEP2=[2/5] Installing Vue ecosystem..."
-    set "F5_STEP3=[3/5] Installing HTTP libraries..."
-    set "F5_STEP4=[4/5] Installing package managers..."
-    set "F5_STEP5=[5/5] Installing dev tools..."
-    set "F5_SUCCESS=All Dependencies Installed!"
-    set "F5_INFO=Projects can use them directly without local install"
-
-    set "F6_TITLE=Cleaning All Project Cache"
-    set "F6_WARNING=WARNING: This will permanently delete all cache files!"
-    set "F6_SUCCESS=All Cache Cleaned!"
-
-    set "F7_TITLE=Cleaning Vite/Build Cache"
-    set "F7_WARNING=WARNING: This will delete .vite/dist/.turbo directories!"
-    set "F7_SUCCESS=Vite/Build Cache Cleaned!"
-
-    set "OK=[OK]"
-    set "ERROR=[ERROR]"
-    set "PAUSE=Press any key to continue..."
-
-    goto :INTERACTIVE_INPUT
+    call :SET_LANG_EN
+) else (
+    call :SET_LANG_ZH
 )
-
-:LOAD_ZH_SKIP
-set "LANG_TITLE=选择语言 / Select Language"
-set "LANG_1=English"
-set "LANG_2=中文"
-set "LANG_PROMPT=请输入选项 [1-2]:"
-
-set "PATH_TITLE=选择代码库根目录"
-set "PATH_1=使用当前目录:"
-set "PATH_2=使用上级目录:"
-set "PATH_3=手动输入路径"
-set "PATH_4=使用默认:"
-set "PATH_PROMPT=请输入选项 [1-4]:"
-set "PATH_ERROR=错误: 路径不存在! 请重试..."
-set "PATH_SAVE=是否保存为默认? [Y/N]:"
-set "PATH_SAVED=配置已保存到 config.ini"
-
-set "MENU_TITLE=RepoCleaner - 项目清理工具"
-set "MENU_TARGET=目标目录:"
-set "MENU_OPTION1=启用全局 node_modules     - 无需本地 node_modules"
-set "MENU_OPTION2=重置 Node 配置            - 恢复默认设置"
-set "MENU_OPTION3=清理 .next 缓存           - 禁用 NextJS 缓存"
-set "MENU_OPTION4=恢复 NextJS 缓存          - 启用正常编译"
-set "MENU_OPTION5=安装全局依赖              - React/Vue/Next/axios/工具"
-set "MENU_OPTION6=清理所有项目缓存          - 删除 node_modules/.next/dist"
-set "MENU_EXIT=退出"
-set "MENU_CHOOSE=请输入选项 [0-6]:"
-
-set "F1_TITLE=启用全局 node_modules"
-set "F1_STEP1=[1/4] 获取全局 node_modules 路径..."
-set "F1_STEP2=[2/4] 设置 NODE_PATH 环境变量..."
-set "F1_STEP3=[3/4] 禁用所有项目的本地 node_modules..."
-    set "F1_STEP4=[4/4] 清理现有本地 node_modules 目录..."
-    set "F1_SUCCESS=全局 node_modules 已启用!"
-set "F1_INFO=请先运行 [5] 安装依赖"
-
-set "F2_TITLE=重置 Node 配置"
-set "F2_STEP1=删除 NODE_PATH 环境变量..."
-set "F2_STEP2=清理项目 .npmrc 配置..."
-set "F2_SUCCESS=Node 配置已重置!"
-
-set "F3_TITLE=清理 .next 缓存"
-set "F3_STEP1=扫描并清理 NextJS 缓存..."
-set "F3_SUCCESS=.next 缓存已清理并禁用!"
-
-set "F4_TITLE=恢复 NextJS 缓存"
-set "F4_STEP1=恢复 NextJS 缓存功能..."
-set "F4_SUCCESS=NextJS 缓存已恢复!"
-
-set "F5_TITLE=安装常用全局依赖"
-set "F5_LIST=安装列表: React, Vue, Next, Axios, Express, pnpm, yarn, rimraf 等"
-set "F5_WAIT=请稍候..."
-set "F5_STEP1=[1/5] 安装 React 生态..."
-set "F5_STEP2=[2/5] 安装 Vue 生态..."
-set "F5_STEP3=[3/5] 安装 HTTP 库..."
-set "F5_STEP4=[4/5] 安装包管理器..."
-set "F5_STEP5=[5/5] 安装开发工具..."
-set "F5_SUCCESS=所有依赖已安装!"
-set "F5_INFO=项目可直接使用，无需本地安装"
-
-set "F6_TITLE=清理所有项目缓存"
-set "F6_WARNING=警告: 这将永久删除所有缓存文件!"
-set "F6_SUCCESS=所有缓存已清理!"
-
-set "OK=[完成]"
-set "ERROR=[错误]"
-set "PAUSE=按任意键继续..."
 
 goto :INTERACTIVE_INPUT
 
@@ -506,7 +376,7 @@ if not exist "!REPO_ROOT!" (
 echo.
 set /p "SAVE_CONFIG=!PATH_SAVE!"
 if /i "!SAVE_CONFIG!"=="Y" (
-    echo REPO_ROOT=!REPO_ROOT! > "%~dp0config.ini"
+    call :SAVE_CONFIG REPO_ROOT "!REPO_ROOT!"
     echo.
     echo    !PATH_SAVED!
     timeout /t 1 >nul 2>&1
