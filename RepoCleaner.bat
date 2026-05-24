@@ -1,33 +1,145 @@
 @echo off
 chcp 65001 >nul 2>&1
 setlocal enabledelayedexpansion
-title RepoCleaner - Github Project Cleaner
+title RepoCleaner - 项目清理工具
 
-:: ====================== Language Config ======================
+:: ========================================================================
+:: 配置和初始化
+:: ========================================================================
 set "CONFIG_FILE=%~dp0config.ini"
-set "LANG_SECTION=zh"
+set "LANG_FILE=%~dp0lang.ini"
+set "DEFAULT_REPO_ROOT=E:\Github"
 
-:: Check config.ini for language preference
+:: ========================================================================
+:: 加载配置
+:: ========================================================================
+call :LOAD_CONFIG
+
+:: ========================================================================
+:: 加载语言
+:: ========================================================================
+call :LOAD_LANGUAGE
+
+:: ========================================================================
+:: 解析命令行参数
+:: ========================================================================
+if not "%~1"=="" call :PARSE_ARGUMENTS %*
+
+:: ========================================================================
+:: 设置根目录
+:: ========================================================================
+call :SET_REPO_ROOT
+
+:: ========================================================================
+:: 主循环
+:: ========================================================================
+:MENU
+call :DISPLAY_MENU
+call :GET_USER_CHOICE
+call :PROCESS_CHOICE
+goto :MENU
+
+:: ========================================================================
+:: 配置管理模块
+:: ========================================================================
+:LOAD_CONFIG
+set "LANG_SECTION=zh"
+set "REPO_ROOT="
+
 if exist "%CONFIG_FILE%" (
     for /f "usebackq tokens=1,2 delims==" %%a in ("%CONFIG_FILE%") do (
+        if /i "%%a"=="REPO_ROOT" set "REPO_ROOT=%%b"
         if /i "%%a"=="LANG" set "LANG_SECTION=%%b"
     )
 )
+goto :EOF
 
-if "!LANG_SECTION!"=="en" goto :LOAD_EN
-goto :LOAD_ZH
+:SAVE_CONFIG
+set "KEY=%~1"
+set "VALUE=%~2"
 
-:: ====================== Load Chinese ======================
-:LOAD_ZH
-call :SET_LANG_ZH
-goto :LANG_LOADED
+if not defined VALUE goto :EOF
 
-:: ====================== Load English ======================
-:LOAD_EN
-call :SET_LANG_EN
-goto :LANG_LOADED
+if /i "%KEY%"=="REPO_ROOT" (
+    (
+        echo REPO_ROOT=%VALUE%
+        if exist "%CONFIG_FILE%" (
+            for /f "usebackq tokens=1,* delims==" %%a in ("%CONFIG_FILE%") do (
+                if /i "%%a" neq "REPO_ROOT" echo %%a=%%b
+            )
+        )
+    ) > "%CONFIG_FILE%"
+) else if /i "%KEY%"=="LANG" (
+    (
+        echo LANG=%VALUE%
+        if exist "%CONFIG_FILE%" (
+            for /f "usebackq tokens=1,* delims==" %%a in ("%CONFIG_FILE%") do (
+                if /i "%%a" neq "LANG" echo %%a=%%b
+            )
+        )
+    ) > "%CONFIG_FILE%"
+)
+goto :EOF
 
-:: ====================== Language Subroutines ======================
+:SET_REPO_ROOT
+if defined REPO_ROOT (
+    if exist "!REPO_ROOT!" (
+        if "!REPO_ROOT:~-1!"=="\" set "REPO_ROOT=!REPO_ROOT:~0,-1!"
+        goto :EOF
+    )
+)
+
+:INTERACTIVE_PATH
+cls
+echo.
+echo ======================================================================
+echo               !PATH_TITLE!
+echo ======================================================================
+echo.
+echo    [1] !PATH_1! %CD%
+echo    [2] !PATH_2! %~dp0..\
+echo    [3] !PATH_3!
+echo    [4] !PATH_4! %DEFAULT_REPO_ROOT%
+echo.
+set /p "CHOICE=!PATH_PROMPT!"
+
+if "!CHOICE!"=="1" set "REPO_ROOT=%CD%"
+if "!CHOICE!"=="2" set "REPO_ROOT=%~dp0..\"
+if "!CHOICE!"=="3" set /p "REPO_ROOT=!PATH_INPUT!"
+if "!CHOICE!"=="4" set "REPO_ROOT=%DEFAULT_REPO_ROOT%"
+
+if not defined REPO_ROOT set "REPO_ROOT=%DEFAULT_REPO_ROOT%"
+
+if not exist "!REPO_ROOT!" (
+    echo.
+    echo    !PATH_ERROR!
+    echo.
+    pause
+    goto :INTERACTIVE_PATH
+)
+
+if "!REPO_ROOT:~-1!"=="\" set "REPO_ROOT=!REPO_ROOT:~0,-1!"
+
+echo.
+set /p "SAVE=!PATH_SAVE!"
+if /i "!SAVE!"=="Y" (
+    call :SAVE_CONFIG REPO_ROOT "!REPO_ROOT!"
+    echo    !PATH_SAVED!
+    timeout /t 1 >nul 2>&1
+)
+goto :EOF
+
+:: ========================================================================
+:: 语言管理模块
+:: ========================================================================
+:LOAD_LANGUAGE
+if "!LANG_SECTION!"=="en" (
+    call :SET_LANG_EN
+) else (
+    call :SET_LANG_ZH
+)
+goto :EOF
+
 :SET_LANG_ZH
 set "LANG_TITLE=选择语言 / Select Language"
 set "LANG_1=English"
@@ -43,6 +155,7 @@ set "PATH_PROMPT=请输入选项 [1-4]:"
 set "PATH_ERROR=错误: 路径不存在! 请重试..."
 set "PATH_SAVE=是否保存为默认? [Y/N]:"
 set "PATH_SAVED=配置已保存到 config.ini"
+set "PATH_INPUT=请输入完整路径: "
 
 set "MENU_TITLE=RepoCleaner - 项目清理工具"
 set "MENU_TARGET=目标目录:"
@@ -65,8 +178,8 @@ set "F1_SUCCESS=全局 node_modules 已启用!"
 set "F1_INFO=请先运行 [5] 安装依赖"
 
 set "F2_TITLE=重置 Node 配置"
-set "F2_STEP1=删除 NODE_PATH 环境变量..."
-set "F2_STEP2=清理项目 .npmrc 配置..."
+set "F2_STEP1=[1/2] 删除 NODE_PATH 环境变量..."
+set "F2_STEP2=[2/2] 清理项目 .npmrc 配置..."
 set "F2_SUCCESS=Node 配置已重置!"
 
 set "F3_TITLE=清理 .next 缓存"
@@ -99,6 +212,21 @@ set "F7_SUCCESS=Vite/构建缓存已清理!"
 set "OK=[完成]"
 set "ERROR=[错误]"
 set "PAUSE=按任意键继续..."
+
+set "HELP_TITLE=RepoCleaner - 项目清理工具"
+set "HELP_USAGE=用法: RepoCleaner.bat [选项] [路径]"
+set "HELP_OPTIONS=选项:"
+set "HELP_EXAMPLES=示例:"
+set "HELP_OPT_FUNC=  1-7       直接运行对应的菜单选项"
+set "HELP_OPT_LANG=  -lang en  设置为英文"
+set "HELP_OPT_LANG2=  -lang zh  设置为中文"
+set "HELP_OPT_HELP=  -h        显示帮助信息"
+set "HELP_EX1=  RepoCleaner.bat                    # 交互模式"
+set "HELP_EX2=  RepoCleaner.bat E:\Github          # 设置项目根目录"
+set "HELP_EX3=  RepoCleaner.bat 1                  # 启用全局 node_modules"
+set "HELP_EX4=  RepoCleaner.bat -lang en           # 设置英文"
+set "HELP_EX5=  RepoCleaner.bat 5 E:\Projects      # 为指定路径安装依赖"
+
 goto :EOF
 
 :SET_LANG_EN
@@ -116,6 +244,7 @@ set "PATH_PROMPT=Enter choice [1-4]:"
 set "PATH_ERROR=ERROR: Path does not exist! Please try again..."
 set "PATH_SAVE=Save as default? [Y/N]:"
 set "PATH_SAVED=Config saved to config.ini"
+set "PATH_INPUT=Enter full path: "
 
 set "MENU_TITLE=RepoCleaner - Github Project Cleaner"
 set "MENU_TARGET=Target:"
@@ -138,8 +267,8 @@ set "F1_SUCCESS=Global node_modules Enabled!"
 set "F1_INFO=Run [5] to install dependencies first time"
 
 set "F2_TITLE=Reset Node Config"
-set "F2_STEP1=Removing NODE_PATH environment variable..."
-set "F2_STEP2=Cleaning project .npmrc configs..."
+set "F2_STEP1=[1/2] Removing NODE_PATH environment variable..."
+set "F2_STEP2=[2/2] Cleaning project .npmrc configs..."
 set "F2_SUCCESS=Node Config Reset!"
 
 set "F3_TITLE=Clean .next Cache"
@@ -172,232 +301,108 @@ set "F7_SUCCESS=Vite/Build Cache Cleaned!"
 set "OK=[OK]"
 set "ERROR=[ERROR]"
 set "PAUSE=Press any key to continue..."
+
+set "HELP_TITLE=RepoCleaner - Project Cleaner"
+set "HELP_USAGE=Usage: RepoCleaner.bat [options] [path]"
+set "HELP_OPTIONS=Options:"
+set "HELP_EXAMPLES=Examples:"
+set "HELP_OPT_FUNC=  1-7       Run corresponding menu option directly"
+set "HELP_OPT_LANG=  -lang en  Set language to English"
+set "HELP_OPT_LANG2=  -lang zh  Set language to Chinese"
+set "HELP_OPT_HELP=  -h        Show this help"
+set "HELP_EX1=  RepoCleaner.bat                    # Interactive mode"
+set "HELP_EX2=  RepoCleaner.bat E:\Github          # Set project root"
+set "HELP_EX3=  RepoCleaner.bat 1                  # Enable global node_modules"
+set "HELP_EX4=  RepoCleaner.bat -lang en           # Set English"
+set "HELP_EX5=  RepoCleaner.bat 5 E:\Projects      # Install deps for path"
+
 goto :EOF
 
-:SAVE_CONFIG
-set "KEY=%~1"
-set "VALUE=%~2"
-set "CURRENT_REPO_ROOT="
-set "CURRENT_LANG="
-if exist "%CONFIG_FILE%" (
-    for /f "usebackq tokens=1,* delims==" %%a in ("%CONFIG_FILE%") do (
-        if /i "%%a"=="REPO_ROOT" set "CURRENT_REPO_ROOT=%%b"
-        if /i "%%a"=="LANG" set "CURRENT_LANG=%%b"
-    )
-)
-if /i "%KEY%"=="REPO_ROOT" (
-    set "CURRENT_REPO_ROOT=%VALUE%"
-) else if /i "%KEY%"=="LANG" (
-    set "CURRENT_LANG=%VALUE%"
-)
-(
-    if defined CURRENT_REPO_ROOT echo REPO_ROOT=!CURRENT_REPO_ROOT!
-    if defined CURRENT_LANG echo LANG=!CURRENT_LANG!
-) > "%CONFIG_FILE%"
-goto :EOF
+:: ========================================================================
+:: 参数解析模块
+:: ========================================================================
+:PARSE_ARGUMENTS
+:PARSE_LOOP
+if "%~1"=="" goto :EOF
 
-:LANG_LOADED
+set "ARG=%~1"
 
-:: ====================== Repository Root Config ======================
-set "DEFAULT_REPO_ROOT=E:\Github"
+if /i "%ARG%"=="-h" goto :SHOW_HELP
+if /i "%ARG%"=="--help" goto :SHOW_HELP
 
-:: ====================== Parse Command Line Arguments ======================
-:PARSE_ARGS
-if "%~1"=="" goto :ARGS_DONE
-
-if /i "%~1"=="-lang" (
+if /i "%ARG%"=="-lang" (
     set "LANG_SECTION=%~2"
     call :SAVE_CONFIG LANG "%~2"
     shift
     shift
-    goto :PARSE_ARGS
+    goto :PARSE_LOOP
 )
 
-if /i "%~1"=="-h" goto :SHOW_HELP
-if /i "%~1"=="--help" goto :SHOW_HELP
+if /i "%ARG%"=="1" set "ARG_MODE=1"
+if /i "%ARG%"=="2" set "ARG_MODE=2"
+if /i "%ARG%"=="3" set "ARG_MODE=3"
+if /i "%ARG%"=="4" set "ARG_MODE=4"
+if /i "%ARG%"=="5" set "ARG_MODE=5"
+if /i "%ARG%"=="6" set "ARG_MODE=6"
+if /i "%ARG%"=="7" set "ARG_MODE=7"
 
-if /i "%~1"=="1" goto :ARG_RUN_1
-if /i "%~1"=="2" goto :ARG_RUN_2
-if /i "%~1"=="3" goto :ARG_RUN_3
-if /i "%~1"=="4" goto :ARG_RUN_4
-if /i "%~1"=="5" goto :ARG_RUN_5
-if /i "%~1"=="6" goto :ARG_RUN_6
-if /i "%~1"=="7" goto :ARG_RUN_7
+if defined ARG_MODE (
+    if not "%~2"=="" (
+        if exist "%~2" set "REPO_ROOT=%~2"
+    )
+    goto :SET_ROOT_DIRECT
+)
 
-:: Otherwise treat as path
-if exist "%~1" (
-    set "REPO_ROOT=%~1"
+if exist "%ARG%" (
+    set "REPO_ROOT=%ARG%"
     shift
-    goto :PARSE_ARGS
+    goto :PARSE_LOOP
 )
 
-:ARGS_DONE
-if defined REPO_ROOT goto :ROOT_SET
-goto :CHECK_CONFIG
+shift
+goto :PARSE_LOOP
 
 :SHOW_HELP
 echo.
-echo RepoCleaner - Project Cleaner
+echo !HELP_TITLE!
 echo.
-echo Usage: RepoCleaner.bat [options] [path]
+echo !HELP_USAGE!
 echo.
-echo Options:
-echo   1-7       Run corresponding menu option directly
-echo   -lang en  Set language to English
-echo   -lang zh  Set language to Chinese
-echo   -h        Show this help
+echo !HELP_OPTIONS!
+echo !HELP_OPT_FUNC!
+echo !HELP_OPT_LANG!
+echo !HELP_OPT_LANG2!
+echo !HELP_OPT_HELP!
 echo.
-echo Examples:
-echo   RepoCleaner.bat                    # Interactive mode
-echo   RepoCleaner.bat E:\Github          # Set project root
-echo   RepoCleaner.bat 1                  # Enable global node_modules
-echo   RepoCleaner.bat -lang en           # Set English
-echo   RepoCleaner.bat 5 E:\Projects      # Install deps for path
+echo !HELP_EXAMPLES!
+echo !HELP_EX1!
+echo !HELP_EX2!
+echo !HELP_EX3!
+echo !HELP_EX4!
+echo !HELP_EX5!
 echo.
 exit /b 0
 
-:ARG_RUN_1
-set "ARG_MODE=1"
-if not "%~2"=="" (
-    if exist "%~2" set "REPO_ROOT=%~2"
+:SET_ROOT_DIRECT
+if exist "!REPO_ROOT!" (
+    if "!REPO_ROOT:~-1!"=="\" set "REPO_ROOT=!REPO_ROOT:~0,-1!"
 )
-goto :ROOT_SET
+goto :RUN_ARG_FUNCTION
 
-:ARG_RUN_2
-set "ARG_MODE=2"
-if not "%~2"=="" (
-    if exist "%~2" set "REPO_ROOT=%~2"
-)
-goto :ROOT_SET
+:RUN_ARG_FUNCTION
+if "!ARG_MODE!"=="1" goto :FUNC_GLOBAL_NODE
+if "!ARG_MODE!"=="2" goto :FUNC_RESET_NODE
+if "!ARG_MODE!"=="3" goto :FUNC_CLEAN_NEXT
+if "!ARG_MODE!"=="4" goto :FUNC_RESTORE_NEXT
+if "!ARG_MODE!"=="5" goto :FUNC_INSTALL_DEPS
+if "!ARG_MODE!"=="6" goto :FUNC_CLEAN_ALL
+if "!ARG_MODE!"=="7" goto :FUNC_CLEAN_VITE
+goto :EOF
 
-:ARG_RUN_3
-set "ARG_MODE=3"
-if not "%~2"=="" (
-    if exist "%~2" set "REPO_ROOT=%~2"
-)
-goto :ROOT_SET
-
-:ARG_RUN_4
-set "ARG_MODE=4"
-if not "%~2"=="" (
-    if exist "%~2" set "REPO_ROOT=%~2"
-)
-goto :ROOT_SET
-
-:ARG_RUN_5
-set "ARG_MODE=5"
-if not "%~2"=="" (
-    if exist "%~2" set "REPO_ROOT=%~2"
-)
-goto :ROOT_SET
-
-:ARG_RUN_6
-set "ARG_MODE=6"
-if not "%~2"=="" (
-    if exist "%~2" set "REPO_ROOT=%~2"
-)
-goto :ROOT_SET
-
-:ARG_RUN_7
-set "ARG_MODE=7"
-if not "%~2"=="" (
-    if exist "%~2" set "REPO_ROOT=%~2"
-)
-goto :ROOT_SET
-
-:CHECK_CONFIG
-if exist "%~dp0config.ini" (
-    for /f "usebackq tokens=1,2 delims==" %%a in ("%~dp0config.ini") do (
-        if /i "%%a"=="REPO_ROOT" set "REPO_ROOT=%%b"
-    )
-    if defined REPO_ROOT goto :ROOT_SET
-)
-
-:: ====================== Language Selection ======================
-:LANG_MENU
-cls
-echo.
-echo ======================================================================
-echo                !LANG_TITLE!
-echo ======================================================================
-echo.
-echo    [1] !LANG_1!
-echo    [2] !LANG_2!
-echo.
-set /p "LANG_CHOICE=!LANG_PROMPT!"
-
-if "!LANG_CHOICE!"=="1" (
-    set "LANG_SECTION=en"
-) else if "!LANG_CHOICE!"=="2" (
-    set "LANG_SECTION=zh"
-) else (
-    set "LANG_SECTION=zh"
-)
-
-if "!LANG_SECTION!"=="en" (
-    call :SET_LANG_EN
-) else (
-    call :SET_LANG_ZH
-)
-
-goto :INTERACTIVE_INPUT
-
-:INTERACTIVE_INPUT
-cls
-echo.
-echo ======================================================================
-echo               !PATH_TITLE!
-echo ======================================================================
-echo.
-echo    [1] !PATH_1! %CD%
-echo    [2] !PATH_2! %~dp0..\
-echo    [3] !PATH_3!
-echo    [4] !PATH_4! %DEFAULT_REPO_ROOT%
-echo.
-set /p "PATH_CHOICE=!PATH_PROMPT!"
-
-if "%PATH_CHOICE%"=="1" set "REPO_ROOT=%CD%"
-if "%PATH_CHOICE%"=="2" set "REPO_ROOT=%~dp0..\"
-if "%PATH_CHOICE%"=="3" (
-    set /p "REPO_ROOT=Enter full path: "
-)
-if "%PATH_CHOICE%"=="4" set "REPO_ROOT=%DEFAULT_REPO_ROOT%"
-
-if not defined REPO_ROOT set "REPO_ROOT=%DEFAULT_REPO_ROOT%"
-
-if not exist "!REPO_ROOT!" (
-    echo.
-    echo    !PATH_ERROR!
-    echo.
-    pause
-    goto :INTERACTIVE_INPUT
-)
-
-echo.
-set /p "SAVE_CONFIG=!PATH_SAVE!"
-if /i "!SAVE_CONFIG!"=="Y" (
-    call :SAVE_CONFIG REPO_ROOT "!REPO_ROOT!"
-    echo.
-    echo    !PATH_SAVED!
-    timeout /t 1 >nul 2>&1
-)
-
-:ROOT_SET
-if "!REPO_ROOT:~-1!"=="\" set "REPO_ROOT=!REPO_ROOT:~0,-1!"
-
-:: Check if running from command line argument
-if defined ARG_MODE (
-    if "%ARG_MODE%"=="1" goto GLOBAL_NODE
-    if "%ARG_MODE%"=="2" goto RESET_NODE
-    if "%ARG_MODE%"=="3" goto CLEAN_NEXT
-    if "%ARG_MODE%"=="4" goto RESET_NEXT
-    if "%ARG_MODE%"=="5" goto INSTALL_DEPS
-    if "%ARG_MODE%"=="6" goto CLEAN_ALL_CACHE
-    if "%ARG_MODE%"=="7" goto CLEAN_VITE_CACHE
-)
-
-:: ====================== Main Menu ======================
-:MENU
+:: ========================================================================
+:: UI显示模块
+:: ========================================================================
+:DISPLAY_MENU
 cls
 echo.
 echo         ======================================================================
@@ -421,21 +426,49 @@ echo         [0] !MENU_EXIT!
 echo.
 echo         ======================================================================
 echo.
+goto :EOF
+
+:GET_USER_CHOICE
 set /p "CHOICE=!MENU_CHOOSE!"
+goto :EOF
 
-if "%CHOICE%"=="1" goto GLOBAL_NODE
-if "%CHOICE%"=="2" goto RESET_NODE
-if "%CHOICE%"=="3" goto CLEAN_NEXT
-if "%CHOICE%"=="4" goto RESET_NEXT
-if "%CHOICE%"=="5" goto INSTALL_DEPS
-if "%CHOICE%"=="6" goto CLEAN_ALL_CACHE
-if "%CHOICE%"=="7" goto CLEAN_VITE_CACHE
-if /i "%CHOICE%"=="L" goto :LANG_MENU
+:PROCESS_CHOICE
+if "%CHOICE%"=="1" goto :FUNC_GLOBAL_NODE
+if "%CHOICE%"=="2" goto :FUNC_RESET_NODE
+if "%CHOICE%"=="3" goto :FUNC_CLEAN_NEXT
+if "%CHOICE%"=="4" goto :FUNC_RESTORE_NEXT
+if "%CHOICE%"=="5" goto :FUNC_INSTALL_DEPS
+if "%CHOICE%"=="6" goto :FUNC_CLEAN_ALL
+if "%CHOICE%"=="7" goto :FUNC_CLEAN_VITE
+if /i "%CHOICE%"=="L" (
+    call :SHOW_LANG_MENU
+    goto :EOF
+)
 if "%CHOICE%"=="0" exit
-goto MENU
+goto :EOF
 
-:: ====================== Function 1: Enable Global node_modules ======================
-:GLOBAL_NODE
+:SHOW_LANG_MENU
+cls
+echo.
+echo ======================================================================
+echo                !LANG_TITLE!
+echo ======================================================================
+echo.
+echo    [1] !LANG_1!
+echo    [2] !LANG_2!
+echo.
+set /p "LANG_CHOICE=!LANG_PROMPT!"
+
+if "!LANG_CHOICE!"=="1" set "LANG_SECTION=en"
+if "!LANG_CHOICE!"=="2" set "LANG_SECTION=zh"
+
+call :LOAD_LANGUAGE
+goto :EOF
+
+:: ========================================================================
+:: 功能实现模块
+:: ========================================================================
+:FUNC_GLOBAL_NODE
 cls
 echo.
 echo !F1_STEP1!
@@ -455,7 +488,7 @@ for /d %%d in (!REPO_ROOT!\*) do (
         (
             echo prefix=!GLOBAL_NODE_MODULES!
             echo cache=!GLOBAL_NODE_MODULES!\.npm-cache
-            echo tmp=!TEMP!
+            echo tmp="!TEMP!"
             echo global=true
             echo prefer-global=true
         ) > "%%d\.npmrc"
@@ -483,10 +516,9 @@ echo NODE_PATH: !NODE_PATH!
 echo ======================================================================
 echo.
 pause
-goto MENU
+goto :EOF
 
-:: ====================== Function 2: Reset Node Config ======================
-:RESET_NODE
+:FUNC_RESET_NODE
 cls
 echo.
 echo !F2_STEP1!
@@ -505,10 +537,9 @@ echo !OK! !F2_SUCCESS!
 echo ======================================================================
 echo.
 pause
-goto MENU
+goto :EOF
 
-:: ====================== Function 3: Clean .next Cache ======================
-:CLEAN_NEXT
+:FUNC_CLEAN_NEXT
 cls
 echo.
 echo !F3_STEP1!
@@ -527,10 +558,9 @@ echo !OK! !F3_SUCCESS!
 echo ======================================================================
 echo.
 pause
-goto MENU
+goto :EOF
 
-:: ====================== Function 4: Restore .next ======================
-:RESET_NEXT
+:FUNC_RESTORE_NEXT
 cls
 echo.
 echo !F4_STEP1!
@@ -548,10 +578,9 @@ echo !OK! !F4_SUCCESS!
 echo ======================================================================
 echo.
 pause
-goto MENU
+goto :EOF
 
-:: ====================== Function 5: Install Global Dependencies ======================
-:INSTALL_DEPS
+:FUNC_INSTALL_DEPS
 cls
 echo.
 echo ======================================================================
@@ -562,25 +591,11 @@ echo !F5_LIST!
 echo !F5_WAIT!
 echo.
 
-echo.
-echo !F5_STEP1!
-npm install -g react react-dom next
-
-echo.
-echo !F5_STEP2!
-npm install -g vue @vue/cli
-
-echo.
-echo !F5_STEP3!
-npm install -g axios express
-
-echo.
-echo !F5_STEP4!
-npm install -g pnpm yarn
-
-echo.
-echo !F5_STEP5!
-npm install -g cross-env dotenv nodemon pm2 rimraf mkdirp
+call :EXEC_NPM_INSTALL "react react-dom next" "!F5_STEP1!"
+call :EXEC_NPM_INSTALL "vue @vue/cli" "!F5_STEP2!"
+call :EXEC_NPM_INSTALL "axios express" "!F5_STEP3!"
+call :EXEC_NPM_INSTALL "pnpm yarn" "!F5_STEP4!"
+call :EXEC_NPM_INSTALL "cross-env dotenv nodemon pm2 rimraf mkdirp" "!F5_STEP5!"
 
 echo.
 echo ======================================================================
@@ -589,10 +604,17 @@ echo !F5_INFO!
 echo ======================================================================
 echo.
 pause
-goto MENU
+goto :EOF
 
-:: ====================== Function 6: Clean All Project Cache ======================
-:CLEAN_ALL_CACHE
+:EXEC_NPM_INSTALL
+set "PKGS=%~1"
+set "STEP_MSG=%~2"
+echo.
+echo !STEP_MSG!
+npm install -g !PKGS!
+goto :EOF
+
+:FUNC_CLEAN_ALL
 cls
 echo.
 echo ======================================================================
@@ -608,9 +630,9 @@ for /d %%d in (!REPO_ROOT!\*) do (
     echo Cleaning: %%~nd
     rd /s /q "%%d\node_modules" 2>nul
     rd /s /q "%%d\.next" 2>nul
+    rd /s /q "%%d\.nuxt" 2>nul
     rd /s /q "%%d\dist" 2>nul
     rd /s /q "%%d\build" 2>nul
-    rd /s /q "%%d\.nuxt" 2>nul
     del /f /q "%%d\package-lock.json" 2>nul
     del /f /q "%%d\yarn.lock" 2>nul
     del /f /q "%%d\pnpm-lock.yaml" 2>nul
@@ -622,10 +644,9 @@ echo !OK! !F6_SUCCESS!
 echo ======================================================================
 echo.
 pause
-goto MENU
+goto :EOF
 
-:: ====================== Function 7: Clean Vite/Build Cache ======================
-:CLEAN_VITE_CACHE
+:FUNC_CLEAN_VITE
 cls
 echo.
 echo ======================================================================
@@ -652,4 +673,9 @@ echo !OK! !F7_SUCCESS!
 echo ======================================================================
 echo.
 pause
-goto MENU
+goto :EOF
+
+:: ========================================================================
+:: 通用显示模块 (已弃用，保留以兼容)
+:: ========================================================================
+:: SHOW_SUCCESS 函数已弃用，每个功能现在直接显示自己的成功消息
