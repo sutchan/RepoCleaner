@@ -1,4 +1,5 @@
 @echo off
+:: RepoCleaner v1.2.1 - Windows 项目清理工具
 chcp 65001 >nul 2>&1
 setlocal enabledelayedexpansion
 title RepoCleaner - Github Project Cleaner
@@ -25,7 +26,10 @@ goto :LANG_LOADED
 
 :: ====================== Language Loading Function ======================
 :LOAD_LANGUAGE
-set "CURRENT_LANG=%~1"
+::: 仅当显式传入参数时覆盖语言（避免 LANG_MENU 已设值被清空）
+if not "%~1"=="" set "CURRENT_LANG=%~1"
+::: 命令行 -lang 已写入 LANG，同步到 CURRENT_LANG
+if not defined CURRENT_LANG if defined LANG set "CURRENT_LANG=%LANG%"
 
 :: Default Chinese values
 set "LANG_TITLE=选择语言 / Select Language"
@@ -42,6 +46,7 @@ set "PATH_PROMPT=请输入选项 [1-4]:"
 set "PATH_ERROR=错误: 路径不存在! 请重试..."
 set "PATH_SAVE=是否保存为默认? [Y/N]:"
 set "PATH_SAVED=配置已保存到 config.ini"
+set "PATH_INPUT=请输入完整路径: "
 
 set "MENU_TITLE=RepoCleaner - 项目清理工具"
 set "MENU_TARGET=目标目录:"
@@ -112,6 +117,7 @@ if /i "!CURRENT_LANG!"=="en" (
     set "PATH_ERROR=ERROR: Path does not exist! Please try again..."
     set "PATH_SAVE=Save as default? [Y/N]:"
     set "PATH_SAVED=Config saved to config.ini"
+    set "PATH_INPUT=Enter full path: "
 
     set "MENU_TITLE=RepoCleaner - Github Project Cleaner"
     set "MENU_TARGET=Target:"
@@ -122,6 +128,7 @@ if /i "!CURRENT_LANG!"=="en" (
     set "MENU_OPTION5=Install Global Dependencies   - React/Vue/Next/axios/tools"
     set "MENU_OPTION6=Clean All Project Cache       - Remove node_modules/.next/dist"
     set "MENU_OPTION7=Clean Vite/Build Cache        - Remove .vite/dist/.turbo"
+    set "MENU_EXIT=Exit"
     set "MENU_CHOOSE=Enter choice [0-7]:"
 
     set "F1_TITLE=Enable Global node_modules"
@@ -204,13 +211,14 @@ if /i "%~1"=="-lang" (
 if /i "%~1"=="-h" goto :SHOW_HELP
 if /i "%~1"=="--help" goto :SHOW_HELP
 
-if /i "%~1"=="1" goto :ARG_RUN_1
-if /i "%~1"=="2" goto :ARG_RUN_2
-if /i "%~1"=="3" goto :ARG_RUN_3
-if /i "%~1"=="4" goto :ARG_RUN_4
-if /i "%~1"=="5" goto :ARG_RUN_5
-if /i "%~1"=="6" goto :ARG_RUN_6
-if /i "%~1"=="7" goto :ARG_RUN_7
+::: 统一命令行数字参数分发（OPENSPEC 2.2：消除 ARG_RUN_1~7 重复）
+if /i "%~1"=="1" set "ARG_MODE=1" & goto :RUN_ARG_FUNCTION
+if /i "%~1"=="2" set "ARG_MODE=2" & goto :RUN_ARG_FUNCTION
+if /i "%~1"=="3" set "ARG_MODE=3" & goto :RUN_ARG_FUNCTION
+if /i "%~1"=="4" set "ARG_MODE=4" & goto :RUN_ARG_FUNCTION
+if /i "%~1"=="5" set "ARG_MODE=5" & goto :RUN_ARG_FUNCTION
+if /i "%~1"=="6" set "ARG_MODE=6" & goto :RUN_ARG_FUNCTION
+if /i "%~1"=="7" set "ARG_MODE=7" & goto :RUN_ARG_FUNCTION
 
 :: Otherwise treat as path
 if exist "%~1" (
@@ -227,7 +235,7 @@ goto :CHECK_CONFIG
 echo.
 echo RepoCleaner - Project Cleaner
 echo.
-echo Usage: RepoCleaner.bat [options] [path]
+echo Usage: RepoCleaner.bat [options] [function] [path]
 echo.
 echo Options:
 echo   1-7       Run corresponding menu option directly
@@ -244,50 +252,8 @@ echo   RepoCleaner.bat 5 E:\Projects      # Install deps for path
 echo.
 exit /b 0
 
-:ARG_RUN_1
-set "ARG_MODE=1"
-if not "%~2"=="" (
-    if exist "%~2" set "REPO_ROOT=%~2"
-)
-goto :ROOT_SET
-
-:ARG_RUN_2
-set "ARG_MODE=2"
-if not "%~2"=="" (
-    if exist "%~2" set "REPO_ROOT=%~2"
-)
-goto :ROOT_SET
-
-:ARG_RUN_3
-set "ARG_MODE=3"
-if not "%~2"=="" (
-    if exist "%~2" set "REPO_ROOT=%~2"
-)
-goto :ROOT_SET
-
-:ARG_RUN_4
-set "ARG_MODE=4"
-if not "%~2"=="" (
-    if exist "%~2" set "REPO_ROOT=%~2"
-)
-goto :ROOT_SET
-
-:ARG_RUN_5
-set "ARG_MODE=5"
-if not "%~2"=="" (
-    if exist "%~2" set "REPO_ROOT=%~2"
-)
-goto :ROOT_SET
-
-:ARG_RUN_6
-set "ARG_MODE=6"
-if not "%~2"=="" (
-    if exist "%~2" set "REPO_ROOT=%~2"
-)
-goto :ROOT_SET
-
-:ARG_RUN_7
-set "ARG_MODE=7"
+:RUN_ARG_FUNCTION
+::: 统一处理数字参数携带的可选路径参数（如 "RepoCleaner.bat 5 E:\Projects"）
 if not "%~2"=="" (
     if exist "%~2" set "REPO_ROOT=%~2"
 )
@@ -337,7 +303,7 @@ set /p "PATH_CHOICE=!PATH_PROMPT!"
 if "%PATH_CHOICE%"=="1" set "REPO_ROOT=%CD%"
 if "%PATH_CHOICE%"=="2" set "REPO_ROOT=%~dp0..\"
 if "%PATH_CHOICE%"=="3" (
-    set /p "REPO_ROOT=Enter full path: "
+    set /p "REPO_ROOT=!PATH_INPUT!"
 )
 if "%PATH_CHOICE%"=="4" set "REPO_ROOT=%DEFAULT_REPO_ROOT%"
 

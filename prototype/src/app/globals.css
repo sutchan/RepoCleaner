@@ -1,0 +1,58 @@
+/* e:/Github/RepoCleaner/prototype/src/app/globals.css v1.2.0
+   Tailwind 4 + 设计令牌（对齐 DESIGN-SYSTEM.md §2） */
+@import "tailwindcss";
+
+@theme {
+  --color-background: #0a0a0b;
+  --color-foreground: #ededed;
+  --color-card: #161618;
+  --color-muted: #1c1c1f;
+  --color-muted-foreground: #a1a1aa;
+  --color-border: #27272a;
+  --color-primary: #10b981;
+  --color-primary-foreground: #052e22;
+  --color-destructive: #ef4444;
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+
+  --radius: 12px;
+  --radius-sm: 8px;
+
+  --font-sans: -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-mono: ui-monospace, "JetBrains Mono", "SF Mono", Consolas, monospace;
+
+  --dur-fast: 150ms;
+  --dur: 250ms;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 动效：卡片入场 */
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in-up { animation: fade-in-up var(--dur) cubic-bezier(0.4,0,0.2,1) both; }
+
+/* 旋转加载 */
+@keyframes spin { to { transform: rotate(360deg); } }
+.animate-spin-slow { animation: spin 0.8s linear infinite; }
+
+/* 焦点可见 */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+::selection { background: color-mix(in srgb, var(--color-primary) 35%, transparent); }

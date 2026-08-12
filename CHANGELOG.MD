@@ -4,6 +4,41 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [1.2.1] - 2026-08-12
+
+### Fixed
+- **恢复 lang.ini** - 此前被截断为单行导致运行期所有翻译键缺失，已据 git 历史完整还原 168 行中英文配置并升级版本头至 1.2.1
+- **config.ini 去重** - 删除重复的 `LANG` 行与尾部多余空格，避免 `if exist` 路径误判
+- **prototype 依赖缺口** - 补充缺失的 `lucide-react` 依赖，页面图标可正常渲染
+- **prototype 页面重构** - 重写 `page.tsx`，接入真实 7 项功能数据与 `src/lib/data.ts` 单一数据源，移除默认模板占位内容
+- **prototype 双语切换** - 顶部语言开关（中/EN）实时切换全部文案，对齐 bat 的 i18n 行为
+
+### Added
+- **语义化容器 id** - prototype 所有 UI 容器/区块加 `id`（如 `hero`、`features-grid`、`feature-card-3`、`lang-toggle`），便于调试定位与无障碍访问
+- **根 `.gitignore`** - 忽略 npm 误存缓存（`%USERPROFILE%/`、`.npm-cache/`）、日志与构建产物
+
+### Changed
+- **版本号统一** - README 徽章、RepoCleaner.bat 头、lang.ini 头、prototype（package.json/README/DESIGN-SYSTEM）全部同步至 v1.2.1
+
+### Security
+- 路径校验沿用 `if exist` 白名单，未引入任意路径执行风险
+
+---
+
+## [1.1.0] - 2026-08-12
+
+### Fixed
+- **消除命令行参数解析重复代码** - 将 7 个 `ARG_RUN_1~7` 统一为单标签 `RUN_ARG_FUNCTION` 分发，对齐 OPENSPEC 2.2
+- **i18n 缺口补全** - `lang.ini` 英文节补齐 `MENU_OPTION7`，修正 `MENU_CHOOSE` 范围 `[0-6]`→`[0-7]`
+- **交互式路径输入国际化** - 硬编码 `Enter full path: ` 改为 `PATH_INPUT` 变量，支持中英文切换（OPENSPEC 2.3）
+- **config.ini 修复** - 去除 `REPO_ROOT=E:\Github` 值末尾多余空格，避免 `if exist` 误判路径不存在
+- **版本号统一** - README 徽章、lang.ini 头、CHANGELOG 同步至 v1.1.0
+
+### Security
+- 路径校验沿用 `if exist` 白名单，未引入任意路径执行风险
+
+---
+
 ## [1.0.1] - 2025-03-19
 
 ### Added
