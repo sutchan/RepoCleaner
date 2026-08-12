@@ -1,4 +1,4 @@
-// e:/Github/RepoCleaner/prototype/src/components/ui/button.tsx v1.2.0
+// e:/Github/RepoCleaner/prototype/src/components/ui/button.tsx v1.2.1
 import * as React from "react";
 import { cn } from "@/lib/utils";
 

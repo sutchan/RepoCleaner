@@ -1,208 +1,211 @@
 // src/app/page.tsx v1.2.1
-"use client";
+import { useState, type SVGProps } from "react";
 
-import { useState } from "react";
-import {
-  Github,
-  Menu,
-  Package,
-  RotateCcw,
-  Trash2,
-  RotateCw,
-  Download,
-  Brush,
-  Zap,
-  ArrowRight,
-  Check,
-} from "lucide-react";
+import { scanResults, tweaks } from "@/lib/data";
+import { i18n, type Lang } from "@/lib/i18n";
+
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import { features, projectTypes, steps, i18n, type Lang } from "@/lib/data";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-const ICONS = {
-  package: Package,
-  "rotate-ccw": RotateCcw,
-  trash: Trash2,
-  "rotate-cw": RotateCw,
-  download: Download,
-  broom: Brush,
-  zap: Zap,
-} as const;
+/* 内联 SVG 图标（零外部依赖，避免运行时网络安装） */
+type IconProps = SVGProps<SVGSVGElement>;
+function Icon({ children, ...props }: IconProps & { children: React.ReactNode }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      width={16}
+      height={16}
+      aria-hidden="true"
+      {...props}
+    >
+      {children}
+    </svg>
+  );
+}
+const ScanLine = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2" />
+    <line x1="3" y1="12" x2="21" y2="12" />
+  </Icon>
+);
+const ShieldCheck = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+    <path d="m9 12 2 2 4-4" />
+  </Icon>
+);
+const FolderTree = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M4 20h16M4 16h8M4 12h16M10 4h4v4h-4z" />
+  </Icon>
+);
+const CheckCircle2 = (p: IconProps) => (
+  <Icon {...p}>
+    <circle cx="12" cy="12" r="9" />
+    <path d="m8.5 12 2.5 2.5 4.5-5" />
+  </Icon>
+);
+const AlertCircle = (p: IconProps) => (
+  <Icon {...p}>
+    <circle cx="12" cy="12" r="9" />
+    <line x1="12" y1="8" x2="12" y2="12" />
+    <line x1="12" y1="16" x2="12.01" y2="16" />
+  </Icon>
+);
+const Trash2 = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+    <line x1="10" y1="11" x2="10" y2="17" />
+    <line x1="14" y1="11" x2="14" y2="17" />
+  </Icon>
+);
 
 export default function Home() {
   const [lang, setLang] = useState<Lang>("zh");
   const t = i18n[lang];
 
+  const totalScan = scanResults.length;
+  const safeCount = scanResults.filter((r) => r.risk === "safe").length;
+
   return (
-    <div id="page-home" className="flex flex-col">
-      {/* 顶部导航 */}
-      <header id="site-header" className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur">
-        <div id="site-header-inner" className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
-          <div id="brand" className="flex items-center gap-2">
-            <div id="brand-logo" className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <Brush className="h-4 w-4" />
-            </div>
-            <span id="brand-name" className="font-semibold">{t.appName}</span>
-          </div>
-          <nav id="site-nav" className="hidden items-center gap-6 md:flex">
-            <a id="nav-features" href="#features" className="text-sm text-muted-foreground hover:text-foreground">{t.navFeatures}</a>
-            <a id="nav-projects" href="#projects" className="text-sm text-muted-foreground hover:text-foreground">{t.navProjects}</a>
-            <a id="nav-steps" href="#steps" className="text-sm text-muted-foreground hover:text-foreground">{t.navSteps}</a>
-          </nav>
-          <div id="lang-switch" className="flex items-center gap-2">
-            <span id="lang-label" className="text-xs text-muted-foreground">{t.langLabel}</span>
-            <button
-              id="lang-toggle"
-              type="button"
-              onClick={() => setLang((l) => (l === "zh" ? "en" : "zh"))}
-              className="rounded-md border border-border px-2 py-1 text-xs hover:bg-accent"
-            >
-              {lang === "zh" ? "EN" : "中"}
-            </button>
-          </div>
-        </div>
-      </header>
-
-      {/* Hero */}
-      <section id="hero" className="relative overflow-hidden">
-        <div id="hero-bg" className="pointer-events-none absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent" />
-        <div id="hero-inner" className="relative mx-auto max-w-6xl px-6 py-20 text-center md:py-28">
-          <Badge id="hero-badge" tone="secondary" className="mb-4">
-            {t.heroBadge}
-          </Badge>
-          <h1 id="hero-title" className="mx-auto max-w-3xl text-4xl font-bold tracking-tight md:text-5xl">
-            {t.heroTitle}
+    <main id="repo-cleaner-app" className="min-h-screen bg-[#0d1117] py-8 text-gray-100">
+      <div id="app-container" className="mx-auto max-w-5xl px-4">
+        {/* 顶部栏：标题 + 语言切换 */}
+        <header id="app-header" className="mb-6 flex items-center justify-between">
+          <h1 id="app-title" className="text-2xl font-bold">
+            {t.appTitle}
           </h1>
-          <p id="hero-subtitle" className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
-            {t.heroSubtitle}
-          </p>
-          <div id="hero-actions" className="mt-8 flex items-center justify-center gap-3">
-            <Button id="cta-primary" size="lg">
-              {t.ctaPrimary}
-              <ArrowRight className="ml-2 h-4 w-4" />
+          <div id="lang-switch" className="flex items-center gap-2">
+            <span className="text-sm text-gray-400">{t.language}</span>
+            <Button
+              id="lang-btn-zh"
+              variant={lang === "zh" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setLang("zh")}
+            >
+              中文
             </Button>
-            <Button id="cta-secondary" variant="outline" size="lg">
-              {t.ctaSecondary}
+            <Button
+              id="lang-btn-en"
+              variant={lang === "en" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setLang("en")}
+            >
+              English
             </Button>
           </div>
-          <div id="hero-stats" className="mx-auto mt-12 grid max-w-2xl grid-cols-3 gap-6">
-            <div id="stat-saved" className="text-center">
-              <div className="text-2xl font-bold text-primary">10GB+</div>
-              <div className="text-xs text-muted-foreground">{t.statSaved}</div>
-            </div>
-            <div id="stat-projects" className="text-center">
-              <div className="text-2xl font-bold text-primary">4</div>
-              <div className="text-xs text-muted-foreground">{t.statProjects}</div>
-            </div>
-            <div id="stat-languages" className="text-center">
-              <div className="text-2xl font-bold text-primary">2</div>
-              <div className="text-xs text-muted-foreground">{t.statLanguages}</div>
-            </div>
-          </div>
-        </div>
-      </section>
+        </header>
 
-      {/* 功能 */}
-      <section id="features" className="border-t border-border">
-        <div id="features-inner" className="mx-auto max-w-6xl px-6 py-16">
-          <div id="features-head" className="mb-10 text-center">
-            <h2 id="features-title" className="text-3xl font-bold">{t.featuresTitle}</h2>
-            <p id="features-subtitle" className="mt-2 text-muted-foreground">{t.featuresSubtitle}</p>
-          </div>
-          <div id="features-grid" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {features.map((f) => {
-              const Icon = ICONS[f.icon];
-              return (
-                <Card id={`feature-card-${f.id}`} key={f.id}>
-                  <CardContent id={`feature-card-content-${f.id}`} className="pt-6">
-                    <div id={`feature-icon-${f.id}`} className="mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                      <Icon className="h-5 w-5" />
+        {/* 概览卡片 */}
+        <section id="overview" className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <Card id="stat-total">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-sm text-gray-400">
+                <ScanLine className="h-4 w-4" /> {t.statTotal}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-3xl font-bold">{totalScan}</p>
+            </CardContent>
+          </Card>
+          <Card id="stat-safe">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-sm text-gray-400">
+                <ShieldCheck className="h-4 w-4" /> {t.statSafe}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-3xl font-bold">{safeCount}</p>
+            </CardContent>
+          </Card>
+          <Card id="stat-tweaks">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-sm text-gray-400">
+                <FolderTree className="h-4 w-4" /> {t.statTweaks}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-3xl font-bold">{tweaks.length}</p>
+            </CardContent>
+          </Card>
+        </section>
+
+        {/* 安全提示 */}
+        <Alert id="security-note" tone="warning" className="mb-6">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>{t.securityTitle}</AlertTitle>
+          <AlertDescription>{t.securityDesc}</AlertDescription>
+        </Alert>
+
+        {/* 主内容：扫描结果 / 优化项 */}
+        <Tabs id="main-tabs" defaultValue="scan">
+          <TabsList id="main-tabs-list">
+            <TabsTrigger id="tab-scan" value="scan">
+              {t.tabScan}
+            </TabsTrigger>
+            <TabsTrigger id="tab-tweaks" value="tweaks">
+              {t.tabTweaks}
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent id="tab-content-scan" value="scan">
+            <section id="scan-results" className="space-y-3">
+              {scanResults.map((r) => (
+                <Card key={r.repo} id={`repo-card-${r.repo}`}>
+                  <CardContent className="flex items-center justify-between py-4">
+                    <div id={`repo-info-${r.repo}`}>
+                      <p className="font-semibold">{r.repo}</p>
+                      <p className="text-sm text-gray-400">{r.path}</p>
                     </div>
-                    <h3 id={`feature-title-${f.id}`} className="font-semibold">
-                      [{f.id}] {f.title[lang]}
-                    </h3>
-                    <p id={`feature-desc-${f.id}`} className="mt-2 text-sm text-muted-foreground">
-                      {f.desc[lang]}
-                    </p>
+                    <div id={`repo-status-${r.repo}`} className="flex items-center gap-2">
+                      {r.risk === "safe" ? (
+                        <Badge tone="success">
+                          <CheckCircle2 className="mr-1 h-3 w-3" /> {t.safe}
+                        </Badge>
+                      ) : (
+                        <Badge tone="destructive">
+                          <AlertCircle className="mr-1 h-3 w-3" /> {t.warning}
+                        </Badge>
+                      )}
+                      <Button id={`btn-clean-${r.repo}`} variant="outline" size="sm">
+                        <Trash2 className="mr-1 h-3 w-3" /> {t.clean}
+                      </Button>
+                    </div>
                   </CardContent>
                 </Card>
-              );
-            })}
-          </div>
-        </div>
-      </section>
+              ))}
+            </section>
+          </TabsContent>
 
-      {/* 项目类型 */}
-      <section id="projects" className="border-t border-border bg-muted/30">
-        <div id="projects-inner" className="mx-auto max-w-6xl px-6 py-16">
-          <div id="projects-head" className="mb-10 text-center">
-            <h2 id="projects-title" className="text-3xl font-bold">{t.projectsTitle}</h2>
-            <p id="projects-subtitle" className="mt-2 text-muted-foreground">{t.projectsSubtitle}</p>
-          </div>
-          <div id="projects-grid" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {projectTypes.map((p) => (
-              <Card id={`project-card-${p.type}`} key={p.type}>
-                <CardContent id={`project-card-content-${p.type}`} className="pt-6">
-                  <div id={`project-icon-${p.type}`} className="mb-3 text-3xl">{p.icon}</div>
-                  <h3 id={`project-name-${p.type}`} className="font-semibold">{p.type}</h3>
-                  <p id={`project-size-${p.type}`} className="mt-1 text-sm font-medium text-primary">{p.size[lang]}</p>
-                  <p id={`project-desc-${p.type}`} className="mt-2 text-xs text-muted-foreground">{p.desc[lang]}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-          <p id="projects-avg" className="mt-6 text-center text-sm text-muted-foreground">
-            {t.projectsAvg}：≈ 290 MB / 项目
-          </p>
-        </div>
-      </section>
+          <TabsContent id="tab-content-tweaks" value="tweaks">
+            <section id="tweak-list" className="space-y-3">
+              {tweaks.map((tw) => (
+                <Card key={tw.id} id={`tweak-card-${tw.id}`}>
+                  <CardContent className="py-4">
+                    <div id={`tweak-head-${tw.id}`} className="mb-1 flex items-center gap-2">
+                      <Badge tone="primary">{tw.category}</Badge>
+                      <span className="font-semibold">{tw.title}</span>
+                    </div>
+                    <p className="text-sm text-gray-400">{tw.desc}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </section>
+          </TabsContent>
+        </Tabs>
 
-      {/* 使用步骤 */}
-      <section id="steps" className="border-t border-border">
-        <div id="steps-inner" className="mx-auto max-w-6xl px-6 py-16">
-          <div id="steps-head" className="mb-10 text-center">
-            <h2 id="steps-title" className="text-3xl font-bold">{t.stepsTitle}</h2>
-            <p id="steps-subtitle" className="mt-2 text-muted-foreground">{t.stepsSubtitle}</p>
-          </div>
-          <div id="steps-grid" className="grid gap-4 md:grid-cols-3">
-            {steps.map((s, i) => (
-              <Card id={`step-card-${i + 1}`} key={i}>
-                <CardContent id={`step-card-content-${i + 1}`} className="pt-6">
-                  <div id={`step-index-${i + 1}`} className="mb-3 flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
-                    {i + 1}
-                  </div>
-                  <h3 id={`step-title-${i + 1}`} className="font-semibold">{s.title[lang]}</h3>
-                  <p id={`step-desc-${i + 1}`} className="mt-2 text-sm text-muted-foreground">{s.desc[lang]}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-          <div id="steps-commands" className="mx-auto mt-8 max-w-xl">
-            <code
-              id="steps-copy-command"
-              className="block rounded-lg border border-border bg-muted px-4 py-3 text-center text-sm"
-            >
-              RepoCleaner.bat "D:\Projects"
-            </code>
-          </div>
-        </div>
-      </section>
-
-      {/* 页脚 */}
-      <footer id="site-footer" className="border-t border-border">
-        <div id="footer-inner" className="mx-auto flex max-w-6xl flex-col items-center gap-2 px-6 py-10 text-center">
-          <div id="footer-brand" className="flex items-center gap-2">
-            <Github className="h-4 w-4" />
-            <span id="footer-name" className="text-sm font-semibold">{t.appTagline}</span>
-          </div>
-          <p id="footer-desc" className="text-sm text-muted-foreground">{t.footerDesc}</p>
-          <p id="footer-built" className="text-xs text-muted-foreground/70">{t.footerBuilt}</p>
-          <p id="footer-check" className="mt-1 flex items-center gap-1 text-xs text-primary">
-            <Check className="h-3 w-3" /> v1.2.1
-          </p>
-        </div>
-      </footer>
-    </div>
+        <footer id="app-footer" className="mt-8 text-center text-xs text-gray-500">
+          {t.footer} · v1.2.1
+        </footer>
+      </div>
+    </main>
   );
 }

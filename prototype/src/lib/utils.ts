@@ -1,4 +1,4 @@
-// e:/Github/RepoCleaner/prototype/src/lib/utils.ts v1.2.0
+// e:/Github/RepoCleaner/prototype/src/lib/utils.ts v1.2.1
 export type ClassValue = string | number | null | false | undefined | ClassValue[];
 
 export function cn(...inputs: ClassValue[]): string {

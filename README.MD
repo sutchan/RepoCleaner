@@ -179,6 +179,27 @@ RepoCleaner.bat [选项] [功能号] [目录路径]
 
 ---
 
+## 🎨 原型 (prototype/)
+
+`prototype/` 是与本工具对齐的 Next.js + React + TypeScript + Tailwind v4 参考界面（OPENSPEC 规范的可视化落地）：
+
+- **设计系统** `prototype/DESIGN-SYSTEM.md`、设计稿 `prototype/*.svg` 与 Tokens `prototype/tokens.json`
+- **单一数据源** `src/lib/data.ts`（7 项功能数据 + i18n 字典）
+- **国际化** `src/lib/i18n.ts`，顶部语言开关实时切换中/英，翻译全覆盖
+- **语义化 id** 所有 UI 容器/区块均带 `id`（如 `repo-cleaner-app`、`main-tabs`、`repo-card-<name>`）
+
+本地预览：
+
+```bash
+cd prototype
+npm install
+npm run dev      # 开发预览
+npm run build    # 生产构建（需先 npm install 拉全依赖）
+npm run type-check
+```
+
+---
+
 ## 📄 License
 
 MIT License
