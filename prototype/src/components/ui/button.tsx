@@ -1,11 +1,12 @@
-// e:/Github/RepoCleaner/prototype/src/components/ui/button.tsx v1.2.1
+// e:/Github/RepoCleaner/prototype/src/components/ui/button.tsx v1.2.2
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
-type Variant = "primary" | "secondary" | "destructive" | "ghost" | "outline";
+type Variant = "default" | "primary" | "secondary" | "destructive" | "ghost" | "outline";
 type Size = "sm" | "md" | "lg" | "icon";
 
 const variants: Record<Variant, string> = {
+  default: "bg-primary text-primary-foreground hover:opacity-90",
   primary: "bg-primary text-primary-foreground hover:opacity-90",
   secondary: "bg-muted text-foreground hover:bg-[#26262a]",
   destructive: "bg-destructive text-white hover:opacity-90",

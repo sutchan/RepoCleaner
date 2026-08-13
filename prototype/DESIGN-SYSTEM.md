@@ -1,4 +1,4 @@
-# RepoCleaner 设计系统 (Design System) v1.2.1
+# RepoCleaner 设计系统 (Design System) v1.2.2
 
 > 本文件是 prototype/ 的**唯一设计规范来源**。所有页面、组件、文档均须对齐此处。
 > 配套前端工程：Next.js 16 + React 19 + Tailwind 4 + shadcn/ui 风格组件。
@@ -63,8 +63,9 @@
 
 ### 2.5 图标 (Icon)
 
-- 库：`lucide-react`（线性、1.5px 描边、24px 默认）。
-- 映射：全局 node_modules→`Boxes`，重置→`RotateCcw`，.next→`Zap`，恢复→`PlayCircle`，依赖→`PackagePlus`，清理→`Trash2`，Vite→`Bolt`，语言→`Languages`，退出→`LogOut`。
+- 实现：`src/components/icons.tsx` 内联 SVG 组件（零外部依赖，避免运行时网络安装）。
+- 线性、1.5px 描边、24px viewBox，继承 `currentColor`。
+- 现有图标：`ScanLine`（扫描）、`ShieldCheck`（安全）、`FolderTree`（目录）、`CheckCircle2`（成功）、`AlertCircle`（警告）、`Trash2`（清理）。
 
 ### 2.6 动效 (Motion)
 
@@ -79,27 +80,27 @@
 
 | 组件 | 等价 shadcn | 说明 |
 |------|------------|------|
-| `button` | Button | 变体 primary/secondary/destructive/ghost/outline |
+| `button` | Button | 变体 default/primary/secondary/destructive/ghost/outline |
 | `card` | Card | Card/CardHeader/CardTitle/CardContent |
 | `badge` | Badge | 状态/标签 |
-| `tabs` | Tabs | 语言/视图切换 |
+| `tabs` | Tabs | 受控/非受控双模式，视图切换 |
 | `table` | Table | 功能/清理项对照 |
-| `alert` | Alert | 警告/成功反馈 |
+| `alert` | Alert | Alert/AlertTitle/AlertDescription，警告/成功反馈 |
 | `code-block` | — | 配置/命令展示（等宽+复制） |
 
-### 3.2 复合组件 (Composite) — `src/components/`
+### 3.2 图标组件 (Icons) — `src/components/icons.tsx`
 
-- `SiteHeader` / `SiteFooter` — 站点外壳
-- `FeatureCard` — 单个功能卡（图标+标题+描述+操作）
-- `StatGrid` — 数据指标网格
-- `TerminalMock` — 模拟 CLI 菜单（还原 OPENSPEC 5.2）
-- `LangToggle` — 中英文切换（受控）
+- 内联 SVG 图标集合（见 2.5），无第三方依赖。
 
-### 3.3 业务组件 (Business)
+### 3.3 业务组件 (Business) — `src/app/page.tsx`
 
-- `ConsolePanel` — 控制台，渲染 7 个功能，可点选并执行（模拟）
-- `FeatureTable` — 功能↔清理项对照表
-- `ConfigViewer` — config.ini / .npmrc 配置展示
+单页 dashboard，自上而下：
+
+- 顶部栏 `#app-header`：标题 + 语言开关（中文/English）
+- 概览卡片 `#overview`：扫描总数 / 安全数 / 优化建议数
+- 安全提示 `#security-note`：warning 级别 Alert
+- 主内容 `#main-tabs`：`scan`（扫描结果列表，含风险徽章与清理按钮）/ `tweaks`（优化建议列表）
+- 页脚 `#app-footer`：版本号
 
 ---
 
@@ -107,8 +108,8 @@
 
 ### 4.1 模式 (Patterns)
 
-- 首页 → 功能总览 → 控制台（可执行模拟）/ 文档。
-- 所有导航走顶部 `SiteHeader`，移动端折叠为抽屉。
+- 单页 dashboard，`Tabs` 在「扫描结果」与「优化建议」间切换。
+- 语言开关实时切换中/英（受控 `useState`）。
 
 ### 4.2 反馈 (Feedback)
 

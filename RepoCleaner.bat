@@ -1,5 +1,5 @@
 @echo off
-:: RepoCleaner v1.2.1 - Windows 项目清理工具
+:: RepoCleaner v1.2.2 - Windows 项目清理工具
 chcp 65001 >nul 2>&1
 setlocal enabledelayedexpansion
 title RepoCleaner - Github Project Cleaner
@@ -48,7 +48,7 @@ set "PATH_SAVE=是否保存为默认? [Y/N]:"
 set "PATH_SAVED=配置已保存到 config.ini"
 set "PATH_INPUT=请输入完整路径: "
 
-set "MENU_TITLE=RepoCleaner - 项目清理工具"
+set "MENU_TITLE=RepoCleaner - 项目清洁助手"
 set "MENU_TARGET=目标目录:"
 set "MENU_OPTION1=启用全局 node_modules     - 无需本地 node_modules"
 set "MENU_OPTION2=重置 Node 配置            - 恢复默认设置"
@@ -103,6 +103,8 @@ set "F7_SUCCESS=Vite/构建缓存已清理!"
 set "OK=[完成]"
 set "ERROR=[错误]"
 set "PAUSE=按任意键继续..."
+set "F1_WARNING=警告: 这将删除所有项目的本地 node_modules!"
+set "CONFIRM_PROMPT=是否继续? [Y/N]:"
 
 :: Override with English values if needed
 if /i "!CURRENT_LANG!"=="en" (
@@ -174,6 +176,8 @@ if /i "!CURRENT_LANG!"=="en" (
     set "OK=[OK]"
     set "ERROR=[ERROR]"
     set "PAUSE=Press any key to continue..."
+    set "F1_WARNING=WARNING: This will delete all local node_modules!"
+    set "CONFIRM_PROMPT=Continue? [Y/N]:"
 )
 goto :eof
 
@@ -188,21 +192,24 @@ if "%~1"=="" goto :ARGS_DONE
 
 if /i "%~1"=="-lang" (
     set "LANG_SECTION=%~2"
-    :: Save to config.ini (primary)
+    :: 保存到 config.ini（primary，去重 LANG 行并保留 REPO_ROOT）
+    set "LANG_UPDATED="
     if exist "%CONFIG_FILE%" (
         (
             for /f "usebackq tokens=1,* delims==" %%a in ("%CONFIG_FILE%") do (
                 if /i "%%a"=="REPO_ROOT" echo REPO_ROOT=%%b
-                if /i "%%a"=="LANG" echo LANG=%~2
+                if /i "%%a"=="LANG" (
+                    echo LANG=%~2
+                    set "LANG_UPDATED=1"
+                )
             )
-            echo LANG=%~2
+            if not defined LANG_UPDATED echo LANG=%~2
         ) > "%CONFIG_FILE%.tmp"
         move /y "%CONFIG_FILE%.tmp" "%CONFIG_FILE%" >nul 2>&1
     ) else (
         echo LANG=%~2 > "%CONFIG_FILE%"
     )
-    :: Also save to lang.ini for backward compatibility
-    echo LANG=%~2 > "%LANG_FILE%"
+    :: lang.ini 仅读取，不再整文件覆盖（避免清空 [en]/[zh] 文案节）
     shift
     shift
     goto :PARSE_ARGS
@@ -320,7 +327,22 @@ if not exist "!REPO_ROOT!" (
 echo.
 set /p "SAVE_CONFIG=!PATH_SAVE!"
 if /i "!SAVE_CONFIG!"=="Y" (
-    echo REPO_ROOT=!REPO_ROOT! > "%~dp0config.ini"
+    set "REPO_SAVED="
+    if exist "%CONFIG_FILE%" (
+        (
+            for /f "usebackq tokens=1,* delims==" %%a in ("%CONFIG_FILE%") do (
+                if /i "%%a"=="REPO_ROOT" (
+                    echo REPO_ROOT=!REPO_ROOT!
+                    set "REPO_SAVED=1"
+                )
+                if /i "%%a"=="LANG" echo LANG=%%b
+            )
+            if not defined REPO_SAVED echo REPO_ROOT=!REPO_ROOT!
+        ) > "%CONFIG_FILE%.tmp"
+        move /y "%CONFIG_FILE%.tmp" "%CONFIG_FILE%" >nul 2>&1
+    ) else (
+        echo REPO_ROOT=!REPO_ROOT! > "%CONFIG_FILE%"
+    )
     echo.
     echo    !PATH_SAVED!
     timeout /t 1 >nul 2>&1
@@ -382,6 +404,15 @@ goto MENU
 :GLOBAL_NODE
 cls
 echo.
+echo ======================================================================
+echo        !F1_TITLE!
+echo ======================================================================
+echo.
+echo !F1_WARNING!
+echo.
+set /p "CONFIRM_F1=!CONFIRM_PROMPT!"
+if /i not "!CONFIRM_F1!"=="Y" goto MENU
+echo.
 echo !F1_STEP1!
 for /f "delims=" %%i in ('npm root -g') do set "GLOBAL_NODE_MODULES=%%i"
 echo Path: !GLOBAL_NODE_MODULES!
@@ -393,7 +424,7 @@ set "NODE_PATH=!GLOBAL_NODE_MODULES!"
 
 echo.
 echo !F1_STEP3!
-for /d %%d in (!REPO_ROOT!\*) do (
+for /d %%d in ("!REPO_ROOT!\*") do (
     if exist "%%d\package.json" (
         echo Configured: %%~nd
         (
@@ -408,7 +439,7 @@ for /d %%d in (!REPO_ROOT!\*) do (
 
 echo.
 echo !F1_STEP4!
-for /d %%d in (!REPO_ROOT!\*) do (
+for /d %%d in ("!REPO_ROOT!\*") do (
     if exist "%%d\package.json" (
         if exist "%%d\node_modules" (
             echo Cleaning: %%~nd
@@ -439,7 +470,7 @@ reg delete "HKCU\Environment" /v NODE_PATH /f >nul 2>&1
 
 echo.
 echo !F2_STEP2!
-for /d %%d in (!REPO_ROOT!\*) do (
+for /d %%d in ("!REPO_ROOT!\*") do (
     del /f /q "%%d\.npmrc" >nul 2>&1
 )
 
@@ -456,8 +487,11 @@ goto MENU
 cls
 echo.
 echo !F3_STEP1!
-for /d %%d in (!REPO_ROOT!\*) do (
-    if exist "%%d\next.config.js" (
+for /d %%d in ("!REPO_ROOT!\*") do (
+    set "IS_NEXT="
+    if exist "%%d\next.config.js" set "IS_NEXT=1"
+    if exist "%%d\next.config.ts" set "IS_NEXT=1"
+    if defined IS_NEXT (
         echo Processing: %%~nd
         rd /s /q "%%d\.next" 2>nul
         echo. > "%%d\.next" 2>nul
@@ -478,8 +512,11 @@ goto MENU
 cls
 echo.
 echo !F4_STEP1!
-for /d %%d in (!REPO_ROOT!\*) do (
-    if exist "%%d\next.config.js" (
+for /d %%d in ("!REPO_ROOT!\*") do (
+    set "IS_NEXT="
+    if exist "%%d\next.config.js" set "IS_NEXT=1"
+    if exist "%%d\next.config.ts" set "IS_NEXT=1"
+    if defined IS_NEXT (
         echo Restoring: %%~nd
         del /f /q /a:s /a:h /a:r "%%d\.next" 2>nul
         rd /s /q "%%d\.next" 2>nul
@@ -548,7 +585,7 @@ echo.
 pause
 echo.
 
-for /d %%d in (!REPO_ROOT!\*) do (
+for /d %%d in ("!REPO_ROOT!\*") do (
     echo Cleaning: %%~nd
     rd /s /q "%%d\node_modules" 2>nul
     rd /s /q "%%d\.next" 2>nul
@@ -581,7 +618,7 @@ echo.
 pause
 echo.
 
-for /d %%d in (!REPO_ROOT!\*) do (
+for /d %%d in ("!REPO_ROOT!\*") do (
     echo Cleaning: %%~nd
     rd /s /q "%%d\.vite" 2>nul
     rd /s /q "%%d\dist" 2>nul

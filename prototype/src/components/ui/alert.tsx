@@ -1,4 +1,4 @@
-// e:/Github/RepoCleaner/prototype/src/components/ui/alert.tsx v1.2.1
+// e:/Github/RepoCleaner/prototype/src/components/ui/alert.tsx v1.2.2
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
@@ -24,4 +24,12 @@ export function Alert({
       {children}
     </div>
   );
+}
+
+export function AlertTitle({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
+  return <h5 className={cn("font-semibold leading-none tracking-tight", className)} {...props} />;
+}
+
+export function AlertDescription({ className, ...props }: React.HTMLAttributes<HTMLParagraphElement>) {
+  return <p className={cn("text-sm opacity-90", className)} {...props} />;
 }

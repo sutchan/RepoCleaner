@@ -4,6 +4,30 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [1.2.2] - 2026-08-13
+
+### Fixed
+- **prototype 编译失败（P0）** - `page.tsx` 引用不存在的 `scanResults`/`tweaks`、`AlertTitle`/`AlertDescription`、`variant="default"`、`Tabs defaultValue` 等导致 20 个 TS 错误；新增 `src/lib/data/repos.ts`（扫描结果/优化建议）并补全 `alert/button/tabs` 组件 API，`tsc --noEmit` 恢复通过
+- **数据层拆分** - `src/lib/data.ts`（236 行）按职责拆为 `src/lib/data/`（features/project-types/steps/repos + barrel），消除与 `src/lib/i18n.ts` 的双 i18n 冲突，保持 `@/lib/data` 导出契约不变
+- **`page.tsx` 超限拆分** - 212 行 → 158 行，内联 SVG 图标抽离至 `src/components/icons.tsx`
+- **空格路径支持** - 全部 7 处 `for /d` 目录扫描加引号，真正支持含空格的仓库根目录
+- **`next.config.ts` 检测** - 功能 3/4 同时识别 `next.config.js` 与 `next.config.ts`（Next.js 15+/16 默认）
+- **功能 1 二次确认** - 执行删除前要求输入 Y 确认，避免误删本地 node_modules
+- **config.ini 写入修复** - `-lang` 参数与路径保存不再产生重复 `LANG=` 行、不再丢失另一配置项（实测验证）
+- **lang.ini 保护** - `-lang` 不再整文件覆盖 lang.ini，避免清空 `[en]/[zh]` 文案节
+- **globals.css 版本对齐** - 头注释 v1.2.0 → v1.2.2
+
+### Changed
+- **产品名统一** - bat 菜单/`lang.ini`/prototype `i18n.ts` 统一为「RepoCleaner 项目清洁助手」
+- **文档对齐实现** - `DESIGN-SYSTEM.md` 更新实际组件/图标/交互；README 修正资源表述（`data/` 目录与 `tokens.json`）；OPENSPEC 更新功能规格与文件结构；重写 prototype/README.md（移除 Next.js 默认模板）
+- **新增 `tokens.json`** - 设计令牌与 `DESIGN-SYSTEM.md` §2 及 `globals.css` CSS 变量一致
+- **仓库卫生** - 删除 prototype 残留的 `%USERPROFILE%/` npm 缓存、日志与 `tsconfig.tsbuildinfo`；根 `.gitignore` 忽略 `.codebuddy/`
+
+### Security
+- 路径校验沿用 `for` 目录枚举 + `if exist` 白名单，本次未引入任意路径执行风险
+
+---
+
 ## [1.2.1] - 2026-08-12
 
 ### Fixed

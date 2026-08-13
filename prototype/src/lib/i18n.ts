@@ -1,4 +1,4 @@
-// src/lib/i18n.ts v1.2.1
+// src/lib/i18n.ts v1.2.2
 export type Lang = "zh" | "en";
 
 export type Dict = {
@@ -19,7 +19,7 @@ export type Dict = {
 
 export const i18n: Record<Lang, Dict> = {
   zh: {
-    appTitle: "RepoCleaner 仓库清理器",
+    appTitle: "RepoCleaner 项目清洁助手",
     language: "语言",
     statTotal: "扫描仓库",
     statSafe: "安全项",

@@ -4,7 +4,7 @@
 
 [![Windows](https://img.shields.io/badge/Windows-0078D6?style=flat&logo=windows&logoColor=white)](https://github.com/sutchan/RepoCleaner)
 [![Batch](https://img.shields.io/badge/Batch-.bat-blue?style=flat)](https://github.com/sutchan/RepoCleaner)
-[![Version](https://img.shields.io/badge/Version-1.2.1-green?style=flat)](https://github.com/sutchan/RepoCleaner)
+[![Version](https://img.shields.io/badge/Version-1.2.2-green?style=flat)](https://github.com/sutchan/RepoCleaner)
 [![License](https://img.shields.io/badge/License-MIT-orange?style=flat)](https://github.com/sutchan/RepoCleaner)
 [![Node](https://img.shields.io/badge/Node.js-339933?style=flat&logo=node.js&logoColor=white)](https://nodejs.org)
 [![Disk](https://img.shields.io/badge/Saves-10GB%2B-red?style=flat)](https://github.com/sutchan/RepoCleaner)
@@ -74,7 +74,7 @@
 
 ### 功能3：清理 & 禁用 .next 缓存
 
-- 扫描所有包含 `next.config.js` 的项目
+- 扫描所有包含 `next.config.js` / `next.config.ts` 的项目
 - 删除现有的 `.next` 缓存目录
 - 创建不可见的 `.next` 文件阻止缓存生成
 
@@ -183,8 +183,8 @@ RepoCleaner.bat [选项] [功能号] [目录路径]
 
 `prototype/` 是与本工具对齐的 Next.js + React + TypeScript + Tailwind v4 参考界面（OPENSPEC 规范的可视化落地）：
 
-- **设计系统** `prototype/DESIGN-SYSTEM.md`、设计稿 `prototype/*.svg` 与 Tokens `prototype/tokens.json`
-- **单一数据源** `src/lib/data.ts`（7 项功能数据 + i18n 字典）
+- **设计系统** `prototype/DESIGN-SYSTEM.md` 与 Tokens `prototype/tokens.json`（令牌与 `globals.css` 的 CSS 变量一致）
+- **单一数据源** `src/lib/data/`（features / project-types / steps / repos 数据，统一经 `@/lib/data` 导出）
 - **国际化** `src/lib/i18n.ts`，顶部语言开关实时切换中/英，翻译全覆盖
 - **语义化 id** 所有 UI 容器/区块均带 `id`（如 `repo-cleaner-app`、`main-tabs`、`repo-card-<name>`）
 
