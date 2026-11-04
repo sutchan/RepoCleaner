@@ -1,0 +1,19 @@
+# RepoCleaner 赞助配置 v1.2.6
+#
+# 本项目当前未启用任何赞助渠道，因此下方全部为注释，不填写任何账号。
+# 为避免虚假信息，未配置的平台一律不写占位账号；GitHub 在配置为空时不会显示 Sponsor 按钮。
+#
+# 启用方式：维护者确认渠道为真实、可核实后，取消对应行注释并填入自己的账号，例如：
+#
+# github: [sutchan]                 # GitHub Sponsors（需该账号已开通 Sponsors）
+# patreon: <你的 Patreon 项目名>     # 替换尖括号占位
+# open_collective: <你的集体名称>
+# ko_fi: <你的 Ko-fi 用户名>
+# custom: ["https://<你的收款页面>"]  # 最多 4 个自定义链接，须为 HTTPS
+#
+# 说明：
+# - 只有 github / patreon / open_collective / ko_fi / tidelift /
+#   community_bridge / liberapay / issuehunt / otechie / lfx_crowdfunding / custom
+#   这些键会被 GitHub 识别，其它键将被忽略。
+# - 提交前请删除示例中所有尖括号占位；保留占位会导致链接无效。
+# - 社区贡献方式见 ../docs/CONTRIBUTING.md，赞助不是贡献的前提条件。

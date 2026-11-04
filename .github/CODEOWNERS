@@ -1,0 +1,11 @@
+# CODEOWNERS v1.2.6
+# 每行格式：<路径模式> <GitHub 用户名或团队>
+# 用户名来自本仓库 remote：https://github.com/sutchan/RepoCleaner.git
+# 所有改动默认请求仓库维护者审查。
+
+*                       @sutchan
+
+# 规范与文档改动同时提示先查 docs/README.md 的文档地图（见 docs/CONTRIBUTING.md §10）。
+/docs/                  @sutchan
+/.github/               @sutchan
+/scripts/               @sutchan

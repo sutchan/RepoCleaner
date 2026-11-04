@@ -1,6 +1,7 @@
 <!--
 PR 标题格式与提交信息一致：<type>: <description>（如 fix: 修复功能4恢复 .next 缓存失效）
-完整规范见 docs/CONTRIBUTING.md（§6 提交信息 / §9 代码审查流程），文档导航见 docs/README.md。
+完整规范见 ../docs/CONTRIBUTING.md（§6 提交信息 / §9 代码审查流程），文档导航见 ../docs/README.md。
+贡献前请阅读行为准则 CODE_OF_CONDUCT.md；安全漏洞请勿通过 PR 公开提交，见 SECURITY.md。
 -->
 
 ## 变更总结

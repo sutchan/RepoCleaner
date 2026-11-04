@@ -1,0 +1,108 @@
+# 缺陷报告模板 v1.2.6
+name: 缺陷报告
+description: 报告 RepoCleaner.bat 或参考界面应用的功能异常
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢反馈。提交前请先查阅[文档中心](https://github.com/sutchan/RepoCleaner/blob/main/docs/README.md)、[已知限制](https://github.com/sutchan/RepoCleaner/blob/main/docs/OPENSPEC.md) 与[变更历史](https://github.com/sutchan/RepoCleaner/blob/main/CHANGELOG.MD)。
+
+        **注意**：
+        - 安全漏洞（路径穿越、绕过二次确认等）**请勿公开提交**，按[安全策略](https://github.com/sutchan/RepoCleaner/blob/main/.github/SECURITY.md)私密报告。
+        - 删除类问题的复现请在**隔离的临时目录**进行，严禁在真实仓库根目录验证。
+        - 所有内容请脱敏，不要包含真实用户名、绝对路径、密钥或私有仓库名。
+
+  - type: input
+    id: version
+    attributes:
+      label: RepoCleaner 版本
+      description: 见脚本头部注释或 CHANGELOG.MD，如 v1.2.6
+      placeholder: v1.2.6
+    validations:
+      required: true
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: 问题范围
+      description: 选择最贴近的一项
+      options:
+        - "功能 1：启用全局 node_modules"
+        - "功能 2：重置 Node 配置"
+        - "功能 3：清理并禁用 .next 缓存"
+        - "功能 4：恢复 Next.js 缓存"
+        - "功能 5：安装常用全局依赖"
+        - "功能 6：清理所有项目缓存"
+        - "功能 7：清理 Vite/构建缓存"
+        - 语言切换 / 目录选择 / 命令行参数
+        - 参考界面应用（根 src/）
+        - 文档或工程配置
+    validations:
+      required: true
+
+  - type: input
+    id: windows
+    attributes:
+      label: Windows 版本
+      placeholder: Windows 11 23H2
+    validations:
+      required: true
+
+  - type: input
+    id: node
+    attributes:
+      label: Node.js / npm 版本
+      description: 执行 node -v 与 npm -v 的结果
+      placeholder: v20.11.0 / 10.2.4
+    validations:
+      required: false
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤
+      description: 请给出完整命令或菜单操作序列；涉及目录时给出结构示意（用假项目名）
+      placeholder: |
+        1. 在隔离临时目录创建 repo-a（含 package.json）
+        2. 运行 RepoCleaner.bat "C:\Temp\sandbox"
+        3. 选择 [6]
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: 预期行为
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: 实际行为
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: 日志或截图
+      description: 请脱敏后粘贴；无则填「无」
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: 确认项
+      options:
+        - label: 我已查阅 FAQ、已知限制与 CHANGELOG，确认问题未被记录或修复
+          required: true
+        - label: 我已在隔离的临时目录复现，未在真实仓库执行删除类操作
+          required: true
+        - label: 提交内容已脱敏，不含密钥、真实路径或私有信息
+          required: true
+        - label: 该问题不是安全漏洞（安全漏洞走私密渠道）
+          required: true

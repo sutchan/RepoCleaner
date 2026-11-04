@@ -1,0 +1,19 @@
+# Issue 模板配置 v1.2.6
+blank_issues_enabled: false
+
+contact_links:
+  - name: 文档中心与使用说明
+    url: https://github.com/sutchan/RepoCleaner/blob/main/docs/README.md
+    about: 快速开始、功能详解、FAQ 与全部规范文档的入口，提问前请先查阅。
+  - name: 已知限制与功能规格
+    url: https://github.com/sutchan/RepoCleaner/blob/main/docs/OPENSPEC.md
+    about: 某些行为属于设计上的已知限制（§7.3）或扩展计划（§10），提交前请先确认。
+  - name: 安全漏洞私密报告（请勿公开提 Issue）
+    url: https://github.com/sutchan/RepoCleaner/security/advisories/new
+    about: 路径穿越、绕过二次确认、误删越界等安全问题请使用此私密渠道。
+  - name: 支持与提问指南
+    url: https://github.com/sutchan/RepoCleaner/blob/main/.github/SUPPORT.md
+    about: 说明有效的 Issue 应包含哪些信息，以及不适用的提问渠道。
+  - name: 变更历史
+    url: https://github.com/sutchan/RepoCleaner/blob/main/CHANGELOG.MD
+    about: 确认问题是否已在最新版本修复。
