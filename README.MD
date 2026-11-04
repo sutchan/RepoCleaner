@@ -4,7 +4,7 @@
 
 [![Windows](https://img.shields.io/badge/Windows-0078D6?style=flat&logo=windows&logoColor=white)](https://github.com/sutchan/RepoCleaner)
 [![Batch](https://img.shields.io/badge/Batch-.bat-blue?style=flat)](https://github.com/sutchan/RepoCleaner)
-[![Version](https://img.shields.io/badge/Version-1.2.4-green?style=flat)](https://github.com/sutchan/RepoCleaner)
+[![Version](https://img.shields.io/badge/Version-1.2.5-green?style=flat)](https://github.com/sutchan/RepoCleaner)
 [![License](https://img.shields.io/badge/License-MIT-orange?style=flat)](https://github.com/sutchan/RepoCleaner)
 [![Node](https://img.shields.io/badge/Node.js-339933?style=flat&logo=node.js&logoColor=white)](https://nodejs.org)
 [![Disk](https://img.shields.io/badge/Saves-10GB%2B-red?style=flat)](https://github.com/sutchan/RepoCleaner)
@@ -28,7 +28,7 @@
 - [GitHub 仓库信息（推荐设置）](#-github-仓库信息推荐设置)
 - [常见问题 FAQ](#-常见问题-faq)
 - [注意事项](#-注意事项)
-- [原型与设计规范](#-原型与设计规范-prototype)
+- [文档体系与开发规范](#-文档体系与开发规范-docs)
 - [目录结构](#-目录结构)
 - [许可证](#-许可证)
 - [更新日志](#-更新日志)
@@ -93,13 +93,13 @@
 
 > 首次使用后，项目将共享全局依赖，不再生成 `node_modules` 文件夹
 
-### 功能 2：还原默认 Node 配置
+### 功能 2：重置 Node 配置
 
 - 清除 `NODE_PATH` 环境变量
 - 删除所有项目的 `.npmrc` 配置文件
 - 恢复 npm 默认行为
 
-### 功能 3：清理 & 禁用 .next 缓存
+### 功能 3：清理并禁用 .next 缓存
 
 - 扫描所有包含 `next.config.js` / `next.config.ts` 的项目
 - 删除现有的 `.next` 缓存目录
@@ -107,12 +107,12 @@
 
 > 适合磁盘空间紧张时使用，会影响 Next.js 热更新速度
 
-### 功能 4：还原 NextJS 缓存
+### 功能 4：恢复 Next.js 缓存
 
 - 删除禁止缓存的 `.next` 文件（先清除隐藏/系统/只读属性再删除）
 - 恢复 Next.js 正常编译和热更新功能
 
-### 功能 5：一键安装常用全局依赖
+### 功能 5：安装常用全局依赖
 
 一次性安装以下常用开发库：
 
@@ -124,7 +124,7 @@ pnpm yarn
 cross-env dotenv nodemon pm2 rimraf mkdirp
 ```
 
-### 功能 6：一键清理所有项目缓存
+### 功能 6：清理所有项目缓存
 
 清理以下内容：
 
@@ -132,7 +132,7 @@ cross-env dotenv nodemon pm2 rimraf mkdirp
 |--------|------|
 | `node_modules` | 项目依赖目录 |
 | `.next` | Next.js 缓存 |
-| `.nuxt` | NuxtJS 缓存 |
+| `.nuxt` | Nuxt 缓存 |
 | `dist` | 打包输出目录 |
 | `build` | 构建输出目录 |
 | `package-lock.json` | npm 锁文件 |
@@ -147,7 +147,7 @@ cross-env dotenv nodemon pm2 rimraf mkdirp
 |--------|------|
 | `.vite` | Vite 缓存目录 |
 | `.turbo` | Turborepo 缓存 |
-| `.nuxt` | NuxtJS 缓存 |
+| `.nuxt` | Nuxt 缓存 |
 | `dist` | 打包输出目录 |
 | `build` | 构建输出目录 |
 | `coverage` | 测试覆盖率报告 |
@@ -277,24 +277,40 @@ A：支持。所有目录扫描均已做引号包裹处理，可正确识别含�
 
 ---
 
-## 🎨 原型与设计规范 (prototype/)
+## 📚 文档体系与开发规范 (docs/)
 
-应用代码已提升到仓库根（`src/` + 根级 `package.json` / `next.config.ts` / `tsconfig.json`），是与本工具对齐的 Next.js + React + TypeScript + Tailwind v4 参考界面（OPENSPEC 规范的可视化落地）。
+所有规格与规范文档统一归档在 [`docs/`](./docs/README.md)，根 README 只作使用者入口：
 
-- **根目录应用** 即原型实现：`src/app/page.tsx` 单页 dashboard，数据统一经 `@/lib/data` 导出，文案统一经 `src/lib/i18n.ts` 双语切换
-- **设计系统** `prototype/DESIGN-SYSTEM.md` 与 Tokens `prototype/tokens.json`（令牌与 `src/app/globals.css` 的 CSS 变量一致）
-- **语义化 id** 所有 UI 容器/区块均带 `id`（如 `repo-cleaner-app`、`main-tabs`、`repo-card-<name>`）
+| 文档 | 内容 |
+|------|------|
+| [docs/README.md](./docs/README.md) | 文档中心：文档地图、职责边界、按角色阅读路径 |
+| [docs/OPENSPEC.md](./docs/OPENSPEC.md) | 产品功能规格：7 项功能行为契约、交互、兼容性、已知限制 |
+| [docs/CONTRIBUTING.md](./docs/CONTRIBUTING.md) | 开发规范：编码风格、命名约定、目录组织、提交信息格式、分支管理、代码审查流程、版本规则、术语表 |
+| [docs/DESIGN-SYSTEM.md](./docs/DESIGN-SYSTEM.md) | UI 设计规范：设计令牌、组件库、交互、响应式、a11y、规范与实现差距清单 |
+| [docs/tokens.json](./docs/tokens.json) | 机器可读设计令牌 |
+| [.github/PULL_REQUEST_TEMPLATE.md](./.github/PULL_REQUEST_TEMPLATE.md) | PR 审查清单模板 |
+
+`prototype/` 现仅保留[原型目录说明](./prototype/README.md)，不再包含代码或规范正文。
+
+### 参考界面应用
+
+根 `src/` 是与本工具对齐的 Next.js + React + TypeScript + Tailwind v4 参考界面（[OPENSPEC](./docs/OPENSPEC.md) 规范的可视化落地）：
+
+- **单一数据源** `src/lib/data/`，文案统一经 `src/lib/i18n.ts` 中/英双语切换
+- **设计令牌** `src/app/globals.css` 的 CSS 变量，与 `docs/tokens.json` 对齐
+- **语义化 id** 主要容器/区块均带 `id`（如 `repo-cleaner-app`、`main-tabs`、`repo-card-<name>`）
+- **页脚** 展示版本号与 build 编号（由 `next.config.ts` 从 `package.json` 注入）
 
 本地预览（在仓库根目录）：
 
 ```bash
 npm install
-npm run dev      # 开发预览
-npm run build    # 生产构建（需先 npm install 拉全依赖）
-npm run type-check
+npm run dev          # 开发预览
+npm run type-check   # 类型检查
+npm run lint         # ESLint
+npm run check:docs   # 文档相对链接校验（含大小写）
+npm run build        # 生产构建
 ```
-
-> `prototype/` 目录仅保留设计规范与令牌等参考文件（`DESIGN-SYSTEM.md` / `tokens.json` / `README.md`），不再包含可运行代码。
 
 ---
 
@@ -302,27 +318,31 @@ npm run type-check
 
 ```
 RepoCleaner/
-├── RepoCleaner.bat      # 主程序脚本（Windows 批处理）
-├── config.ini           # 配置文件（REPO_ROOT / LANG）
-├── lang.ini             # 语言配置（LANG 值 + [en]/[zh] 文案节）
-├── README.MD            # 项目说明文档
-├── CHANGELOG.MD         # 更新日志
-├── OPENSPEC.md          # 开放规格说明书
-├── RepoCleaner.code-workspace  # VS Code 工作区配置
-├── package.json         # 根应用依赖与脚本（dev/build/type-check）
-├── next.config.ts       # Next.js 配置
-├── tsconfig.json        # TypeScript 配置（@/* → ./src/*）
-├── postcss.config.mjs   # Tailwind v4 PostCSS 配置
-├── eslint.config.mjs    # ESLint 配置
-├── public/              # 静态资源
-├── src/                 # 参考界面应用代码（App Router）
-│   ├── app/             # layout.tsx / page.tsx / globals.css
-│   ├── components/      # icons.tsx + ui/ 基础组件
-│   └── lib/             # i18n.ts + data/（单一数据源）
-└── prototype/           # 仅保留设计规范与令牌
-    ├── DESIGN-SYSTEM.md
-    ├── tokens.json
-    └── README.md
+├── .github/PULL_REQUEST_TEMPLATE.md   # PR 审查清单模板
+├── docs/                              # 所有规范与规格文档归档
+│   ├── README.md                      # 文档中心（导航 + 职责边界）
+│   ├── OPENSPEC.md                    # 产品功能规格
+│   ├── CONTRIBUTING.md                # 开发规范
+│   ├── DESIGN-SYSTEM.md               # UI 设计规范
+│   └── tokens.json                    # 设计令牌
+├── RepoCleaner.bat                    # 产品本体（Windows 批处理）
+├── config.ini                         # 配置文件（REPO_ROOT / LANG）
+├── lang.ini                           # 语言配置（[en]/[zh] 文案节）
+├── README.MD / CHANGELOG.MD / LICENSE # 入口 / 变更历史 / 许可证
+├── RepoCleaner.code-workspace          # VS Code 工作区配置
+├── package.json                       # 根应用依赖、脚本与唯一版本源
+├── next.config.ts                     # Next.js 配置（注入版本 + build 编号）
+├── tsconfig.json                      # TypeScript 配置（@/* → ./src/*）
+├── postcss.config.mjs                 # Tailwind v4 PostCSS 配置
+├── eslint.config.mjs                  # ESLint 配置
+├── public/                            # 静态资源
+├── scripts/check-doc-links.mjs        # 文档链接校验（npm run check:docs）
+├── src/                               # 参考界面应用代码（App Router）
+│   ├── app/                           # layout.tsx / page.tsx / globals.css
+│   ├── components/                    # icons.tsx + ui/ 基础组件
+│   └── lib/                           # i18n.ts + data/（单一数据源）
+├── prototype/README.md                # 原型目录说明（无代码、无规范正文）
+└── .gitignore
 ```
 
 ---
@@ -335,4 +355,12 @@ RepoCleaner/
 
 ## 📝 更新日志
 
-详细更新内容请查看 [CHANGELOG.md](./CHANGELOG.md)
+详细更新内容请查看 [CHANGELOG.MD](./CHANGELOG.MD)。
+
+---
+
+<div align="center">
+
+RepoCleaner v1.2.5 · MIT License · [文档中心](./docs/README.md)
+
+</div>

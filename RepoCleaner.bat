@@ -1,5 +1,5 @@
 @echo off
-:: RepoCleaner v1.2.3 - Windows 项目清理工具
+:: RepoCleaner v1.2.5 - Windows 项目清理工具
 chcp 65001 >nul 2>&1
 setlocal enabledelayedexpansion
 title RepoCleaner - Github Project Cleaner
@@ -52,8 +52,8 @@ set "MENU_TITLE=RepoCleaner - 项目清洁助手"
 set "MENU_TARGET=目标目录:"
 set "MENU_OPTION1=启用全局 node_modules     - 无需本地 node_modules"
 set "MENU_OPTION2=重置 Node 配置            - 恢复默认设置"
-set "MENU_OPTION3=清理 .next 缓存           - 禁用 NextJS 缓存"
-set "MENU_OPTION4=恢复 NextJS 缓存          - 启用正常编译"
+set "MENU_OPTION3=清理 .next 缓存           - 禁用 Next.js 缓存"
+set "MENU_OPTION4=恢复 Next.js 缓存         - 启用正常编译"
 set "MENU_OPTION5=安装全局依赖              - React/Vue/Next/axios/工具"
 set "MENU_OPTION6=清理所有项目缓存          - 删除 node_modules/.next/dist"
 set "MENU_OPTION7=清理 Vite/构建缓存        - 删除 .vite/dist/.turbo"
@@ -74,12 +74,12 @@ set "F2_STEP2=清理项目 .npmrc 配置..."
 set "F2_SUCCESS=Node 配置已重置!"
 
 set "F3_TITLE=清理 .next 缓存"
-set "F3_STEP1=扫描并清理 NextJS 缓存..."
+set "F3_STEP1=扫描并清理 Next.js 缓存..."
 set "F3_SUCCESS=.next 缓存已清理并禁用!"
 
-set "F4_TITLE=恢复 NextJS 缓存"
-set "F4_STEP1=恢复 NextJS 缓存功能..."
-set "F4_SUCCESS=NextJS 缓存已恢复!"
+set "F4_TITLE=恢复 Next.js 缓存"
+set "F4_STEP1=恢复 Next.js 缓存功能..."
+set "F4_SUCCESS=Next.js 缓存已恢复!"
 
 set "F5_TITLE=安装常用全局依赖"
 set "F5_LIST=安装列表: React, Vue, Next, Axios, Express, pnpm, yarn, rimraf 等"
@@ -125,8 +125,8 @@ if /i "!CURRENT_LANG!"=="en" (
     set "MENU_TARGET=Target:"
     set "MENU_OPTION1=Enable Global node_modules     - No local node_modules"
     set "MENU_OPTION2=Reset Node Config             - Restore default settings"
-    set "MENU_OPTION3=Clean .next Cache             - Disable NextJS cache"
-    set "MENU_OPTION4=Restore NextJS Cache          - Enable normal compilation"
+    set "MENU_OPTION3=Clean .next Cache             - Disable Next.js cache"
+    set "MENU_OPTION4=Restore Next.js Cache         - Enable normal compilation"
     set "MENU_OPTION5=Install Global Dependencies   - React/Vue/Next/axios/tools"
     set "MENU_OPTION6=Clean All Project Cache       - Remove node_modules/.next/dist"
     set "MENU_OPTION7=Clean Vite/Build Cache        - Remove .vite/dist/.turbo"
@@ -147,12 +147,12 @@ if /i "!CURRENT_LANG!"=="en" (
     set "F2_SUCCESS=Node Config Reset!"
 
     set "F3_TITLE=Clean .next Cache"
-    set "F3_STEP1=Scanning and cleaning NextJS cache..."
+    set "F3_STEP1=Scanning and cleaning Next.js cache..."
     set "F3_SUCCESS=.next Cache Cleaned and Disabled!"
 
-    set "F4_TITLE=Restore NextJS Cache"
-    set "F4_STEP1=Restoring NextJS cache functionality..."
-    set "F4_SUCCESS=NextJS Cache Restored!"
+    set "F4_TITLE=Restore Next.js Cache"
+    set "F4_STEP1=Restoring Next.js cache functionality..."
+    set "F4_SUCCESS=Next.js Cache Restored!"
 
     set "F5_TITLE=Installing Common Global Dependencies"
     set "F5_LIST=Install List: React, Vue, Next, Axios, Express, pnpm, yarn, rimraf, etc."

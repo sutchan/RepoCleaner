@@ -1,4 +1,4 @@
-// src/lib/i18n.ts v1.2.3
+// src/lib/i18n.ts v1.2.5
 export type Lang = "zh" | "en";
 
 export type Dict = {
@@ -31,7 +31,7 @@ export const i18n: Record<Lang, Dict> = {
     safe: "安全",
     warning: "需注意",
     clean: "清理",
-    footer: "RepoCleaner 跨平台仓库清理工具",
+    footer: "RepoCleaner 项目清洁助手",
   },
   en: {
     appTitle: "RepoCleaner",
@@ -46,6 +46,6 @@ export const i18n: Record<Lang, Dict> = {
     safe: "Safe",
     warning: "Caution",
     clean: "Clean",
-    footer: "RepoCleaner cross-platform repo cleaner",
+    footer: "RepoCleaner Project Cleaner",
   },
 };

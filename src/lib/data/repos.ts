@@ -1,5 +1,6 @@
-// src/lib/data/repos.ts v1.2.3
-// 扫描结果与优化建议（prototype dashboard 数据源）
+// src/lib/data/repos.ts v1.2.5
+// 扫描结果与优化建议（参考界面 dashboard 演示数据）
+// 注意：以下均为 mock 数据，用于展示界面结构，非真实磁盘扫描结果；容量数字为示意，不可作为事实引用。
 
 export type Risk = "safe" | "warning";
 
@@ -34,7 +35,7 @@ export const tweaks: Tweak[] = [
     id: "next-cache",
     category: "缓存",
     title: "清理 .next 构建缓存",
-    desc: "2 个 NextJS 项目共占用 860 MB，禁用后热更新略慢但省空间。",
+    desc: "2 个 Next.js 项目共占用 860 MB，禁用后热更新略慢但省空间。",
   },
   {
     id: "vite-cache",

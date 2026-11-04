@@ -1,4 +1,4 @@
-// src/lib/data/features.ts v1.2.3
+// src/lib/data/features.ts v1.2.5
 // 功能数据（对齐 OPENSPEC 7 项功能）
 import type { Lang } from "../i18n";
 
@@ -22,7 +22,7 @@ export const features: Feature[] = [
   {
     id: 2,
     icon: "rotate-ccw",
-    title: { zh: "还原默认 Node 配置", en: "Restore Default Node Config" },
+    title: { zh: "重置 Node 配置", en: "Reset Node Config" },
     desc: {
       zh: "清除 NODE_PATH，删除所有 .npmrc，恢复 npm 默认行为。",
       en: "Clear NODE_PATH, remove all .npmrc and restore npm default behavior.",
@@ -31,25 +31,25 @@ export const features: Feature[] = [
   {
     id: 3,
     icon: "trash",
-    title: { zh: "清理 & 禁用 .next 缓存", en: "Clean & Disable .next Cache" },
+    title: { zh: "清理并禁用 .next 缓存", en: "Clean and Disable .next Cache" },
     desc: {
-      zh: "扫描 NextJS 项目，删除 .next 并写入不可见 .next 文件阻止缓存生成。",
-      en: "Scan NextJS projects, delete .next and drop an invisible .next file to block cache generation.",
+      zh: "扫描 Next.js 项目，删除 .next 并写入不可见 .next 文件阻止缓存生成。",
+      en: "Scan Next.js projects, delete .next and drop an invisible .next file to block cache generation.",
     },
   },
   {
     id: 4,
     icon: "rotate-cw",
-    title: { zh: "还原 NextJS 缓存", en: "Restore NextJS Cache" },
+    title: { zh: "恢复 Next.js 缓存", en: "Restore Next.js Cache" },
     desc: {
-      zh: "删除禁止缓存的 .next 文件，恢复 NextJS 正常编译与热更新。",
-      en: "Remove the cache-blocking .next file to restore normal NextJS compilation and HMR.",
+      zh: "删除禁止缓存的 .next 文件，恢复 Next.js 正常编译与热更新。",
+      en: "Remove the cache-blocking .next file to restore normal Next.js compilation and HMR.",
     },
   },
   {
     id: 5,
     icon: "download",
-    title: { zh: "一键安装常用全局依赖", en: "Install Common Global Deps" },
+    title: { zh: "安装常用全局依赖", en: "Install Common Global Deps" },
     desc: {
       zh: "批量安装 react/react-dom/next、vue、axios、express、pnpm、yarn 等开发库。",
       en: "Batch-install react/react-dom/next, vue, axios, express, pnpm, yarn and more dev libs.",

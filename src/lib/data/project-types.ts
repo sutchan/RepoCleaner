@@ -1,4 +1,4 @@
-// src/lib/data/project-types.ts v1.2.3
+// src/lib/data/project-types.ts v1.2.5
 // 适配项目类型与平均缓存占用
 import type { Lang } from "../i18n";
 
@@ -11,7 +11,7 @@ export interface ProjectType {
 
 export const projectTypes: ProjectType[] = [
   {
-    type: "NextJS",
+    type: "Next.js",
     icon: "▲",
     size: { zh: "≈ 450 MB / 项目", en: "≈ 450 MB / project" },
     desc: {

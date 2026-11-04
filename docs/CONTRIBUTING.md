@@ -1,29 +1,36 @@
 # RepoCleaner 开发规范与贡献指南 v1.2.5
 
 > 本文是 RepoCleaner 仓库的**唯一开发规范来源**，规定「如何改代码、如何写文档、如何提交与评审」。
-> 所有贡献者（含 AI 协作会话）在动手前必须阅读本文。若本文与代码实现冲突，以代码为准并及时修正本文。
+> 本文存放于 `docs/`；所有贡献者（含 AI 协作会话）在动手前必须阅读本文。
+> 文档导航见 [docs/README.md](./README.md)；若本文与代码实现冲突，以代码为准并及时修正本文。
 
 ---
 
 ## 1. 文档体系与职责边界
 
-仓库文档按「一个主题一份权威文档」组织，禁止同一事实在多处重复维护。
+仓库文档按「一个主题一份权威文档、统一归档 `docs/`」组织，禁止同一事实在多处重复维护。下表路径均为**仓库根相对路径**。
 
 | 文档 | 职责（写什么） | 不写什么 |
 |------|---------------|----------|
-| `README.MD` | 面向使用者：功能、快速开始、参数、FAQ、文档索引 | 不写开发规范、不写版本历史明细 |
-| `OPENSPEC.md` | 产品功能规格：7 项功能的行为契约、交互、环境、兼容性 | 不写代码风格、不写提交/分支规则、不重复变更日志 |
-| `CONTRIBUTING.md`（本文） | 开发规范：编码风格、命名、目录、提交、分支、审查、版本、术语 | 不写功能介绍、不写设计令牌 |
-| `prototype/DESIGN-SYSTEM.md` | UI 设计规范：设计令牌、组件库、交互、响应式、a11y | 不写业务功能、不写开发流程 |
-| `prototype/tokens.json` | 机器可读设计令牌（与 `DESIGN-SYSTEM.md` §2 对齐） | 不作为产品版本号来源 |
-| `prototype/README.md` | `prototype/` 目录索引（3～5 行说明） | 不复述设计规范正文 |
-| `CHANGELOG.MD` | **唯一版本历史来源**，按版本倒序记录变更 | 不重复功能规格 |
-| `LICENSE` | MIT 许可证正文 | — |
+| `README.MD`（根） | 面向使用者：功能、快速开始、参数、FAQ、文档索引 | 不写开发规范、不写版本历史明细 |
+| `docs/README.md` | 文档中心：文档地图、职责边界、按角色阅读路径、维护约定 | 不复述各规范正文 |
+| `docs/OPENSPEC.md` | 产品功能规格：7 项功能的行为契约、交互、环境、兼容性、已知限制 | 不写代码风格、不写提交/分支规则、不重复变更日志 |
+| `docs/CONTRIBUTING.md`（本文） | 开发规范：编码风格、命名、目录、提交、分支、审查、版本、术语、安全 | 不写功能介绍、不写设计令牌 |
+| `docs/DESIGN-SYSTEM.md` | UI 设计规范：设计令牌、组件库、交互、响应式、a11y、差距清单 | 不写业务功能、不写开发流程 |
+| `docs/tokens.json` | 机器可读设计令牌（与 `DESIGN-SYSTEM.md` §2 对齐） | 不作为产品版本号来源 |
+| `prototype/README.md` | `prototype/` 目录说明：原型现状与目录用途 | 不复述设计规范正文、不存放代码 |
+| `CHANGELOG.MD`（根） | **唯一版本历史来源**，按版本倒序记录变更 | 不重复功能规格 |
+| `LICENSE`（根） | MIT 许可证正文 | — |
 | `.github/PULL_REQUEST_TEMPLATE.md` | PR 审查清单模板 | — |
 
-**引用规则**：需要版本历史 → 链接 `CHANGELOG.MD`；需要功能行为 → 链接 `OPENSPEC.md`；需要协作流程 → 链接本文。禁止把 `CHANGELOG.MD` 的内容复制到 `OPENSPEC.md` 或其它文档。
+**引用规则**：需要版本历史 → `CHANGELOG.MD`；需要功能行为 → `docs/OPENSPEC.md`；需要协作流程 → 本文；需要视觉/组件规范 → `docs/DESIGN-SYSTEM.md`。禁止把 `CHANGELOG.MD` 的内容复制到 `docs/OPENSPEC.md` 或其它文档。
 
-**文件名大小写**：仓库内文档实际文件名为 `README.MD`、`CHANGELOG.MD`（大写扩展名）、`OPENSPEC.md`（小写）。**所有链接必须按实际大小写书写**（GitHub / Linux 区分大小写），禁止写 `[CHANGELOG.md](./CHANGELOG.md)`。
+**文件名大小写**：根文档历史形成为大写扩展名 `README.MD` / `CHANGELOG.MD`；`docs/` 下全部为小写 `.md`；`docs/tokens.json` 为小写 `.json`。**所有链接必须按实际大小写与相对层级书写**（GitHub / Linux 区分大小写）：
+- 从 `docs/` 内的文档引用根文件用 `../README.MD`、`../CHANGELOG.MD`、`../LICENSE`；
+- 引用同目录文档用 `./OPENSPEC.md`、`./CONTRIBUTING.md`、`./DESIGN-SYSTEM.md`、`./tokens.json`；
+- 禁止把链接目标写成小写扩展名的 `CHANGELOG.md` 或错误大小写的 `Openspec.md` 等不存在的路径。
+
+**禁止**：在 `.github/` 下创建 `readme.md`（与根 README 重复且易误导）；Community Health 文件与 PR 模板不受此限。
 
 ---
 
@@ -36,18 +43,19 @@
 | 包管理器 | **npm**（仓库提交 `package-lock.json`，不使用 yarn / pnpm 锁文件） |
 | 框架 | Next.js 16（App Router）+ React 19 + TypeScript 5（strict）+ Tailwind CSS v4 |
 
-在**仓库根目录**执行（依赖已提交锁文件，先 `npm ci` 或 `npm install`）：
+在**仓库根目录**执行：
 
 ```bash
 npm install            # 安装依赖（改动 package.json 后同步更新 package-lock.json）
 npm run dev            # 启动开发服务器
 npm run type-check     # TypeScript 类型检查（tsc --noEmit）
 npm run lint           # ESLint 检查
+npm run check:docs     # 校验所有 Markdown 相对链接（含文件名大小写）
 npm run build          # 生产构建（含类型检查 + 静态预渲染）
 npm run start          # 启动生产构建产物（需先 build）
 ```
 
-> 仓库**没有** `npm test` 脚本，不要臆造测试命令。当前质量门禁是 `type-check` + `lint` + `build` 三项，外加 §9.3 的批处理手动冒烟清单。
+> 仓库**没有** `npm test` 脚本，不要臆造测试命令。当前质量门禁是 `type-check` + `lint` + `check:docs` + `build` 四项，外加 §9.3 的批处理手动冒烟清单。
 
 ---
 
@@ -59,7 +67,15 @@ npm run start          # 启动生产构建产物（需先 build）
 RepoCleaner/
 ├── .github/                     # PR 模板等仓库协作配置（禁止创建 .github/readme.md）
 │   └── PULL_REQUEST_TEMPLATE.md
+├── docs/                        # 所有规范与规格文档归档
+│   ├── README.md                # 文档中心
+│   ├── OPENSPEC.md              # 产品功能规格
+│   ├── CONTRIBUTING.md          # 本文：开发规范
+│   ├── DESIGN-SYSTEM.md         # UI 设计规范
+│   └── tokens.json              # 设计令牌
 ├── public/                      # 参考界面应用静态资源（SVG）
+├── scripts/                     # 工程校验脚本
+│   └── check-doc-links.mjs      # 文档相对链接校验（npm run check:docs）
 ├── src/                         # 参考界面应用代码（Next.js App Router）
 │   ├── app/                     # 路由与全局样式：layout.tsx / page.tsx / globals.css / favicon.ico
 │   ├── components/
@@ -69,26 +85,24 @@ RepoCleaner/
 │       ├── i18n.ts              # 唯一 UI 文案字典（zh / en）
 │       ├── utils.ts             # 纯工具函数（cn 等）
 │       └── data/                # 单一数据源：features/project-types/steps/repos + index.ts barrel
-├── prototype/                   # 仅设计规范与令牌，不含可运行代码
-│   ├── DESIGN-SYSTEM.md
-│   ├── tokens.json
+├── prototype/                   # 原型目录，仅保留 README.md 说明，无代码、无规范正文
 │   └── README.md
 ├── RepoCleaner.bat              # 产品本体：Windows 批处理脚本
 ├── config.ini                   # 运行配置：REPO_ROOT / LANG
 ├── lang.ini                     # 语言文案参考节 [en] / [zh]
-├── README.MD / OPENSPEC.md / CONTRIBUTING.md / CHANGELOG.MD / LICENSE
+├── README.MD / CHANGELOG.MD / LICENSE     # 入口、变更历史、许可证
+├── RepoCleaner.code-workspace   # VS Code 工作区配置，禁止删除
 ├── package.json / package-lock.json / tsconfig.json / next.config.ts
 ├── postcss.config.mjs / eslint.config.mjs / next-env.d.ts
-├── .gitignore
-└── RepoCleaner.code-workspace   # VS Code 工作区配置，禁止删除
+└── .gitignore
 ```
 
 ### 3.2 组织规则
 
-1. **应用代码一律放根 `src/`**；`prototype/` 只放设计规范、令牌及其索引，禁止再放回可运行代码。
+1. **所有规范 / 规格文档放 `docs/`**；根只保留入口 `README.MD`、`CHANGELOG.MD`、`LICENSE`。**应用代码一律放根 `src/`**；`prototype/` 只放原型说明，禁止再放回可运行代码或规范正文。
 2. **单一数据源**：业务展示数据只放 `src/lib/data/`，统一经 `@/lib/data` 导出；UI 文案只放 `src/lib/i18n.ts`。禁止在组件内硬编码展示数据或文案。
 3. **路径别名**：统一用 `@/` 指向 `./src/*`（见 `tsconfig.json` `paths`），禁止跨层使用长串 `../../../`。
-4. **新增模块按职责落位**：路由 → `src/app/`；可复用 UI → `src/components/ui/`；图标 → `src/components/icons.tsx`；纯函数 → `src/lib/`；数据 → `src/lib/data/`。
+4. **新增模块按职责落位**：路由 → `src/app/`；可复用 UI → `src/components/ui/`；图标 → `src/components/icons.tsx`；纯函数 → `src/lib/`；数据 → `src/lib/data/`；规范 → `docs/`；工程校验脚本 → `scripts/`。
 5. **文件行数**：所有源代码文件（`.ts/.tsx/.js/.jsx/.vue/.py/.dart/.go/.java` 等）单文件 **≤ 200 行**。超出时按职责拆分为更小模块（组件拆子组件、逻辑抽纯函数/常量/类型），且**不得改变对外导出契约**。
    - **文档文件（`.md/.markdown/.mdx/.rst`）不拆分**，即使超过 200 行也保持单文件完整连贯。
    - `.bat` 为批处理脚本，不纳入源码 200 行规则，但仍须按标签分节、保持可读。
@@ -123,7 +137,7 @@ RepoCleaner/
 ### 4.3 样式与设计令牌
 
 - 颜色/字体/圆角/动效**一律走 `src/app/globals.css` 的 `@theme` 令牌生成的工具类**：`bg-background`、`text-foreground`、`text-muted-foreground`、`bg-card`、`border-border`、`text-primary` 等。
-- **禁止散落硬编码颜色**（`bg-[#0d1117]`、`text-gray-400` 等任意值）；新令牌先在 `prototype/tokens.json` 与 `prototype/DESIGN-SYSTEM.md` 登记，再写入 `globals.css`。
+- **禁止散落硬编码颜色**（`bg-[#0d1117]`、`text-gray-400` 等任意值）；新令牌先在 `docs/tokens.json` 与 `docs/DESIGN-SYSTEM.md` 登记，再写入 `globals.css`。
 - 不引入 `next/font/google` 等**构建期联网**资源：离线环境会导致 `next build` 失败。使用 `font-sans` 系统字体栈。
 - 图标使用 `src/components/icons.tsx` 内联 SVG，**不引入第三方图标库**。
 - 当前仅实现**暗色主题**（`color-scheme: dark`）；浅色值属规划，不得在代码中假定已实现。
@@ -158,8 +172,8 @@ RepoCleaner/
 | 类型 / 接口 | `PascalCase`，不加 `I` 前缀 | `ScanResult`、`ButtonProps` |
 | 常量 | `SCREAMING_SNAKE_CASE` | `APP_VERSION`、`DEFAULT_REPO_ROOT` |
 | CSS 类名 / DOM id | `kebab-case` | `security-note`、`app-footer` |
-| 文档文件 | 历史形成混合大小写：`README.MD` / `CHANGELOG.MD`（大写）、`OPENSPEC.md` / `CONTRIBUTING.md`（小写）。**新增文档统一用 `.md` 小写**，链接一律按实际文件名书写 | 禁止臆造 `CHANGELOG.md`、`Openspec.md` 等不存在的路径 |
-| 分支 | 见 §7 | `fix/next-restore`、`docs/sync-spec` |
+| 文档文件 | 根目录既有 `README.MD` / `CHANGELOG.MD` 保持历史大写；`docs/` 下统一小写 `.md`，新增文档一律小写 | `docs/OPENSPEC.md`、`docs/README.md` |
+| 分支 | 见 §7 | `fix/next-restore`、`docs/spec-sync` |
 | 图标组件 | `PascalCase`，语义化 | `ScanLine`、`ShieldCheck` |
 
 **术语统一**（全仓库文档与代码注释一致，禁止混用）：
@@ -168,13 +182,14 @@ RepoCleaner/
 |----------|----------|
 | `Next.js` | NextJS、Nextjs、next.js（句首除外） |
 | `Nuxt` | NuxtJS |
-| `node_modules`、`.next`、`dist`、`build` | 中文意译或加引号的变体；代码块/行内代码用反引号 |
+| `node_modules`、`.next`、`dist`、`build` | 中文意译变体；代码块/行内代码用反引号 |
 | 仓库根目录（`REPO_ROOT`，含多个项目的父目录） | 项目根目录（二者含义不同，禁止混用） |
 | 项目根目录（单个项目，`REPO_ROOT` 的直接子目录） | — |
 | 参考界面应用（根 `src/` 的 Next.js 应用） | prototype 应用、前端工程 |
-| 设计规范目录（`prototype/`） | 原型目录（易误解为可运行原型） |
+| 规范文档目录（`docs/`） | 原型目录（后者专指 `prototype/`） |
+| 原型目录（`prototype/`，仅说明文件） | 设计规范目录（规范在 `docs/`） |
 | 批处理脚本（`RepoCleaner.bat`） | bat 脚本、主程序 |
-| 功能 1 ～ 功能 7 | 功能一、F1（仅代码变量名可用 F1_） |
+| 功能 1 ～ 功能 7（名称见 `OPENSPEC.md` §3.0） | 功能一、F1（仅代码变量名可用 F1_） |
 
 ---
 
@@ -215,11 +230,11 @@ RepoCleaner/
 示例：
 
 ```
-docs: 完善开发规范并对齐文档至 v1.2.5
+docs: 建立 docs 文档体系并同步规范至 v1.2.5
 
-- 新增 CONTRIBUTING.md 统一编码/提交/分支/审查规范
-- 修正 OPENSPEC 与实现不一致的功能描述
-- 移除重复版本历史，统一指向 CHANGELOG.MD
+- 新建 docs/ 归档全部规格与规范文档，补充文档中心索引
+- 对齐 OPENSPEC 与实现，修正过时描述并统一术语
+- 版本号改由 package.json 单一来源在构建时注入
 
 v1.2.5
 ```
@@ -281,13 +296,13 @@ npm run build
 每次 bump 需同步以下**全局展示位**（各一处）：
 
 - `package.json` → `version`
-- `README.MD` → 版本徽章 `Version-X.Y.Z` 与页脚版本号
-- `CHANGELOG.MD` → 新增对应版本小节（置于最上方）
-- `prototype/tokens.json` → `version`
-- `prototype/DESIGN-SYSTEM.md`、`prototype/README.md` → 标题版本
+- `README.MD`（根） → 版本徽章 `Version-X.Y.Z` 与页脚版本号
+- `CHANGELOG.MD`（根） → 新增对应版本小节（置于最上方）
+- `docs/tokens.json` → `version`
+- `docs/DESIGN-SYSTEM.md`、`docs/README.md`、`docs/OPENSPEC.md`、`docs/CONTRIBUTING.md`、`prototype/README.md` → 标题版本
 - 被改动**代码文件**的头注释版本号
 
-**禁止**：全仓库批量刷写所有源码文件的头注释；未改动文件头注释保持不变（头注释是文件自版本，不等于产品版本，看到 `v1.2.3` 与新版本并存属正常，不是版本漂移）。
+**禁止**：全仓库批量刷写所有源码文件的头注释；未改动文件头注释保持不变（头注释是文件自版本，不等于产品版本，看到旧版本与新版本并存属正常，不是版本漂移）。
 
 **build 编号**：格式 `yyyymmddhhmm`（本地构建时间到分钟），由 `next.config.ts` 自动生成，`dev` / `build` 均生效，无需手工维护。页脚注入缺失时回退为仅显示版本号。
 
@@ -312,8 +327,8 @@ npm run build
 
 ### 9.2 审查清单
 
-- [ ] 功能行为与 `OPENSPEC.md` 对应条目一致；变更功能时已同步规格文档
-- [ ] 新增/修改的 UI 对齐 `prototype/DESIGN-SYSTEM.md` 与 `prototype/tokens.json`，无硬编码颜色
+- [ ] 功能行为与 `docs/OPENSPEC.md` 对应条目一致；变更功能时已同步规格文档
+- [ ] 新增/修改的 UI 对齐 `docs/DESIGN-SYSTEM.md` 与 `docs/tokens.json`，无硬编码颜色
 - [ ] 主要容器与关键元素已加语义化 `id`（§4.4）
 - [ ] 无 `console.log` / `debugger`；无 `any`；无未使用的 import
 - [ ] `npm run type-check`、`npm run lint`、`npm run build` 全部通过
@@ -321,7 +336,8 @@ npm run build
 - [ ] 批处理改动：路径带引号、延迟展开正确、危险操作有二次确认
 - [ ] 提交信息格式合规，且含新版本号
 - [ ] 版本号已 bump，`package.json` / README 徽章 / CHANGELOG / 展示位一致
-- [ ] `CHANGELOG.MD` 已新增对应小节；`README.MD` / OPENSPEC 使用说明随功能变化更新
+- [ ] `CHANGELOG.MD` 已新增对应小节；`README.MD` / `docs/OPENSPEC.md` 使用说明随功能变化更新
+- [ ] 文档链接按实际大小写与相对层级书写，新增文档归入 `docs/`
 - [ ] 无密钥 / Token / 真实用户数据入库；`node_modules`、`.next`、`*.log`、`*.tsbuildinfo` 未被跟踪
 
 ### 9.3 功能验证（批处理手动冒烟）
@@ -344,13 +360,13 @@ npm run build
 
 ## 10. 文档维护约定
 
-1. 改功能 → 同步 `OPENSPEC.md` + `README.MD`；改 UI → 同步 `DESIGN-SYSTEM.md` + `tokens.json`；改流程 → 同步本文。
+1. 改功能 → 同步 `docs/OPENSPEC.md` + 根 `README.MD`；改 UI → 同步 `docs/DESIGN-SYSTEM.md` + `docs/tokens.json`；改流程 → 同步本文；改文档结构 → 同步 `docs/README.md`。
 2. 文档中的**路径、命令、文件名、版本号必须与仓库实况一致**；写文档前先 `git log -1` 与 `node -p "require('./package.json').version"` 实查，禁止凭记忆填写。
-3. 禁止在文档中保留「规划中但未实现」的内容而不加标注；要么删除，要么明确写「规划，当前未实现」。
+3. 禁止在文档中保留「规划中但未实现」的内容而不加标注；要么删除，要么明确写「规划，当前未实现」，或记入 `docs/DESIGN-SYSTEM.md` §7 差距清单。
 4. 数据型描述（数量、行数、命令数）须实算或引用唯一来源，禁止估算。
 5. 文档文件不拆分；超长文档保持单文件完整。
-6. 禁止创建 `.github/readme.md`（与根 README 重复且易误导）；Community Health 文件可放 `.github/`。
-7. `RepoCleaner.code-workspace` 是工作区配置，禁止删除。
+6. 禁止创建 `.github/readme.md`；`RepoCleaner.code-workspace` 是工作区配置，禁止删除。
+7. 改动文档后校验所有 Markdown 相对链接可达（含大小写），链接检查脚本思路见 `docs/README.md` §5。
 
 ---
 

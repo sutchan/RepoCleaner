@@ -1,4 +1,4 @@
-// src/app/page.tsx v1.2.3
+// src/app/page.tsx v1.2.5
 "use client";
 import { useState } from "react";
 
@@ -12,7 +12,9 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AlertCircle, CheckCircle2, FolderTree, ScanLine, ShieldCheck, Trash2 } from "@/components/icons";
 
-export const APP_VERSION = "1.2.3";
+// 版本与 build 编号由 next.config.ts 在构建时注入，注入缺失时回退为版本号
+const APP_VERSION = process.env.NEXT_PUBLIC_APP_VERSION ?? "0.0.0";
+const BUILD_ID = process.env.NEXT_PUBLIC_BUILD_ID ?? "";
 
 export default function Home() {
   const [lang, setLang] = useState<Lang>("zh");
@@ -149,7 +151,7 @@ export default function Home() {
         </Tabs>
 
         <footer id="app-footer" className="mt-8 text-center text-xs text-muted-foreground">
-          {t.footer} · v{APP_VERSION}
+          {t.footer} · v{APP_VERSION}{BUILD_ID ? ` · build ${BUILD_ID}` : ""}
         </footer>
       </div>
     </main>

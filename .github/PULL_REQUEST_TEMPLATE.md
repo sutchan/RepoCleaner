@@ -1,6 +1,6 @@
 <!--
 PR 标题格式与提交信息一致：<type>: <description>（如 fix: 修复功能4恢复 .next 缓存失效）
-完整规范见仓库根目录 CONTRIBUTING.md（§6 提交信息 / §9 代码审查流程）。
+完整规范见 docs/CONTRIBUTING.md（§6 提交信息 / §9 代码审查流程），文档导航见 docs/README.md。
 -->
 
 ## 变更总结
@@ -33,18 +33,19 @@ PR 标题格式与提交信息一致：<type>: <description>（如 fix: 修复�
 - [ ] `npm run type-check`
 - [ ] `npm run lint`
 - [ ] `npm run build`
-- [ ] `RepoCleaner.bat` 手动冒烟（按 CONTRIBUTING.md §9.3，仅改批处理时必填）
+- [ ] `RepoCleaner.bat` 手动冒烟（按 docs/CONTRIBUTING.md §9.3，仅改批处理时必填）
 
 ## 审查清单
 
-- [ ] 行为与 `OPENSPEC.md` 一致，变更功能已同步规格文档
-- [ ] UI 对齐 `prototype/DESIGN-SYSTEM.md` / `tokens.json`，无硬编码颜色
+- [ ] 行为与 `docs/OPENSPEC.md` 一致，变更功能已同步规格文档
+- [ ] UI 对齐 `docs/DESIGN-SYSTEM.md` / `docs/tokens.json`，无硬编码颜色
 - [ ] 主要容器与关键元素已加语义化 `id`
 - [ ] 无 `console.log` / `debugger` / `any` / 未使用 import
 - [ ] 代码文件单文件 ≤ 200 行，超出已拆分且导出契约不变
 - [ ] 批处理：路径带引号、延迟展开正确、危险操作有二次确认
 - [ ] 版本号已 bump，`package.json` / README 徽章 / CHANGELOG / 展示位一致
 - [ ] `CHANGELOG.MD` 已新增版本小节；相关文档已同步
+- [ ] 新增文档归入 `docs/`，Markdown 相对链接按实际大小写可达
 - [ ] 无密钥 / Token / 真实用户数据；`node_modules`、`.next`、`*.log`、`*.tsbuildinfo` 未被跟踪
 
 ## 破坏性变更 / 回滚方案

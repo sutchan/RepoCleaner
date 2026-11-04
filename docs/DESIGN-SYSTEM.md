@@ -1,145 +1,214 @@
-# RepoCleaner 设计系统 (Design System) v1.2.3
+# RepoCleaner 设计系统 (Design System) v1.2.5
 
-> 本文件是 prototype/ 的**唯一设计规范来源**。所有页面、组件、文档均须对齐此处。
-> 配套前端工程：Next.js 16 + React 19 + Tailwind 4 + shadcn/ui 风格组件。
+> **本文定位**：RepoCleaner 参考界面应用（仓库根 `src/`）的**唯一 UI 设计规范来源**，规定设计令牌、组件库、交互与可访问性。
+> 本文归档于 `docs/`（v1.2.5 起从 `prototype/` 迁入）；`prototype/` 现仅保留原型说明，不含可运行代码或规范正文。
+> 配套工程：Next.js 16（App Router）+ React 19 + TypeScript strict + Tailwind CSS v4，零第三方 UI / 图标依赖。
+> 机器可读令牌见 [tokens.json](./tokens.json)；实现见 [`src/app/globals.css`](../src/app/globals.css)；开发规范见 [CONTRIBUTING.md](./CONTRIBUTING.md)；文档导航见 [README.md](./README.md)。
+
+**阅读约定**：本文用「**已实现**」标注当前代码确实具备的能力，用「**规划**」标注尚未落地的设计意图。凡「规划」项均不得在文档其它位置被当作既成事实引用。完整差距清单见 §7。
 
 ---
 
-## 1. 设计原则 (Design Principles)
+## 1. 设计原则
 
 1. **极简优先** — 留白即设计，单屏只解决一件事。
-2. **数据真实** — 所有展示数据来自 `src/lib/data/`（与 OPENSPEC/README 一致）。
-3. **一致令牌** — 颜色/间距/字号全部走 CSS 变量，禁止散落硬编码（页面/组件仅使用 `bg-background`/`text-foreground`/`text-muted-foreground` 等令牌工具类）。
+2. **数据可追溯** — 展示数据统一来自 `src/lib/data/`；其中 `repos.ts` 为**演示数据（mock）**，已在文件头注释标明，容量数字为示意，不可作为事实引用。
+3. **一致令牌** — 颜色/字体全部走 `src/app/globals.css` 的 `@theme` CSS 变量生成的工具类，禁止散落硬编码颜色（`bg-background` / `text-foreground` / `text-muted-foreground` / `bg-muted` 等）。
 4. **响应式无妥协** — 移动端单列、桌面多列，断点 `sm/md/lg/xl`。
 5. **克制动效** — 仅用于引导注意力与状态反馈，时长 ≤ 300ms。
 
 ---
 
-## 2. 设计系统 (Design Tokens)
+## 2. 设计令牌 (Design Tokens) — 已实现
 
-### 2.1 色彩 (Color)
+### 2.1 色彩
 
-基于中性灰 + 单一品牌强调色（青绿），暗色优先（开发者工具调性）。
+中性灰 + 单一品牌强调色（青绿），**当前仅实现暗色主题**（`:root { color-scheme: dark }`）。
 
-| 令牌 | 浅色 | 暗色 | 用途 |
-|------|------|------|------|
-| `--background` | `#ffffff` | `#0a0a0b` | 页面底色 |
-| `--foreground` | `#0a0a0b` | `#ededed` | 主文字 |
-| `--card` | `#ffffff` | `#161618` | 卡片底 |
-| `--muted` | `#f4f4f5` | `#1c1c1f` | 次级底 |
-| `--muted-foreground` | `#71717a` | `#a1a1aa` | 次级文字 |
-| `--border` | `#e4e4e7` | `#27272a` | 描边 |
-| `--primary` | `#10b981` | `#10b981` | 品牌主色（emerald-500） |
-| `--primary-foreground` | `#ffffff` | `#052e22` | 主色上文字 |
-| `--destructive` | `#ef4444` | `#ef4444` | 危险/删除 |
-| `--success` | `#22c55e` | `#22c55e` | 成功 |
-| `--warning` | `#f59e0b` | `#f59e0b` | 警告 |
+Tailwind v4 的 `@theme` 使用 `--color-<name>` 命名，生成 `bg-<name>` / `text-<name>` / `border-<name>` 工具类。下表「令牌」列写逻辑名，「CSS 变量」列写实现名。
 
-**语义规则**：删除类操作（功能3/6/7 清理）用 destructive；安装/启用类用 primary；成功反馈用 success。
+| 令牌 | 亮色（规划） | 暗色（已实现） | CSS 变量 / 工具类 | 用途 |
+|------|-------------|---------------|-------------------|------|
+| background | `#ffffff` | `#0a0a0b` | `--color-background` / `bg-background` | 页面底色 |
+| foreground | `#0a0a0b` | `#ededed` | `--color-foreground` / `text-foreground` | 主文字 |
+| card | `#ffffff` | `#161618` | `--color-card` / `bg-card` | 卡片底 |
+| muted | `#f4f4f5` | `#1c1c1f` | `--color-muted` / `bg-muted` | 次级底 |
+| muted-foreground | `#71717a` | `#a1a1aa` | `--color-muted-foreground` / `text-muted-foreground` | 次级文字 |
+| border | `#e4e4e7` | `#27272a` | `--color-border` / `border-border` | 描边 |
+| primary | `#10b981` | `#10b981` | `--color-primary` / `bg-primary` | 品牌主色（emerald-500） |
+| primary-foreground | `#ffffff` | `#052e22` | `--color-primary-foreground` | 主色上文字 |
+| destructive | `#ef4444` | `#ef4444` | `--color-destructive` | 危险 / 删除 |
+| success | `#22c55e` | `#22c55e` | `--color-success` | 成功 |
+| warning | `#f59e0b` | `#f59e0b` | `--color-warning` | 警告 |
 
-### 2.2 字体 (Typography)
+**语义规则（已实现）**：删除/风险类用 `destructive`，安全/成功用 `success`，提示用 `warning`，主操作用 `primary`。
+
+> 亮色列的值保存在 `tokens.json` 中作为规划基线，但 `globals.css` **未**实现亮色模式切换；不得假定亮色主题可用。
+
+### 2.2 字体 — 已实现
 
 | 层级 | 字号 | 字重 | 行高 | 用途 |
 |------|------|------|------|------|
-| Display | 48px | 700 | 1.1 | 首页大标题 |
-| H1 | 32px | 700 | 1.2 | 页面标题 |
+| Display | 48px | 700 | 1.1 | 首页大标题（规划，当前页面未使用） |
+| H1 | 32px | 700 | 1.2 | 页面标题（当前用 `text-2xl`） |
 | H2 | 24px | 600 | 1.3 | 区块标题 |
 | H3 | 18px | 600 | 1.4 | 卡片标题 |
-| Body | 15px | 400 | 1.6 | 正文 |
-| Small | 13px | 400 | 1.5 | 辅助文字 |
-| Code | 13px | 500 | 1.5 | 等宽（ui-monospace） |
+| Body | 15px | 400 | 1.6 | 正文（`body` 已设置） |
+| Small | 13px | 400 | 1.5 | 辅助文字（`text-sm` / `text-xs`） |
+| Code | 13px | 500 | 1.5 | 等宽（`font-mono`） |
 
-字体栈：`-apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif`；
-代码：`ui-monospace, "JetBrains Mono", "SF Mono", Consolas, monospace`。
+字体栈（已实现，写入 `--font-sans` / `--font-mono`）：
 
-### 2.3 间距 (Spacing)
+```
+sans: -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif
+mono: ui-monospace, "JetBrains Mono", "SF Mono", Consolas, monospace
+```
 
-4px 基准栅格：`--space-1=4px ... --space-8=32px`，组件内边距统一 `p-4/p-6`，卡片间距 `gap-4`。
+**禁止**引入 `next/font/google` 等构建期联网资源：离线/沙箱环境会导致 `next build` 失败。布局使用 `font-sans antialiased`。
 
-### 2.4 圆角与阴影 (Radius & Shadow)
+### 2.3 间距 — 部分实现
 
-- 圆角：`--radius=12px`（卡片），按钮 `8px`，徽章 `9999px`。
-- 阴影：暗色下以 `border` 代替阴影，浅色用 `shadow-sm`/`shadow-md`。
+4px 基准栅格。`tokens.json` 定义 `space-1`(4) ～ `space-8`(32)，作为设计契约；**`globals.css` 未逐项定义 `--space-*` 变量**，当前直接使用 Tailwind 内置间距工具类：
 
-### 2.5 图标 (Icon)
+- 组件内边距：`p-4` / `p-6`；列表项 `py-4`
+- 卡片间距：`gap-4`；区块间距 `space-y-3` / `gap-2`
+- 页面容器：`px-4 py-8`
 
-- 实现：`src/components/icons.tsx` 内联 SVG 组件（零外部依赖，避免运行时网络安装）。
-- 线性、1.5px 描边、24px viewBox，继承 `currentColor`。
+新增间距优先复用上述既有档位，避免任意值（`p-[13px]`）。
+
+### 2.4 圆角与阴影 — 部分实现
+
+- `globals.css` 已定义 `--radius: 12px`（卡片）、`--radius-sm: 8px`（按钮），徽章用 `rounded-full`。
+- **当前组件使用具名数值类**（`rounded-[12px]` / `rounded-[8px]` / `rounded-[10px]` / `rounded-[6px]`），未消费 `--radius` 变量。统一改造列入 §7 待办。
+- 阴影：暗色下以 `border` 代替阴影；仅激活态 Tab 用 `shadow-sm`。
+
+### 2.5 图标 — 已实现
+
+- 实现：[`src/components/icons.tsx`](../src/components/icons.tsx) 内联 SVG，**零外部图标依赖**。
+- 规格：`viewBox="0 0 24 24"`、`fill="none"`、`stroke="currentColor"`、`strokeWidth={2}`、`strokeLinecap/Linejoin="round"`，默认 `width/height=16`，`aria-hidden="true"`。
 - 现有图标：`ScanLine`（扫描）、`ShieldCheck`（安全）、`FolderTree`（目录）、`CheckCircle2`（成功）、`AlertCircle`（警告）、`Trash2`（清理）。
+- 尺寸由调用方用 `className="h-4 w-4"` 等覆盖；颜色继承 `currentColor`。
 
-### 2.6 动效 (Motion)
+### 2.6 动效 — 已实现（部分未消费）
 
-- 时长：`--dur-fast=150ms`，`--dur=250ms`，缓动 `cubic-bezier(0.4,0,0.2,1)`。
-- 用途：hover 抬升（`translateY(-2px)`）、卡片入场 `fade-in-up`、状态切换淡入。
-
----
-
-## 3. 组件库 (Component Library)
-
-### 3.1 基础组件 (Base) — `src/components/ui/`
-
-| 组件 | 等价 shadcn | 说明 |
-|------|------------|------|
-| `button` | Button | 变体 default/primary/secondary/destructive/ghost/outline |
-| `card` | Card | Card/CardHeader/CardTitle/CardContent |
-| `badge` | Badge | 状态/标签 |
-| `tabs` | Tabs | 受控/非受控双模式，视图切换 |
-| `table` | Table | 功能/清理项对照 |
-| `alert` | Alert | Alert/AlertTitle/AlertDescription，警告/成功反馈 |
-| `code-block` | — | 配置/命令展示（等宽+复制） |
-
-### 3.2 图标组件 (Icons) — `src/components/icons.tsx`
-
-- 内联 SVG 图标集合（见 2.5），无第三方依赖。
-
-### 3.3 业务组件 (Business) — `src/app/page.tsx`
-
-单页 dashboard，自上而下：
-
-- 顶部栏 `#app-header`：标题 + 语言开关（中文/English）
-- 概览卡片 `#overview`：扫描总数 / 安全数 / 优化建议数
-- 安全提示 `#security-note`：warning 级别 Alert
-- 主内容 `#main-tabs`：`scan`（扫描结果列表，含风险徽章与清理按钮）/ `tweaks`（优化建议列表）
-- 页脚 `#app-footer`：版本号
+- `globals.css` 定义 `--dur-fast: 150ms`、`--dur: 250ms`，缓动 `cubic-bezier(0.4,0,0.2,1)`。
+- 已定义关键帧：`fade-in-up`（卡片入场，`.animate-fade-in-up`）、`spin`（旋转加载，`.animate-spin-slow`）——**当前页面未使用**。
+- 组件过渡实际使用 Tailwind `transition-all duration-150` / `transition-colors`；按钮 `active:scale-[0.98]`。
+- 焦点态：`:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px }`。
+- 文本选中：`::selection` 用 `color-mix` 混合 `primary` 35%。
 
 ---
 
-## 4. 交互标准 (Interaction)
+## 3. 组件库
 
-### 4.1 模式 (Patterns)
+### 3.1 基础组件 — `src/components/ui/`
 
-- 单页 dashboard，`Tabs` 在「扫描结果」与「优化建议」间切换。
-- 语言开关实时切换中/英（受控 `useState`）。
+| 组件 | 用途 | 当前页面是否使用 |
+|------|------|------------------|
+| `button.tsx` | 变体 `default/primary/secondary/destructive/ghost/outline`；尺寸 `sm/md/lg/icon`；`forwardRef` 透传原生属性 | ✅ |
+| `card.tsx` | `Card` / `CardHeader` / `CardTitle` / `CardDescription` / `CardContent` | ✅（Description 未使用） |
+| `badge.tsx` | `primary/secondary/destructive/success/warning` 状态徽章 | ✅ |
+| `tabs.tsx` | `Tabs`（受控 `value` + 非受控 `defaultValue`）/ `TabsList` / `TabsTrigger` / `TabsContent` | ✅ |
+| `alert.tsx` | `Alert`（tone）+ `AlertTitle` + `AlertDescription`，`role="alert"` | ✅（仅 warning） |
+| `table.tsx` | `Table` / `THead` / `TBody` / `TR` / `TH` / `TD` | ❌ 已提供，未在页面使用 |
+| `code-block.tsx` | 等宽代码展示 + 剪贴板复制（客户端组件） | ❌ 已提供，未在页面使用 |
 
-### 4.2 反馈 (Feedback)
+> 所有基础组件透传 `...props`，因此可传入 `id`、`aria-*` 等属性（`CONTRIBUTING.md` §4.2 / §4.4）。
 
-- 操作成功：`alert` success + 图标；失败：`alert` destructive。
-- 加载：按钮 `disabled` + `Spinner`（lucide `Loader2` 旋转）。
+### 3.2 业务页面 — `src/app/page.tsx`（已实现）
 
-### 4.3 错误 (Error)
+单页 dashboard，客户端组件（`"use client"` + `useState<Lang>`），自上而下：
 
-- 路径不存在：红色 `alert` + 重新输入提示（对齐 OPENSPEC 5.3）。
-- 删除前：`alert` warning 二次确认（destructive 按钮）。
+| 区块 | 语义化 id | 内容 |
+|------|-----------|------|
+| 页面容器 | `repo-cleaner-app`（`main`）、`app-container` | 全屏暗色底，`max-w-5xl` 居中 |
+| 顶部栏 | `app-header`、`app-title`、`lang-switch`、`lang-btn-zh`、`lang-btn-en` | 标题 + 中/英实时切换 |
+| 概览卡片 | `overview`、`stat-total`、`stat-safe`、`stat-tweaks` | 扫描总数 / 安全数 / 优化项数 |
+| 安全提示 | `security-note` | `warning` 级 Alert，提示删除不可逆 |
+| 主内容 | `main-tabs`、`main-tabs-list`、`tab-scan`、`tab-tweaks` | Tabs 切换「扫描结果」/「优化建议」 |
+| 扫描结果 | `tab-content-scan`、`scan-results`、`repo-card-<repo>`、`repo-info-<repo>`、`repo-status-<repo>`、`btn-clean-<repo>` | 仓库卡片 + 风险徽章 + 清理按钮（当前为展示按钮，无实际删除行为） |
+| 优化建议 | `tab-content-tweaks`、`tweak-list`、`tweak-card-<id>`、`tweak-head-<id>` | 分类徽章 + 标题 + 说明 |
+| 页脚 | `app-footer` | 文案 + 版本号 + build 编号（由 `next.config.ts` 注入，见 `CONTRIBUTING.md` §8.2） |
 
-### 4.4 空状态 (Empty State)
+根布局 `layout.tsx`：`root-html` / `root-body` / `app-shell`，`metadata` 提供标题与描述。
 
-- 无扫描结果：居中图标 + 文案 + 主操作按钮引导。
+---
+
+## 4. 交互标准
+
+### 4.1 已实现
+
+- 单页 dashboard，`Tabs` 在「扫描结果」与「优化建议」间切换（非受控 `defaultValue="scan"`）。
+- 语言开关实时切换中/英（`useState` 受控，切换全部 UI 文案）。
+- 按钮 hover / active 过渡；焦点可见轮廓。
+- `CodeBlock` 的复制按钮有「复制 / 已复制」状态反馈（`setTimeout` 1.5s 复位），剪贴板不可用则静默降级。
+
+### 4.2 规划（当前未实现）
+
+以下为设计意图，**参考界面当前是纯展示 dashboard，不执行任何真实清理动作**，因此尚未落地：
+
+- 操作成功 / 失败的 `alert` 反馈（success / destructive）。
+- 加载态：按钮 `disabled` + 旋转指示器。原设计设想使用第三方图标库的 Spinner，但仓库**不引入任何图标库**；若实现须使用 `src/components/icons.tsx` 内联 SVG 或已有的 `.animate-spin-slow`。
+- 路径不存在的错误 `alert` + 重新输入（对齐批处理的行为，见 `OPENSPEC.md` §4.5）。
+- 删除前的 warning 二次确认弹层。
+- 空状态（无扫描结果时的居中图标 + 引导按钮）。
+- 清理按钮的真实行为（当前 `btn-clean-*` 无 `onClick`）。
 
 ---
 
 ## 5. 响应式断点
 
-| 断点 | 阈值 | 布局 |
-|------|------|------|
-| sm | ≥640px | 2 列 |
-| md | ≥768px | 3 列 |
-| lg | ≥1024px | 4 列 + 侧栏 |
-| xl | ≥1280px | 最大宽 1200px 居中 |
+| 断点 | 阈值 | 设计约定 | 当前实现 |
+|------|------|----------|----------|
+| 默认 | < 640px | 单列 | `grid-cols-1` |
+| `sm` | ≥ 640px | 概览卡片 3 列 | `sm:grid-cols-3`（已实现） |
+| `md` | ≥ 768px | 多列 | 未单独定义，沿用 `sm` |
+| `lg` | ≥ 1024px | 多列 + 侧栏 | **无侧栏**（规划） |
+| `xl` | ≥ 1280px | 内容居中 | 容器 `max-w-5xl`（1024px），**非** 1200px |
+
+> 历史版本曾写「xl 最大宽 1200px 居中」「lg 4 列 + 侧栏」，与代码不符，已按实现修正；若后续调整布局，须同步本表与 `tokens.json`（若涉及令牌）。
 
 ---
 
 ## 6. 可访问性 (a11y)
 
-- 语义标签 `header/nav/main/section/footer`；
-- 交互元素 `aria-label`；颜色对比 ≥ WCAG AA；
-- 键盘可达，focus 态可见（`ring-2 ring-primary`）。
+**已实现**
+
+- 语义标签：`main` / `header` / `section` / `footer`。
+- `TabsTrigger` 有 `role="tab"` 与 `aria-selected`；`TabsContent` 有 `role="tabpanel"`；`Alert` 有 `role="alert"`。
+- 装饰性 SVG 图标带 `aria-hidden="true"`。
+- 焦点可见：全局 `:focus-visible` 轮廓（2px `primary`，`outline-offset: 2px`）。
+- 语言切换按钮使用可读文本（「中文」/「English」）而非纯图标。
+- 颜色对比：暗色底 `#0a0a0b` 配 `#ededed` 主文字、`#a1a1aa` 次级文字，满足 WCAG AA。
+
+**已知限制 / 待办**
+
+- `<html lang="zh">` 在 `layout.tsx` 中固定，语言切到英文时**不更新**，屏幕阅读器仍按中文朗读。
+- `TabsList` 未加 `role="tablist"`，Tab 之间缺少 `aria-controls` / 方向键导航。
+- `CodeBlock` 复制按钮的 `aria-label="复制代码"` 未随界面语言切换。
+
+---
+
+## 7. 规范与实现差距清单
+
+| 编号 | 差距 | 位置 | 处理建议 |
+|------|------|------|----------|
+| G1 | 亮色主题仅有 `tokens.json` 规划值，CSS 未实现 | §2.1 | 保持规划标注，或实现 `prefers-color-scheme` 切换 |
+| G2 | `--space-*` / `--radius` 已定义但组件使用具名数值类 | §2.3 / §2.4 | 逐步替换为令牌驱动的工具类 |
+| G3 | `animate-fade-in-up` / `animate-spin-slow` 已定义未消费 | §2.6 | 需要时启用，否则保留为组件库能力 |
+| G4 | 成功/失败反馈、加载态、错误态、空状态、删除确认均未实现 | §4.2 | 明确列为规划，禁止写成既有能力 |
+| G5 | `table` / `code-block` 组件已提供但页面未使用 | §3.1 | 保留为组件库能力，或按需接入 |
+| G6 | `lg` 侧栏、1200px 容器为历史设计，实际是 1024px 无侧栏 | §5 | 已按实现修正文档 |
+| G7 | `<html lang>` 不随语言切换、Tabs 缺少完整 ARIA | §6 | 后续补齐 |
+| G8 | 清理按钮无 `onClick`，界面为纯展示 | §3.2 | 若接入真实清理，须先实现二次确认 |
+
+> 本清单是「规范与实现一致」的核对表：修复任一项时，同步更新本文对应章节与本表，并在 `CHANGELOG.MD` 记录。
+
+---
+
+## 8. 变更同步约定
+
+- 新增 / 修改令牌：先改 `tokens.json` 与本文 §2，再改 `src/app/globals.css`，最后跑 `npm run build`。
+- 新增组件：更新 §3.1 表格并标注是否已接入页面；补语义化 `id`。
+- 修改布局或断点：同步 §5 表格。
+- 本文与 `docs/tokens.json` 的 `version` 随产品版本 bump 同步（见 `CONTRIBUTING.md` §8.2）。
