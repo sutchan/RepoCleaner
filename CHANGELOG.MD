@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [1.2.4] - 2026-11-04
+
+### Docs
+- **丰富项目页面信息** - 重写 README，新增目录、功能亮点特性、常见问题 FAQ、GitHub 仓库信息（推荐描述 / 主页 / 话题标签）、目录结构等章节，使项目页面更完整
+- **补充 LICENSE** - 仓库声明 MIT 许可但缺失 LICENSE 文件，新增标准 MIT 许可证文本（含 `./LICENSE` 链接）
+
+### Changed
+- **版本号同步** - package.json 与 README 徽章统一至 `1.2.4`
+
+---
+
 ## [1.2.3] - 2026-11-04
 
 ### Changed
