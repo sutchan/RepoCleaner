@@ -13,6 +13,9 @@ dist/
 build/
 *.tsbuildinfo
 
+# Next.js 自动生成（仓库根的历史跟踪文件不受本规则影响）
+next-env.d.ts
+
 # 环境/密钥
 .env*
 

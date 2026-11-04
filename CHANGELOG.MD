@@ -10,13 +10,14 @@ All notable changes to this project will be documented in this file.
 - **建立 `docs/` 文档体系** - 将 `OPENSPEC.md`、`CONTRIBUTING.md` 从根，`DESIGN-SYSTEM.md`、`tokens.json` 从 `prototype/` 统一迁入 `docs/`；新增 `docs/README.md` 文档中心（文档地图、职责边界、按角色阅读路径、仓库结构速览、维护约定、术语速查）
 - **完整开发规范 `docs/CONTRIBUTING.md`** - 明确编码风格、命名约定、目录组织、语义化 id、提交信息格式（type 九类）、分支管理、代码审查流程与清单、版本号规则、文档维护约定、术语表、安全红线
 - **PR 审查模板** - 新增 `.github/PULL_REQUEST_TEMPLATE.md`，把审查清单与质量门禁落地为可勾选模板
+- **文档链接校验门禁** - 新增 `scripts/check-doc-links.mjs` 与 `npm run check:docs`，逐段比对真实文件名校验所有 Markdown 相对链接（含大小写），失效返回退出码 1；已纳入提交前检查与 PR 审查清单
 - **设计规范差距清单** - `docs/DESIGN-SYSTEM.md` §7 明确列出 G1～G8 规划未实现项，避免设计愿景被当作既成事实
 
 ### Changed
 - **规格与实现对齐** - 重写 `docs/OPENSPEC.md`：删除易失真的源码行号表与重复版本历史（统一指向 `CHANGELOG.MD`）、补「已知限制」L1～L5、把虚构的「功能全部 ✅ 通过」表改为可执行的门禁命令与手动冒烟清单
 - **设计规范与实现对齐** - 修正图标描边（1.5px → 实际 `strokeWidth={2}`）、移除不存在的第三方 Spinner 描述、标注亮色主题/间距/圆角/动效/响应式断点/`a11y` 的实际落地状态
-- **统一术语与功能名称** - 全仓库统一 `Next.js` / `Nuxt`、功能 1～7 名称（对齐 `OPENSPEC.md` §3.0）、「仓库根目录 vs 项目根目录」「参考界面应用」「规范文档目录」等表述
-- **消除冗余** - `prototype/README.md` 精简为原型目录说明并指向 `docs/`；删除 Next.js 模板遗留的 `prototype/.gitignore`（规则已被根 `.gitignore` 覆盖）
+- **统一术语与功能名称** - 全仓库统一 `Next.js` / `Nuxt`、功能 1～7 名称（对齐 `docs/OPENSPEC.md` §3.0）、「仓库根目录 vs 项目根目录」「参考界面应用」「规范文档目录」等表述；同步替换 `RepoCleaner.bat` 中英菜单、`lang.ini` 参考节、`src/lib/data/features.ts` 与 `project-types.ts` 的旧写法（`NextJS`、还原默认/还原、一键安装等），并修正菜单对齐空格；`CHANGELOG.MD` 历史条目按规范保留原貌不改
+- **消除冗余** - `prototype/README.md` 精简为原型目录说明并指向 `docs/`；删除 Next.js 模板遗留的 `prototype/.gitignore`（规则已被根 `.gitignore` 覆盖）与误生成的 `prototype/next-env.d.ts`，并在根 `.gitignore` 忽略 `next-env.d.ts` 防止再次误提交
 - **版本号单一来源** - `next.config.ts` 从 `package.json` 读取版本并注入 `NEXT_PUBLIC_APP_VERSION` 与 `NEXT_PUBLIC_BUILD_ID`（`yyyymmddhhmm`），`src/app/page.tsx` 页脚展示版本号 + build 编号，注入缺失时回退仅显示版本号
 - **演示数据标注** - `src/lib/data/repos.ts` 头注释明确以下为 mock 数据、容量数字为示意，不可作为事实引用
 - **版本号同步** - `package.json`、`package-lock.json`（历史停在 1.2.3，一并修正）、README 徽章与页脚、`docs/tokens.json`、各规范文档标题同步至 `1.2.5`

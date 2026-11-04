@@ -32,6 +32,7 @@ PR 标题格式与提交信息一致：<type>: <description>（如 fix: 修复�
 
 - [ ] `npm run type-check`
 - [ ] `npm run lint`
+- [ ] `npm run check:docs`
 - [ ] `npm run build`
 - [ ] `RepoCleaner.bat` 手动冒烟（按 docs/CONTRIBUTING.md §9.3，仅改批处理时必填）
 

@@ -244,6 +244,7 @@ RepoCleaner/
 │   ├── DESIGN-SYSTEM.md               # UI 设计规范
 │   └── tokens.json                    # 设计令牌
 ├── public/                            # 参考界面应用静态资源
+├── scripts/check-doc-links.mjs        # 文档链接校验（npm run check:docs）
 ├── src/                               # 参考界面应用代码
 │   ├── app/                           # layout.tsx / page.tsx / globals.css / favicon.ico
 │   ├── components/                    # icons.tsx + ui/
@@ -345,17 +346,20 @@ LANG=zh
 
 ## 9. 验证与质量门禁
 
-### 9.1 参考界面应用（自动，可在任意平台执行）
+### 9.1 仓库级自动门禁（可在任意平台执行）
 
-在仓库根目录依次执行，三项全部通过方可合并：
+在仓库根目录依次执行，四项全部通过方可合并：
 
 ```bash
 npm run type-check     # tsc --noEmit
 npm run lint           # eslint
+npm run check:docs     # 校验所有 Markdown 相对链接（含大小写）
 npm run build          # next build（含类型检查与静态预渲染）
 ```
 
-预期：`type-check` / `lint` 无输出错误，`build` 输出 `✓ Compiled successfully` 并完成静态页面生成。
+预期：`type-check` / `lint` 无输出错误，`check:docs` 报告失效链接 0 个，`build` 输出 `✓ Compiled successfully` 并完成静态页面生成。
+
+> `RepoCleaner.bat` 自身无自动化测试；门禁中的 `check:docs` 只校验文档链接，不覆盖批处理行为。批处理验证见 §9.2。
 
 ### 9.2 批处理脚本（手动，仅 Windows）
 

@@ -245,6 +245,7 @@ v1.2.5
 git status                  # 确认无 node_modules / .next / *.log / *.tsbuildinfo 被跟踪
 npm run type-check
 npm run lint
+npm run check:docs
 npm run build
 ```
 
@@ -310,7 +311,7 @@ npm run build
 
 - 按版本倒序，标题 `## [X.Y.Z] - YYYY-MM-DD`。
 - 分组用 `Added` / `Changed` / `Fixed` / `Docs` / `Security`，条目以 `- **要点** - 说明` 书写。
-- 历史版本号是**历史记录，不得改写**；批量替换版本文本时必须排除 CHANGELOG 中的旧版本号与示例占位符。
+- 历史版本号与历史条目的原始措辞是**历史记录，不得改写**；批量替换版本文本或统一术语时必须排除 `CHANGELOG.MD` 的历史小节（其中仍保留 `NextJS` 等旧写法属正常，不算术语违规）。
 
 ---
 
@@ -331,7 +332,7 @@ npm run build
 - [ ] 新增/修改的 UI 对齐 `docs/DESIGN-SYSTEM.md` 与 `docs/tokens.json`，无硬编码颜色
 - [ ] 主要容器与关键元素已加语义化 `id`（§4.4）
 - [ ] 无 `console.log` / `debugger`；无 `any`；无未使用的 import
-- [ ] `npm run type-check`、`npm run lint`、`npm run build` 全部通过
+- [ ] `npm run type-check`、`npm run lint`、`npm run check:docs`、`npm run build` 全部通过
 - [ ] 单文件 ≤ 200 行（代码文件）；超出已按职责拆分且不破坏导出契约
 - [ ] 批处理改动：路径带引号、延迟展开正确、危险操作有二次确认
 - [ ] 提交信息格式合规，且含新版本号
@@ -366,7 +367,7 @@ npm run build
 4. 数据型描述（数量、行数、命令数）须实算或引用唯一来源，禁止估算。
 5. 文档文件不拆分；超长文档保持单文件完整。
 6. 禁止创建 `.github/readme.md`；`RepoCleaner.code-workspace` 是工作区配置，禁止删除。
-7. 改动文档后校验所有 Markdown 相对链接可达（含大小写），链接检查脚本思路见 `docs/README.md` §5。
+7. 改动文档后必须执行 `npm run check:docs` 校验所有 Markdown 相对链接可达（含大小写），校验方法见 `docs/README.md` §5。
 
 ---
 
