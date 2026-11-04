@@ -518,8 +518,8 @@ for /d %%d in ("!REPO_ROOT!\*") do (
     if exist "%%d\next.config.ts" set "IS_NEXT=1"
     if defined IS_NEXT (
         echo Restoring: %%~nd
-        del /f /q /a:s /a:h /a:r "%%d\.next" 2>nul
-        rd /s /q "%%d\.next" 2>nul
+        attrib -h -s -r "%%d\.next" 2>nul
+        del /f /q "%%d\.next" 2>nul
     )
 )
 

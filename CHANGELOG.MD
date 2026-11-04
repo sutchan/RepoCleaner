@@ -15,6 +15,7 @@ All notable changes to this project will be documented in this file.
 - **prototype 客户端边界（P0）** - `src/app/page.tsx` 补充 `"use client"`，否则 App Router 下 `useState` 会在 `next build` 阶段报错，应用无法运行
 - **构建期联网依赖** - `layout.tsx` 移除 `next/font/google` 的 `Inter`（离线/沙箱环境拉取字体会导致构建失败），改用 `font-sans` 系统字体令牌，对齐 DESIGN-SYSTEM 字体规范
 - **违反设计令牌规范** - 页面与组件中的硬编码颜色（`bg-[#0d1117]` / `text-gray-100/400/500` / `bg-[#26262a]` / `bg-[#0d0d0f]`）全部替换为 `bg-background` / `text-foreground` / `text-muted-foreground` / `bg-muted` 等令牌工具类，消除散落硬编码
+- **功能4 恢复 NextJS 缓存失效（P1）** - `RepoCleaner.bat` 删除被设为 隐藏+系统+只读 的 `.next` 文件时，`del` 多 `/a:` 过滤仅末项生效且默认不删隐藏/系统文件，导致恢复静默失败；改为先 `attrib -h -s -r` 清除属性再 `del /f /q`
 - **版本号统一** - README 徽章、package.json、lang.ini 头、bat 头、各源文件头注释、`tokens.json`、`DESIGN-SYSTEM.md`、`page.tsx` 页脚同步至 `1.2.3`
 
 ### Security
