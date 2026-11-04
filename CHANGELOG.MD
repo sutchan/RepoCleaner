@@ -4,6 +4,24 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [1.2.3] - 2026-11-04
+
+### Changed
+- **应用提升至仓库根** - 将 Next.js 参考界面从 `prototype/` 提升到根目录（`src/` + 根级 `package.json` / `next.config.ts` / `tsconfig.json` / `postcss.config.mjs` / `eslint.config.mjs` / `public/`），`prototype/` 仅保留设计规范与令牌（`DESIGN-SYSTEM.md` / `tokens.json` / `README.md`）
+- **package.json 更名** - `name` 由 `prototype` 改为 `repo-cleaner`，版本同步至 `1.2.3`
+- **文档对齐新结构** - README「原型」章节、OPENSPEC §4.2 文件结构同步根级应用布局
+
+### Fixed
+- **prototype 客户端边界（P0）** - `src/app/page.tsx` 补充 `"use client"`，否则 App Router 下 `useState` 会在 `next build` 阶段报错，应用无法运行
+- **构建期联网依赖** - `layout.tsx` 移除 `next/font/google` 的 `Inter`（离线/沙箱环境拉取字体会导致构建失败），改用 `font-sans` 系统字体令牌，对齐 DESIGN-SYSTEM 字体规范
+- **违反设计令牌规范** - 页面与组件中的硬编码颜色（`bg-[#0d1117]` / `text-gray-100/400/500` / `bg-[#26262a]` / `bg-[#0d0d0f]`）全部替换为 `bg-background` / `text-foreground` / `text-muted-foreground` / `bg-muted` 等令牌工具类，消除散落硬编码
+- **版本号统一** - README 徽章、package.json、lang.ini 头、bat 头、各源文件头注释、`tokens.json`、`DESIGN-SYSTEM.md`、`page.tsx` 页脚同步至 `1.2.3`
+
+### Security
+- bat 删除操作路径仍仅来自 `for` 目录枚举变量并带引号，未引入任意路径执行风险
+
+---
+
 ## [1.2.2] - 2026-08-13
 
 ### Fixed

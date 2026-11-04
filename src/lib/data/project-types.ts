@@ -1,4 +1,4 @@
-// src/lib/data/project-types.ts v1.2.2
+// src/lib/data/project-types.ts v1.2.3
 // 适配项目类型与平均缓存占用
 import type { Lang } from "../i18n";
 

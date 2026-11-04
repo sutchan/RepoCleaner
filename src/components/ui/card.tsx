@@ -1,4 +1,4 @@
-// e:/Github/RepoCleaner/prototype/src/components/ui/card.tsx v1.2.1
+// src/components/ui/card.tsx v1.2.3
 import * as React from "react";
 import { cn } from "@/lib/utils";
 

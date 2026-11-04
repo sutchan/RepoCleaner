@@ -1,4 +1,4 @@
-// e:/Github/RepoCleaner/prototype/src/components/ui/alert.tsx v1.2.2
+// src/components/ui/alert.tsx v1.2.3
 import * as React from "react";
 import { cn } from "@/lib/utils";
 

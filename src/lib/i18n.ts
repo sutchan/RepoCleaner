@@ -1,4 +1,4 @@
-// src/lib/i18n.ts v1.2.2
+// src/lib/i18n.ts v1.2.3
 export type Lang = "zh" | "en";
 
 export type Dict = {

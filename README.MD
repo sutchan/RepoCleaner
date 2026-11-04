@@ -4,7 +4,7 @@
 
 [![Windows](https://img.shields.io/badge/Windows-0078D6?style=flat&logo=windows&logoColor=white)](https://github.com/sutchan/RepoCleaner)
 [![Batch](https://img.shields.io/badge/Batch-.bat-blue?style=flat)](https://github.com/sutchan/RepoCleaner)
-[![Version](https://img.shields.io/badge/Version-1.2.2-green?style=flat)](https://github.com/sutchan/RepoCleaner)
+[![Version](https://img.shields.io/badge/Version-1.2.3-green?style=flat)](https://github.com/sutchan/RepoCleaner)
 [![License](https://img.shields.io/badge/License-MIT-orange?style=flat)](https://github.com/sutchan/RepoCleaner)
 [![Node](https://img.shields.io/badge/Node.js-339933?style=flat&logo=node.js&logoColor=white)](https://nodejs.org)
 [![Disk](https://img.shields.io/badge/Saves-10GB%2B-red?style=flat)](https://github.com/sutchan/RepoCleaner)
@@ -179,24 +179,24 @@ RepoCleaner.bat [选项] [功能号] [目录路径]
 
 ---
 
-## 🎨 原型 (prototype/)
+## 🎨 原型与设计规范 (prototype/)
 
-`prototype/` 是与本工具对齐的 Next.js + React + TypeScript + Tailwind v4 参考界面（OPENSPEC 规范的可视化落地）：
+应用代码已提升到仓库根（`src/` + 根级 `package.json` / `next.config.ts` / `tsconfig.json`），是与本工具对齐的 Next.js + React + TypeScript + Tailwind v4 参考界面（OPENSPEC 规范的可视化落地）。
 
-- **设计系统** `prototype/DESIGN-SYSTEM.md` 与 Tokens `prototype/tokens.json`（令牌与 `globals.css` 的 CSS 变量一致）
-- **单一数据源** `src/lib/data/`（features / project-types / steps / repos 数据，统一经 `@/lib/data` 导出）
-- **国际化** `src/lib/i18n.ts`，顶部语言开关实时切换中/英，翻译全覆盖
+- **根目录应用** 即原型实现：`src/app/page.tsx` 单页 dashboard，数据统一经 `@/lib/data` 导出，文案统一经 `src/lib/i18n.ts` 双语切换
+- **设计系统** `prototype/DESIGN-SYSTEM.md` 与 Tokens `prototype/tokens.json`（令牌与 `src/app/globals.css` 的 CSS 变量一致）
 - **语义化 id** 所有 UI 容器/区块均带 `id`（如 `repo-cleaner-app`、`main-tabs`、`repo-card-<name>`）
 
-本地预览：
+本地预览（在仓库根目录）：
 
 ```bash
-cd prototype
 npm install
 npm run dev      # 开发预览
 npm run build    # 生产构建（需先 npm install 拉全依赖）
 npm run type-check
 ```
+
+> `prototype/` 目录仅保留设计规范与令牌等参考文件（`DESIGN-SYSTEM.md` / `tokens.json` / `README.md`），不再包含可运行代码。
 
 ---
 

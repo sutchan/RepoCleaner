@@ -1,4 +1,4 @@
-// e:/Github/RepoCleaner/prototype/src/components/ui/code-block.tsx v1.2.1
+// src/components/ui/code-block.tsx v1.2.3
 "use client";
 import * as React from "react";
 import { cn } from "@/lib/utils";
@@ -10,7 +10,7 @@ export function CodeBlock({ code, className }: { code: string; className?: strin
     catch { /* clipboard 不可用时静默 */ }
   };
   return (
-    <div className={cn("relative rounded-[10px] border border-border bg-[#0d0d0f]", className)}>
+    <div className={cn("relative rounded-[10px] border border-border bg-muted", className)}>
       <button
         onClick={copy}
         aria-label="复制代码"

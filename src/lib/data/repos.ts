@@ -1,4 +1,4 @@
-// src/lib/data/repos.ts v1.2.2
+// src/lib/data/repos.ts v1.2.3
 // 扫描结果与优化建议（prototype dashboard 数据源）
 
 export type Risk = "safe" | "warning";

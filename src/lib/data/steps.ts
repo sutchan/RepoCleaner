@@ -1,4 +1,4 @@
-// src/lib/data/steps.ts v1.2.2
+// src/lib/data/steps.ts v1.2.3
 // 使用步骤（三步开始）
 import type { Lang } from "../i18n";
 

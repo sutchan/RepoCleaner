@@ -1,4 +1,4 @@
-// src/lib/data/features.ts v1.2.2
+// src/lib/data/features.ts v1.2.3
 // 功能数据（对齐 OPENSPEC 7 项功能）
 import type { Lang } from "../i18n";
 

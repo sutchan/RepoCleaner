@@ -1,4 +1,4 @@
-// e:/Github/RepoCleaner/prototype/src/components/icons.tsx v1.2.2
+// src/components/icons.tsx v1.2.3
 // 内联 SVG 图标（零外部依赖，避免运行时网络安装）
 import type { SVGProps } from "react";
 

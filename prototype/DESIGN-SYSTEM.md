@@ -1,4 +1,4 @@
-# RepoCleaner 设计系统 (Design System) v1.2.2
+# RepoCleaner 设计系统 (Design System) v1.2.3
 
 > 本文件是 prototype/ 的**唯一设计规范来源**。所有页面、组件、文档均须对齐此处。
 > 配套前端工程：Next.js 16 + React 19 + Tailwind 4 + shadcn/ui 风格组件。
@@ -8,8 +8,8 @@
 ## 1. 设计原则 (Design Principles)
 
 1. **极简优先** — 留白即设计，单屏只解决一件事。
-2. **数据真实** — 所有展示数据来自 `src/lib/data.ts`（与 OPENSPEC/README 一致）。
-3. **一致令牌** — 颜色/间距/字号全部走 CSS 变量，禁止散落硬编码。
+2. **数据真实** — 所有展示数据来自 `src/lib/data/`（与 OPENSPEC/README 一致）。
+3. **一致令牌** — 颜色/间距/字号全部走 CSS 变量，禁止散落硬编码（页面/组件仅使用 `bg-background`/`text-foreground`/`text-muted-foreground` 等令牌工具类）。
 4. **响应式无妥协** — 移动端单列、桌面多列，断点 `sm/md/lg/xl`。
 5. **克制动效** — 仅用于引导注意力与状态反馈，时长 ≤ 300ms。
 

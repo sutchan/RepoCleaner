@@ -1,5 +1,5 @@
 @echo off
-:: RepoCleaner v1.2.2 - Windows 项目清理工具
+:: RepoCleaner v1.2.3 - Windows 项目清理工具
 chcp 65001 >nul 2>&1
 setlocal enabledelayedexpansion
 title RepoCleaner - Github Project Cleaner

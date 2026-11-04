@@ -1,4 +1,5 @@
-// src/app/page.tsx v1.2.2
+// src/app/page.tsx v1.2.3
+"use client";
 import { useState } from "react";
 
 import { scanResults, tweaks } from "@/lib/data";
@@ -11,6 +12,8 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AlertCircle, CheckCircle2, FolderTree, ScanLine, ShieldCheck, Trash2 } from "@/components/icons";
 
+export const APP_VERSION = "1.2.3";
+
 export default function Home() {
   const [lang, setLang] = useState<Lang>("zh");
   const t = i18n[lang];
@@ -19,7 +22,7 @@ export default function Home() {
   const safeCount = scanResults.filter((r) => r.risk === "safe").length;
 
   return (
-    <main id="repo-cleaner-app" className="min-h-screen bg-[#0d1117] py-8 text-gray-100">
+    <main id="repo-cleaner-app" className="min-h-screen bg-background py-8 text-foreground">
       <div id="app-container" className="mx-auto max-w-5xl px-4">
         {/* 顶部栏：标题 + 语言切换 */}
         <header id="app-header" className="mb-6 flex items-center justify-between">
@@ -27,7 +30,7 @@ export default function Home() {
             {t.appTitle}
           </h1>
           <div id="lang-switch" className="flex items-center gap-2">
-            <span className="text-sm text-gray-400">{t.language}</span>
+            <span className="text-sm text-muted-foreground">{t.language}</span>
             <Button
               id="lang-btn-zh"
               variant={lang === "zh" ? "default" : "outline"}
@@ -51,7 +54,7 @@ export default function Home() {
         <section id="overview" className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
           <Card id="stat-total">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-sm text-gray-400">
+              <CardTitle className="flex items-center gap-2 text-sm text-muted-foreground">
                 <ScanLine className="h-4 w-4" /> {t.statTotal}
               </CardTitle>
             </CardHeader>
@@ -61,7 +64,7 @@ export default function Home() {
           </Card>
           <Card id="stat-safe">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-sm text-gray-400">
+              <CardTitle className="flex items-center gap-2 text-sm text-muted-foreground">
                 <ShieldCheck className="h-4 w-4" /> {t.statSafe}
               </CardTitle>
             </CardHeader>
@@ -71,7 +74,7 @@ export default function Home() {
           </Card>
           <Card id="stat-tweaks">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-sm text-gray-400">
+              <CardTitle className="flex items-center gap-2 text-sm text-muted-foreground">
                 <FolderTree className="h-4 w-4" /> {t.statTweaks}
               </CardTitle>
             </CardHeader>
@@ -106,7 +109,7 @@ export default function Home() {
                   <CardContent className="flex items-center justify-between py-4">
                     <div id={`repo-info-${r.repo}`}>
                       <p className="font-semibold">{r.repo}</p>
-                      <p className="text-sm text-gray-400">{r.path}</p>
+                      <p className="text-sm text-muted-foreground">{r.path}</p>
                     </div>
                     <div id={`repo-status-${r.repo}`} className="flex items-center gap-2">
                       {r.risk === "safe" ? (
@@ -137,7 +140,7 @@ export default function Home() {
                       <Badge tone="primary">{tw.category}</Badge>
                       <span className="font-semibold">{tw.title}</span>
                     </div>
-                    <p className="text-sm text-gray-400">{tw.desc}</p>
+                    <p className="text-sm text-muted-foreground">{tw.desc}</p>
                   </CardContent>
                 </Card>
               ))}
@@ -145,8 +148,8 @@ export default function Home() {
           </TabsContent>
         </Tabs>
 
-        <footer id="app-footer" className="mt-8 text-center text-xs text-gray-500">
-          {t.footer} · v1.2.2
+        <footer id="app-footer" className="mt-8 text-center text-xs text-muted-foreground">
+          {t.footer} · v{APP_VERSION}
         </footer>
       </div>
     </main>

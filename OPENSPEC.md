@@ -192,14 +192,24 @@ Windows 批处理脚本工具 (Batch Script)
 ### 4.2 文件结构
 ```
 /workspace/
-├── RepoCleaner.bat      # 主程序脚本（约630行）
+├── RepoCleaner.bat      # 主程序脚本（Windows 批处理，约637行）
 ├── config.ini           # 配置文件（REPO_ROOT / LANG）
 ├── lang.ini            # 语言配置文件（LANG 值 + [en]/[zh] 文案节）
 ├── README.MD           # 项目说明文档
-├── CHANGELOG.MD        # 更新日志
-├── OPENSPEC.MD         # 开放规格说明书
+├── CHANGELOG.MD         # 更新日志
+├── OPENSPEC.MD          # 开放规格说明书
 ├── RepoCleaner.code-workspace  # VS Code 工作区配置
-└── prototype/          # Next.js 参考界面（详见 README「原型」）
+├── package.json         # 根应用依赖与脚本（dev/build/type-check）
+├── next.config.ts       # Next.js 配置
+├── tsconfig.json        # TypeScript 配置（@/* → ./src/*）
+├── postcss.config.mjs   # Tailwind v4 PostCSS 配置
+├── eslint.config.mjs    # ESLint 配置
+├── public/              # 静态资源（SVG 等）
+├── src/                 # 参考界面应用代码（App Router）
+│   ├── app/             # layout.tsx / page.tsx / globals.css
+│   ├── components/      # icons.tsx + ui/ 基础组件
+│   └── lib/             # i18n.ts + data/（单一数据源）
+└── prototype/           # 仅保留设计规范与令牌（DESIGN-SYSTEM.md / tokens.json / README.md）
 ```
 
 ### 4.3 代码统计

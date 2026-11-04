@@ -1,4 +1,4 @@
-// e:/Github/RepoCleaner/prototype/src/components/ui/tabs.tsx v1.2.2
+// src/components/ui/tabs.tsx v1.2.3
 "use client";
 import * as React from "react";
 import { cn } from "@/lib/utils";
