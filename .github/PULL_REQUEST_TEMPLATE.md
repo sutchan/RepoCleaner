@@ -49,6 +49,8 @@ PR 标题格式与提交信息一致：<type>: <description>（如 fix: 修复�
 - [ ] `CHANGELOG.MD` 已新增版本小节；相关文档已同步
 - [ ] 新增文档归入 `docs/`，Markdown 相对链接按实际大小写可达
 - [ ] 无密钥 / Token / 真实用户数据；`node_modules`、`.next`、`*.log`、`*.tsbuildinfo` 未被跟踪
+- [ ] 已阅读[行为准则](CODE_OF_CONDUCT.md)，PR 描述与讨论保持尊重、就事论事
+- [ ] 本 PR 不含未披露的安全漏洞（安全问题走[私密渠道](SECURITY.md)）
 
 ## 破坏性变更 / 回滚方案
 

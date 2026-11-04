@@ -1,4 +1,4 @@
-# RepoCleaner 开发规范与贡献指南 v1.2.5
+# RepoCleaner 开发规范与贡献指南 v1.2.6
 
 > 本文是 RepoCleaner 仓库的**唯一开发规范来源**，规定「如何改代码、如何写文档、如何提交与评审」。
 > 本文存放于 `docs/`；所有贡献者（含 AI 协作会话）在动手前必须阅读本文。
@@ -21,6 +21,12 @@
 | `prototype/README.md` | `prototype/` 目录说明：原型现状与目录用途 | 不复述设计规范正文、不存放代码 |
 | `CHANGELOG.MD`（根） | **唯一版本历史来源**，按版本倒序记录变更 | 不重复功能规格 |
 | `LICENSE`（根） | MIT 许可证正文 | — |
+| `.github/CODE_OF_CONDUCT.md` | 社区行为标准与举报方式 | 不复述贡献流程 |
+| `.github/SECURITY.md` | 安全策略：支持版本、私密漏洞报告渠道、删除类工具的安全边界 | 不写实现细节 |
+| `.github/SUPPORT.md` | 提问前自查、有效 Issue 要素、不适用渠道 | 不复述功能文档 |
+| `.github/FUNDING.yml` | 赞助配置（当前为全注释占位） | 不得填写未核实的账号 |
+| `.github/ISSUE_TEMPLATE/` | `config.yml` + 缺陷报告 / 功能建议 Issue Form | — |
+| `.github/CODEOWNERS` | 默认审查人 | — |
 | `.github/PULL_REQUEST_TEMPLATE.md` | PR 审查清单模板 | — |
 
 **引用规则**：需要版本历史 → `CHANGELOG.MD`；需要功能行为 → `docs/OPENSPEC.md`；需要协作流程 → 本文；需要视觉/组件规范 → `docs/DESIGN-SYSTEM.md`。禁止把 `CHANGELOG.MD` 的内容复制到 `docs/OPENSPEC.md` 或其它文档。
@@ -30,7 +36,11 @@
 - 引用同目录文档用 `./OPENSPEC.md`、`./CONTRIBUTING.md`、`./DESIGN-SYSTEM.md`、`./tokens.json`；
 - 禁止把链接目标写成小写扩展名的 `CHANGELOG.md` 或错误大小写的 `Openspec.md` 等不存在的路径。
 
+**Community Health Files 归属**：GitHub 会自动识别仓库根、`docs/` 与 `.github/` 下的特定文件。根 `README.MD` / `CHANGELOG.MD` / `LICENSE` 与 `docs/CONTRIBUTING.md` 已分别承担 README、变更历史、许可证、贡献指南角色，因此 `.github/` **不再复制** `CONTRIBUTING.md` 正文（避免两处维护、且 `.github/` 优先级会盖住 `docs/` 的完整规范）。`.github/` 只放行为准则、安全策略、支持指南、赞助配置、Issue/PR 模板与 CODEOWNERS。
+
 **禁止**：在 `.github/` 下创建 `readme.md`（与根 README 重复且易误导）；Community Health 文件与 PR 模板不受此限。
+
+贡献前请阅读[行为准则](../.github/CODE_OF_CONDUCT.md)；报告安全漏洞走[安全策略](../.github/SECURITY.md)的私密渠道，不得公开提 Issue 或 PR；使用疑问先看[支持指南](../.github/SUPPORT.md)。
 
 ---
 
@@ -65,8 +75,17 @@ npm run start          # 启动生产构建产物（需先 build）
 
 ```
 RepoCleaner/
-├── .github/                     # PR 模板等仓库协作配置（禁止创建 .github/readme.md）
-│   └── PULL_REQUEST_TEMPLATE.md
+├── .github/                     # Community Health Files（禁止创建 .github/readme.md）
+│   ├── CODE_OF_CONDUCT.md       # 行为准则
+│   ├── SECURITY.md              # 安全策略与私密漏洞报告
+│   ├── SUPPORT.md               # 支持指南
+│   ├── FUNDING.yml              # 赞助配置（全注释占位）
+│   ├── CODEOWNERS               # 默认审查人
+│   ├── PULL_REQUEST_TEMPLATE.md # PR 审查模板
+│   └── ISSUE_TEMPLATE/
+│       ├── config.yml           # 模板配置与联系入口
+│       ├── bug_report.yml       # 缺陷报告表单
+│       └── feature_request.yml  # 功能建议表单
 ├── docs/                        # 所有规范与规格文档归档
 │   ├── README.md                # 文档中心
 │   ├── OPENSPEC.md              # 产品功能规格
@@ -118,11 +137,11 @@ RepoCleaner/
 - **引号**：TS/JS 统一双引号；JSX 属性用双引号；CSS 用双引号（字体名等）。
 - **分号**：TS/JS 语句必须写分号。
 - **注释**：关键逻辑、非直觉判断（尤其批处理的延迟展开与安全边界）必须写**中文注释**；禁止用注释复述显而易见的代码。
-- **文件头注释**：源代码文件首行标注 `// <相对路径> vX.Y.Z`；CSS 用 `/* ... */`；`.bat` 用 `::`；`.ini` 用 `;`。示例：
+- **文件头注释**：源代码文件首行标注 `// <相对路径> vX.Y.Z`；CSS 用 `/* ... */`；`.bat` 用 `::`；`.ini` 用 `;`。示例（`vX.Y.Z` 为占位，实际写该文件本次改动后的产品版本号）：
   ```ts
-  // src/components/ui/button.tsx v1.2.5
+  // src/components/ui/button.tsx vX.Y.Z
   ```
-  头注释中的版本号是**该文件自身的版本**，随「本次实际修改该文件」更新；**未改动的文件不得批量刷新头注释**。
+  头注释中的版本号是**该文件自身的版本**，随「本次实际修改该文件」更新；**未改动的文件不得批量刷新头注释**，因此仓库中不同文件的头注释版本并存属正常现象。
 
 ### 4.2 TypeScript / React
 
@@ -301,6 +320,8 @@ npm run build
 - `CHANGELOG.MD`（根） → 新增对应版本小节（置于最上方）
 - `docs/tokens.json` → `version`
 - `docs/DESIGN-SYSTEM.md`、`docs/README.md`、`docs/OPENSPEC.md`、`docs/CONTRIBUTING.md`、`prototype/README.md` → 标题版本
+- `.github/` 下新增的 Community Health 文件 → 标题或首行注释版本
+- `package-lock.json` → 顶层与 `packages[""]` 两处 `version`
 - 被改动**代码文件**的头注释版本号
 
 **禁止**：全仓库批量刷写所有源码文件的头注释；未改动文件头注释保持不变（头注释是文件自版本，不等于产品版本，看到旧版本与新版本并存属正常，不是版本漂移）。
@@ -319,7 +340,7 @@ npm run build
 
 ### 9.1 流程
 
-1. 从目标分支切短期分支（§7.1）。
+1. 先用 [Issue 模板](https://github.com/sutchan/RepoCleaner/issues/new/choose) 描述问题或建议并确认未被记录；从目标分支切短期分支（§7.1）。
 2. 完成改动，按 §6.3 跑完全部门禁。
 3. `git add` → `git commit`（格式见 §6）→ `git push origin <分支>`。
 4. 在 GitHub 创建 PR 到 `main`（或 `dev`），**PR 标题格式同提交信息**，描述按 `.github/PULL_REQUEST_TEMPLATE.md` 填写。
@@ -377,4 +398,5 @@ npm run build
 - 用户输入必须校验：批处理路径只用 `if exist` 判定，删除目标只取 `for /d` 枚举值并加引号。
 - 前端不拼接未净化的 HTML（本仓库无 `dangerouslySetInnerHTML`）。
 - 删除类操作必须二次确认，且不得在真实仓库根目录做验证。
+- 发现安全漏洞按 [SECURITY.md](../.github/SECURITY.md) 私密报告，禁止公开披露可复现细节。
 - 依赖定期审计（`npm outdated`）；升级 `next` / `react` 等核心依赖须跑完整门禁。

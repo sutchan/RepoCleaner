@@ -4,7 +4,7 @@
 
 [![Windows](https://img.shields.io/badge/Windows-0078D6?style=flat&logo=windows&logoColor=white)](https://github.com/sutchan/RepoCleaner)
 [![Batch](https://img.shields.io/badge/Batch-.bat-blue?style=flat)](https://github.com/sutchan/RepoCleaner)
-[![Version](https://img.shields.io/badge/Version-1.2.5-green?style=flat)](https://github.com/sutchan/RepoCleaner)
+[![Version](https://img.shields.io/badge/Version-1.2.6-green?style=flat)](https://github.com/sutchan/RepoCleaner)
 [![License](https://img.shields.io/badge/License-MIT-orange?style=flat)](https://github.com/sutchan/RepoCleaner)
 [![Node](https://img.shields.io/badge/Node.js-339933?style=flat&logo=node.js&logoColor=white)](https://nodejs.org)
 [![Disk](https://img.shields.io/badge/Saves-10GB%2B-red?style=flat)](https://github.com/sutchan/RepoCleaner)
@@ -288,7 +288,17 @@ A：支持。所有目录扫描均已做引号包裹处理，可正确识别含�
 | [docs/CONTRIBUTING.md](./docs/CONTRIBUTING.md) | 开发规范：编码风格、命名约定、目录组织、提交信息格式、分支管理、代码审查流程、版本规则、术语表 |
 | [docs/DESIGN-SYSTEM.md](./docs/DESIGN-SYSTEM.md) | UI 设计规范：设计令牌、组件库、交互、响应式、a11y、规范与实现差距清单 |
 | [docs/tokens.json](./docs/tokens.json) | 机器可读设计令牌 |
+| [.github/CODE_OF_CONDUCT.md](./.github/CODE_OF_CONDUCT.md) | 行为准则 |
+| [.github/SECURITY.md](./.github/SECURITY.md) | 安全策略与漏洞私密报告 |
+| [.github/SUPPORT.md](./.github/SUPPORT.md) | 支持与提问指南 |
 | [.github/PULL_REQUEST_TEMPLATE.md](./.github/PULL_REQUEST_TEMPLATE.md) | PR 审查清单模板 |
+
+### 社区与贡献
+
+- 参与贡献前请阅读[开发规范](./docs/CONTRIBUTING.md)与[行为准则](./.github/CODE_OF_CONDUCT.md)。
+- 报缺陷 / 提建议：使用 [Issue 模板](https://github.com/sutchan/RepoCleaner/issues/new/choose)，提问前先看[支持指南](./.github/SUPPORT.md)与[常见问题 FAQ](#-常见问题-faq)。
+- **安全漏洞不要公开提 Issue**，请按[安全策略](./.github/SECURITY.md)走私密渠道；本工具会删除文件，相关边界务必先读。
+- 社区行为问题按[行为准则](./.github/CODE_OF_CONDUCT.md)举报。
 
 `prototype/` 现仅保留[原型目录说明](./prototype/README.md)，不再包含代码或规范正文。
 
@@ -318,7 +328,10 @@ npm run build        # 生产构建
 
 ```
 RepoCleaner/
-├── .github/PULL_REQUEST_TEMPLATE.md   # PR 审查清单模板
+├── .github/                           # Community Health Files
+│   ├── CODE_OF_CONDUCT.md / SECURITY.md / SUPPORT.md
+│   ├── FUNDING.yml / CODEOWNERS / PULL_REQUEST_TEMPLATE.md
+│   └── ISSUE_TEMPLATE/                # config.yml + bug_report.yml + feature_request.yml
 ├── docs/                              # 所有规范与规格文档归档
 │   ├── README.md                      # 文档中心（导航 + 职责边界）
 │   ├── OPENSPEC.md                    # 产品功能规格
@@ -361,6 +374,6 @@ RepoCleaner/
 
 <div align="center">
 
-RepoCleaner v1.2.5 · MIT License · [文档中心](./docs/README.md)
+RepoCleaner v1.2.6 · MIT License · [文档中心](./docs/README.md)
 
 </div>

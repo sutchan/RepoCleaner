@@ -1,4 +1,4 @@
-# RepoCleaner 文档中心 v1.2.5
+# RepoCleaner 文档中心 v1.2.6
 
 > 本目录是 RepoCleaner **所有规范与规格文档的唯一归档位置**。
 > 仓库根只保留面向使用者的入口 [README.MD](../README.MD)、变更历史 [CHANGELOG.MD](../CHANGELOG.MD) 与 [LICENSE](../LICENSE)。
@@ -21,6 +21,26 @@
 
 **单一来源原则**：同一事实只在一处维护。需要版本历史 → `CHANGELOG.MD`；需要功能行为 → `OPENSPEC.md`；需要协作流程 → `CONTRIBUTING.md`；需要视觉/组件规范 → `DESIGN-SYSTEM.md`。禁止跨文档复制正文。
 
+### 1.1 Community Health Files（`.github/`）
+
+GitHub 会自动识别仓库根、`docs/` 与 `.github/` 下的特定文件。本仓库的归属如下：
+
+| 文件 | 位置 | 说明 |
+|------|------|------|
+| README | 根 `README.MD` | 使用者入口；**禁止**创建 `.github/readme.md`（与根 README 重复） |
+| LICENSE | 根 `LICENSE` | MIT |
+| CHANGELOG | 根 `CHANGELOG.MD` | 唯一版本历史 |
+| CONTRIBUTING | `docs/CONTRIBUTING.md` | **唯一来源**，GitHub 已识别 `docs/` 下的 `CONTRIBUTING.md`，因此 `.github/` 不再放副本 |
+| CODE_OF_CONDUCT | [`.github/CODE_OF_CONDUCT.md`](../.github/CODE_OF_CONDUCT.md) | 社区行为标准与举报方式 |
+| SECURITY | [`.github/SECURITY.md`](../.github/SECURITY.md) | 安全策略与私密漏洞报告渠道（删除类工具必读） |
+| SUPPORT | [`.github/SUPPORT.md`](../.github/SUPPORT.md) | 提问前自查、Issue 要求与不适用渠道 |
+| FUNDING | `.github/FUNDING.yml` | 赞助配置；当前全注释占位，未填写任何账号 |
+| ISSUE_TEMPLATE | `.github/ISSUE_TEMPLATE/` | `config.yml` + 缺陷报告 / 功能建议两份 Issue Form |
+| PULL_REQUEST_TEMPLATE | [`.github/PULL_REQUEST_TEMPLATE.md`](../.github/PULL_REQUEST_TEMPLATE.md) | PR 审查清单 |
+| CODEOWNERS | `.github/CODEOWNERS` | 默认审查人 |
+
+**决策**：规范正文只留在 `docs/`，`.github/` 只放 GitHub 平台需要的入口与模板，避免同一规范两处维护。查看文件清单见 [docs/CONTRIBUTING.md §3.1](./CONTRIBUTING.md)。
+
 ---
 
 ## 2. 按角色阅读
@@ -33,6 +53,9 @@
 | 改 UI / 加组件 | [DESIGN-SYSTEM.md](./DESIGN-SYSTEM.md) §2 令牌 → §3 组件库 → §7 差距清单；令牌值见 [tokens.json](./tokens.json) |
 | 发版 / bump 版本 | [CONTRIBUTING.md](./CONTRIBUTING.md) §8 → [CHANGELOG.MD](../CHANGELOG.MD) |
 | 审查 PR | [.github/PULL_REQUEST_TEMPLATE.md](../.github/PULL_REQUEST_TEMPLATE.md) + [CONTRIBUTING.md](./CONTRIBUTING.md) §9.2 |
+| 报缺陷 / 提建议 | [SUPPORT.md](../.github/SUPPORT.md) → 用 [Issue 模板](https://github.com/sutchan/RepoCleaner/issues/new/choose) 提交 |
+| 报告安全漏洞 | [SECURITY.md](../.github/SECURITY.md)，走私密渠道，**不要公开提 Issue** |
+| 社区行为问题 | [CODE_OF_CONDUCT.md](../.github/CODE_OF_CONDUCT.md) |
 
 ---
 
@@ -55,7 +78,17 @@ RepoCleaner/
 │   └── lib/               # i18n.ts / utils.ts / data/
 ├── public/                                     # 静态资源
 ├── scripts/check-doc-links.mjs                 # 文档链接校验门禁
-├── .github/PULL_REQUEST_TEMPLATE.md            # PR 审查模板
+├── .github/                                    # Community Health Files
+│   ├── CODE_OF_CONDUCT.md                     # 行为准则
+│   ├── SECURITY.md                            # 安全策略
+│   ├── SUPPORT.md                             # 支持指南
+│   ├── FUNDING.yml                            # 赞助配置（全注释占位）
+│   ├── CODEOWNERS                             # 默认审查人
+│   ├── PULL_REQUEST_TEMPLATE.md               # PR 审查模板
+│   └── ISSUE_TEMPLATE/
+│       ├── config.yml                         # 模板配置与联系入口
+│       ├── bug_report.yml                     # 缺陷报告表单
+│       └── feature_request.yml                # 功能建议表单
 └── package.json / tsconfig.json / next.config.ts / ...  # 工程配置
 ```
 
@@ -90,6 +123,8 @@ npm run start          # 启动构建产物
 5. 文档文件**不拆分**（即使超过 200 行也保持单文件完整）；源代码文件单文件 ≤ 200 行须按职责拆分。
 6. 每次文件改动至少 bump 一次 patch 版本，并同步 [CONTRIBUTING.md §8.2](./CONTRIBUTING.md) 列出的全部展示位。
 7. 禁止创建 `.github/readme.md`（与根 README 重复）；`RepoCleaner.code-workspace` 禁止删除。
+8. GitHub 平台入口（行为准则、安全、支持、Issue/PR 模板、CODEOWNERS）放 `.github/`，规范正文放 `docs/`；改动社区健康文件时同步本页 §1.1 与 [CONTRIBUTING.md §3.1](./CONTRIBUTING.md) 的文件清单。禁止在 `.github/` 复制 `docs/CONTRIBUTING.md` 正文。
+9. `.github/*.yml`（FUNDING / Issue Forms / config）改动后须验证 YAML 可解析，且不得填写未经核实的账号、邮箱或承诺响应时间。
 
 ---
 

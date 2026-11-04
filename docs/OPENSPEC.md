@@ -1,4 +1,4 @@
-# RepoCleaner 开放规格说明书 (OpenSpec) v1.2.5
+# RepoCleaner 开放规格说明书 (OpenSpec) v1.2.6
 
 > **本文定位**：产品功能规格，定义「做什么」——7 项功能的行为契约、交互方式、环境与兼容性。
 > 开发规范（编码 / 提交 / 分支 / 审查）见 [CONTRIBUTING.md](./CONTRIBUTING.md)；UI 设计规范见 [DESIGN-SYSTEM.md](./DESIGN-SYSTEM.md)；变更历史见 [CHANGELOG.MD](../CHANGELOG.MD)；文档导航见 [docs/README.md](./README.md)。
@@ -236,7 +236,10 @@
 
 ```
 RepoCleaner/
-├── .github/PULL_REQUEST_TEMPLATE.md   # PR 审查清单模板
+├── .github/                           # Community Health Files
+│   ├── CODE_OF_CONDUCT.md / SECURITY.md / SUPPORT.md
+│   ├── FUNDING.yml / CODEOWNERS / PULL_REQUEST_TEMPLATE.md
+│   └── ISSUE_TEMPLATE/                # config.yml + bug_report.yml + feature_request.yml
 ├── docs/                              # 所有规范与规格文档归档
 │   ├── README.md                      # 文档中心（导航 + 职责边界）
 │   ├── OPENSPEC.md                    # 本文：产品功能规格
@@ -338,7 +341,7 @@ LANG=zh
 
 ## 8. 变更记录
 
-**唯一来源：[CHANGELOG.MD](../CHANGELOG.MD)**（按版本倒序，含 `1.2.5` 及更早版本的完整变更明细）。
+**唯一来源：[CHANGELOG.MD](../CHANGELOG.MD)**（按版本倒序记录全部发布版本的完整变更明细）。
 
 本文不再重复维护版本历史，避免两份记录漂移。
 

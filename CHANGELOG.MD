@@ -4,6 +4,29 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [1.2.6] - 2026-11-04
+
+### Added
+- **Community Health Files 全套（`.github/`）**
+  - `CODE_OF_CONDUCT.md` — 基于 Contributor Covenant v2.1 的中文行为准则（承诺/标准/执行责任/范围/举报/四级执行指南/归属）
+  - `SECURITY.md` — 安全策略：支持版本、GitHub Security Advisories 私密报告渠道、删除类工具的安全边界、不属于漏洞的情形、不承诺固定 SLA
+  - `SUPPORT.md` — 提问前自查表、有效 Issue 应含信息、不适用渠道与免责
+  - `FUNDING.yml` — 赞助配置占位（全注释，未填写任何账号）
+  - `CODEOWNERS` — 默认审查人（用户名取自 remote 实查的 `sutchan`）
+  - `ISSUE_TEMPLATE/config.yml` + `bug_report.yml` + `feature_request.yml` — Issue Forms，含脱敏提示、隔离目录复现确认与「安全漏洞勿公开」引导
+- **PR 模板完善** — 补充行为准则 / 安全策略入口与贡献者确认项
+
+### Changed
+- **不复制贡献规范** — GitHub 已识别 `docs/CONTRIBUTING.md`，故 `.github/` 不再创建 `CONTRIBUTING.md` 副本（避免两处维护及优先级遮盖）；同时遵守「禁止创建 `.github/readme.md`」约定。README / LICENSE / CHANGELOG 继续留在根目录
+- **文档同步** — `docs/README.md` 新增 §1.1 Community Health Files 归属表与维护约定，`docs/CONTRIBUTING.md`、`docs/OPENSPEC.md`、根 `README.MD` 的文档地图与目录树补齐 `.github/` 清单；README 新增「社区与贡献」章节
+- **版本号同步** — `package.json`、`package-lock.json`、README 徽章与页脚、`docs/tokens.json`、各 `docs/*.md` 与 `prototype/README.md` 标题同步至 `1.2.6`
+
+### Security
+- `SECURITY.md` 明确「路径穿越 / 绕过二次确认 / 删除越界」值得私密报告，并列出既有的路径来源限制与二次确认机制
+- `FUNDING.yml` 保留全注释占位，不填写未经核实的账号、邮箱或承诺响应时间；所有模板均提示日志脱敏与隔离目录复现
+
+---
+
 ## [1.2.5] - 2026-11-04
 
 ### Added

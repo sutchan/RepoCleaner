@@ -1,4 +1,4 @@
-# RepoCleaner 设计系统 (Design System) v1.2.5
+# RepoCleaner 设计系统 (Design System) v1.2.6
 
 > **本文定位**：RepoCleaner 参考界面应用（仓库根 `src/`）的**唯一 UI 设计规范来源**，规定设计令牌、组件库、交互与可访问性。
 > 本文归档于 `docs/`（v1.2.5 起从 `prototype/` 迁入）；`prototype/` 现仅保留原型说明，不含可运行代码或规范正文。
