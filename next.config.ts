@@ -1,4 +1,4 @@
-// next.config.ts v1.2.5
+// next.config.ts v2.0.1
 import type { NextConfig } from "next";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -14,12 +14,12 @@ function readAppVersion(): string {
   }
 }
 
-// build 编号 yyyymmddhhmm（本地构建时间到分钟），dev / build 均自动注入
+// build 编号 yymmddhhmm（10 位：2 位年 + 月日时分），dev / build 均自动注入
 function makeBuildId(): string {
   const pad = (n: number) => String(n).padStart(2, "0");
   const d = new Date();
   return [
-    d.getFullYear(),
+    String(d.getFullYear()).slice(-2),
     pad(d.getMonth() + 1),
     pad(d.getDate()),
     pad(d.getHours()),

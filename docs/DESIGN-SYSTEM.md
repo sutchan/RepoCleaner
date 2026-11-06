@@ -1,9 +1,9 @@
-# RepoCleaner 设计系统 (Design System) v1.2.6
+# RepoCleaner 设计系统 (Design System) v2.0.1
 
-> **本文定位**：RepoCleaner 参考界面应用（仓库根 `src/`）的**唯一 UI 设计规范来源**，规定设计令牌、组件库、交互与可访问性。
+> **本文定位**：RepoCleaner 的**唯一 UI 设计规范来源**，规定设计令牌、界面结构与交互标准。
+> **v2.0.0 起**：实际 UI 为 **Go + Fyne 桌面 GUI**（`internal/ui`），配色沿用本文 §2.1 设计令牌；仓库根 `src/` 的 Next.js 参考界面为 **v1.x 遗留、已弃用**，§3.1 / §3.2 等 Next.js 章节仅作历史参考。
 > 本文归档于 `docs/`（v1.2.5 起从 `prototype/` 迁入）；`prototype/` 现仅保留原型说明，不含可运行代码或规范正文。
-> 配套工程：Next.js 16（App Router）+ React 19 + TypeScript strict + Tailwind CSS v4，零第三方 UI / 图标依赖。
-> 机器可读令牌见 [tokens.json](./tokens.json)；实现见 [`src/app/globals.css`](../src/app/globals.css)；开发规范见 [CONTRIBUTING.md](./CONTRIBUTING.md)；文档导航见 [README.md](./README.md)。
+> 机器可读令牌见 [tokens.json](./tokens.json)；开发规范见 [CONTRIBUTING.md](./CONTRIBUTING.md)；文档导航见 [README.md](./README.md)。
 
 **阅读约定**：本文用「**已实现**」标注当前代码确实具备的能力，用「**规划**」标注尚未落地的设计意图。凡「规划」项均不得在文档其它位置被当作既成事实引用。完整差距清单见 §7。
 
@@ -42,6 +42,8 @@ Tailwind v4 的 `@theme` 使用 `--color-<name>` 命名，生成 `bg-<name>` / `
 | warning | `#f59e0b` | `#f59e0b` | `--color-warning` | 警告 |
 
 **语义规则（已实现）**：删除/风险类用 `destructive`，安全/成功用 `success`，提示用 `warning`，主操作用 `primary`。
+
+> v2.0.0 起 Fyne 版按上表在 `internal/ui/theme.go` 实现同名配色（背景 / 前景 / 主色 / 危险等）；亮暗主题随 Fyne 系统设置，`tokens.json` 仍为令牌契约。
 
 > 亮色列的值保存在 `tokens.json` 中作为规划基线，但 `globals.css` **未**实现亮色模式切换；不得假定亮色主题可用。
 
@@ -101,7 +103,19 @@ mono: ui-monospace, "JetBrains Mono", "SF Mono", Consolas, monospace
 
 ## 3. 组件库
 
-### 3.1 基础组件 — `src/components/ui/`
+### 3.0 Fyne 界面（v2.0.0 已实现，产品本体 UI）
+
+Go 版 GUI 位于 `internal/ui`，遵循本文 §2.1 配色与 §4 交互标准：
+
+| 区块 | 说明 |
+|------|------|
+| 主窗口 | 标题 + 目标目录展示（可修改并保存到 `config.ini`） |
+| 功能按钮 1–7 | 与 `OPENSPEC.md` §3.0 功能一一对应；危险操作（1 / 6 / 7）先弹确认对话框 |
+| 语言按钮 | 「中文 / English」实时切换全部文案（`internal/i18n`） |
+| 结果区 | 展示每个功能的执行日志与成功消息 |
+| 页脚区（Border bottom） | 唯一展示 `vX.Y.Z · build yymmddhhmm`（10 位，如 `v1.2.3 · build 2611051259`），文本来自 `internal/buildinfo.Footer()`；页眉不得出现版本号（见 `CONTRIBUTING.md` §8.2） |
+
+### 3.1 基础组件 — `src/components/ui/`（已弃用，v1.x 遗留）
 
 | 组件 | 用途 | 当前页面是否使用 |
 |------|------|------------------|
@@ -115,7 +129,7 @@ mono: ui-monospace, "JetBrains Mono", "SF Mono", Consolas, monospace
 
 > 所有基础组件透传 `...props`，因此可传入 `id`、`aria-*` 等属性（`CONTRIBUTING.md` §4.2 / §4.4）。
 
-### 3.2 业务页面 — `src/app/page.tsx`（已实现）
+### 3.2 业务页面 — `src/app/page.tsx`（已弃用，v1.x 遗留）
 
 单页 dashboard，客户端组件（`"use client"` + `useState<Lang>`），自上而下：
 
@@ -128,7 +142,7 @@ mono: ui-monospace, "JetBrains Mono", "SF Mono", Consolas, monospace
 | 主内容 | `main-tabs`、`main-tabs-list`、`tab-scan`、`tab-tweaks` | Tabs 切换「扫描结果」/「优化建议」 |
 | 扫描结果 | `tab-content-scan`、`scan-results`、`repo-card-<repo>`、`repo-info-<repo>`、`repo-status-<repo>`、`btn-clean-<repo>` | 仓库卡片 + 风险徽章 + 清理按钮（当前为展示按钮，无实际删除行为） |
 | 优化建议 | `tab-content-tweaks`、`tweak-list`、`tweak-card-<id>`、`tweak-head-<id>` | 分类徽章 + 标题 + 说明 |
-| 页脚 | `app-footer` | 文案 + 版本号 + build 编号（由 `next.config.ts` 注入，见 `CONTRIBUTING.md` §8.2） |
+| 页脚 | `app-footer` | 文案 + `vX.Y.Z · build yymmddhhmm`（10 位，由 `next.config.ts` 注入，见 `CONTRIBUTING.md` §8.2） |
 
 根布局 `layout.tsx`：`root-html` / `root-body` / `app-shell`，`metadata` 提供标题与描述。
 
@@ -145,7 +159,7 @@ mono: ui-monospace, "JetBrains Mono", "SF Mono", Consolas, monospace
 
 ### 4.2 规划（当前未实现）
 
-以下为设计意图，**参考界面当前是纯展示 dashboard，不执行任何真实清理动作**，因此尚未落地：
+以下为设计意图，**已弃用的参考界面是纯展示 dashboard，不执行任何真实清理动作**（真实清理由 v2.0.0 的 Go + Fyne 版实现，含二次确认），因此尚未落地：
 
 - 操作成功 / 失败的 `alert` 反馈（success / destructive）。
 - 加载态：按钮 `disabled` + 旋转指示器。原设计设想使用第三方图标库的 Spinner，但仓库**不引入任何图标库**；若实现须使用 `src/components/icons.tsx` 内联 SVG 或已有的 `.animate-spin-slow`。
@@ -200,7 +214,7 @@ mono: ui-monospace, "JetBrains Mono", "SF Mono", Consolas, monospace
 | G5 | `table` / `code-block` 组件已提供但页面未使用 | §3.1 | 保留为组件库能力，或按需接入 |
 | G6 | `lg` 侧栏、1200px 容器为历史设计，实际是 1024px 无侧栏 | §5 | 已按实现修正文档 |
 | G7 | `<html lang>` 不随语言切换、Tabs 缺少完整 ARIA | §6 | 后续补齐 |
-| G8 | 清理按钮无 `onClick`，界面为纯展示 | §3.2 | 若接入真实清理，须先实现二次确认 |
+| G8 | ~~清理按钮无 `onClick`，界面为纯展示~~ | §3.2 | **v2.0.0 已解决**：Go + Fyne 版实现真实清理（含二次确认）；Next.js 参考界面保持纯展示并已弃用 |
 
 > 本清单是「规范与实现一致」的核对表：修复任一项时，同步更新本文对应章节与本表，并在 `CHANGELOG.MD` 记录。
 
@@ -208,7 +222,8 @@ mono: ui-monospace, "JetBrains Mono", "SF Mono", Consolas, monospace
 
 ## 8. 变更同步约定
 
-- 新增 / 修改令牌：先改 `tokens.json` 与本文 §2，再改 `src/app/globals.css`，最后跑 `npm run build`。
+- 新增 / 修改令牌：先改 `tokens.json` 与本文 §2，再改 `internal/ui` 的 Fyne 主题配色（`src/app/globals.css` 为已弃用参考界面遗留），最后跑 `go build ./...`。
 - 新增组件：更新 §3.1 表格并标注是否已接入页面；补语义化 `id`。
 - 修改布局或断点：同步 §5 表格。
+- 变更页脚版本 / build 编号格式：同步 `CONTRIBUTING.md` §8.2、`OPENSPEC.md` §4.6、本文 §3.0 / §3.2、`internal/buildinfo`、`next.config.ts` 与 `scripts/build.*`。
 - 本文与 `docs/tokens.json` 的 `version` 随产品版本 bump 同步（见 `CONTRIBUTING.md` §8.2）。

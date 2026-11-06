@@ -2,9 +2,9 @@
 
 <div align="center">
 
-[![Windows](https://img.shields.io/badge/Windows-0078D6?style=flat&logo=windows&logoColor=white)](https://github.com/sutchan/RepoCleaner)
-[![Batch](https://img.shields.io/badge/Batch-.bat-blue?style=flat)](https://github.com/sutchan/RepoCleaner)
-[![Version](https://img.shields.io/badge/Version-1.2.6-green?style=flat)](https://github.com/sutchan/RepoCleaner)
+[![Platform](https://img.shields.io/badge/Platform-Win%20%7C%20macOS%20%7C%20Linux-blue?style=flat)](https://github.com/sutchan/RepoCleaner)
+[![Go](https://img.shields.io/badge/Go-1.25%2B-00ADD8?style=flat&logo=go&logoColor=white)](https://go.dev)
+[![Version](https://img.shields.io/badge/Version-2.0.1-green?style=flat)](https://github.com/sutchan/RepoCleaner)
 [![License](https://img.shields.io/badge/License-MIT-orange?style=flat)](https://github.com/sutchan/RepoCleaner)
 [![Node](https://img.shields.io/badge/Node.js-339933?style=flat&logo=node.js&logoColor=white)](https://nodejs.org)
 [![Disk](https://img.shields.io/badge/Saves-10GB%2B-red?style=flat)](https://github.com/sutchan/RepoCleaner)
@@ -49,7 +49,8 @@
 
 **特性**
 
-- 🪟 纯 Windows 批处理（`.bat`），零运行时依赖，双击即用
+- 🖥️ Go 编译的**单文件可执行程序**（Windows / macOS / Linux），零第三方运行时依赖
+- 🎨 Fyne 桌面 GUI，一键操作；也支持命令行模式
 - 🌏 中文 / English 双语菜单，可交互或命令行切换
 - ⚙️ 支持命令行参数、配置文件、交互式选择三种运行方式
 - 💾 自动保存仓库根目录配置，一次设置永久生效
@@ -61,16 +62,18 @@
 
 ### 前置要求
 
-- Windows 系统
-- 已安装 Node.js 和 npm（建议 Node 18+）
+- Windows / macOS / Linux 系统
+- 已安装 Node.js 和 npm（建议 Node 18+；功能 1 / 5 需要）
 
 ### 使用步骤
 
-1. **将 `RepoCleaner.bat` 放在项目根目录**
-2. **双击运行**
-3. **选择仓库根目录**（支持自动检测、手动输入、保存配置）
-4. **按数字菜单选择功能**
+1. **下载或构建 `repo-cleaner` 可执行文件**（源码构建：`go build -o repo-cleaner ./cmd/repo-cleaner`）
+2. **运行（Windows 双击，macOS/Linux 命令行执行）**
+3. **选择仓库根目录**（支持手动输入、目录选择、保存配置）
+4. **按功能按钮选择功能**
 5. **一次配置，所有项目永久干净**
+
+> 应用页脚展示 `vX.Y.Z · build yymmddhhmm`（10 位构建编号，如 `v2.0.1 · build 2611061234`），便于核对当前构建版本与时间；格式与注入规则见[开发规范 §8.2](./docs/CONTRIBUTING.md)。
 
 ### 🌟 推荐使用流程
 
@@ -163,9 +166,9 @@ cross-env dotenv nodemon pm2 rimraf mkdirp
 
 | 方式 | 说明 |
 |------|------|
-| 命令行参数 | `RepoCleaner.bat "D:\Projects"` |
+| 命令行参数 | `repo-cleaner "D:\Projects"` |
 | 配置文件 | 同目录下的 `config.ini` |
-| 交互选择 | 运行后手动选择目录 |
+| GUI 选择 | 运行后在窗口中选择 / 输入目录 |
 
 ### 语言切换
 
@@ -173,8 +176,8 @@ cross-env dotenv nodemon pm2 rimraf mkdirp
 
 | 方式 | 说明 |
 |------|------|
-| 交互选择 | 运行后按 `[L]` 键切换语言 |
-| 命令行参数 | `RepoCleaner.bat -lang en` |
+| 界面按钮 | GUI 顶部「中文 / English」实时切换 |
+| 命令行参数 | `repo-cleaner -lang en` |
 | 配置文件 | 在 `config.ini` 中添加 `LANG=zh` 或 `LANG=en` |
 
 ### 配置文件示例
@@ -187,7 +190,7 @@ LANG=zh
 ### 命令行参数
 
 ```bash
-RepoCleaner.bat [选项] [功能号] [目录路径]
+repo-cleaner [选项] [功能号] [目录路径]
 ```
 
 | 参数 | 说明 |
@@ -200,11 +203,11 @@ RepoCleaner.bat [选项] [功能号] [目录路径]
 **示例**
 
 ```bash
-RepoCleaner.bat                    # 交互模式
-RepoCleaner.bat E:\Github          # 指定仓库根目录
-RepoCleaner.bat 1                  # 直接启用全局 node_modules
-RepoCleaner.bat -lang en           # 使用英文
-RepoCleaner.bat 5 E:\Projects      # 为指定路径安装全局依赖
+repo-cleaner                       # GUI 模式
+repo-cleaner E:\Github             # 指定仓库根目录
+repo-cleaner 1                     # 命令行直接启用全局 node_modules
+repo-cleaner -lang en              # 使用英文
+repo-cleaner 5 E:\Projects         # 为指定路径安装全局依赖
 ```
 
 ---
@@ -228,9 +231,9 @@ RepoCleaner.bat 5 E:\Projects      # 为指定路径安装全局依赖
 复制以下标签到 **About → Topics**（每行一个，小写、连字符分隔，最多 20 个）：
 
 ```
-windows
-batch
-batchfile
+go
+cross-platform
+gui
 node-modules
 cleanup-tool
 disk-cleaner
@@ -260,7 +263,7 @@ A：是的，禁用缓存会略微影响 Next.js 热更新速度。开发完成�
 A：清理是不可逆的。删除 `node_modules` 后需重新 `npm install`；建议仅在确认不再开发或已备份时执行。
 
 **Q：默认扫描哪个目录？**
-A：默认扫描 `E:\Github\`，可通过交互菜单、命令行参数或 `config.ini` 的 `REPO_ROOT` 修改。
+A：默认扫描 Windows 下的 `E:\Github\`（macOS / Linux 为 `~/Github`），可通过 GUI、命令行参数或 `config.ini` 的 `REPO_ROOT` 修改。
 
 **Q：支持含空格的仓库路径吗？**
 A：支持。所有目录扫描均已做引号包裹处理，可正确识别含空格的路径。
@@ -302,14 +305,14 @@ A：支持。所有目录扫描均已做引号包裹处理，可正确识别含�
 
 `prototype/` 现仅保留[原型目录说明](./prototype/README.md)，不再包含代码或规范正文。
 
-### 参考界面应用
+### 参考界面应用（已弃用）
 
-根 `src/` 是与本工具对齐的 Next.js + React + TypeScript + Tailwind v4 参考界面（[OPENSPEC](./docs/OPENSPEC.md) 规范的可视化落地）：
+根 `src/` 是 v1.x 的 Next.js + React + TypeScript + Tailwind v4 参考界面（纯展示，不执行真实清理；真实清理由 Go 版实现）。自 v2.0.0 起已弃用，仅保留作历史参考：
 
 - **单一数据源** `src/lib/data/`，文案统一经 `src/lib/i18n.ts` 中/英双语切换
 - **设计令牌** `src/app/globals.css` 的 CSS 变量，与 `docs/tokens.json` 对齐
 - **语义化 id** 主要容器/区块均带 `id`（如 `repo-cleaner-app`、`main-tabs`、`repo-card-<name>`）
-- **页脚** 展示版本号与 build 编号（由 `next.config.ts` 从 `package.json` 注入）
+- **页脚** 展示 `vX.Y.Z · build yymmddhhmm`（10 位 build 编号，由 `next.config.ts` 从 `package.json` 注入）
 
 本地预览（在仓库根目录）：
 
@@ -338,7 +341,11 @@ RepoCleaner/
 │   ├── CONTRIBUTING.md                # 开发规范
 │   ├── DESIGN-SYSTEM.md               # UI 设计规范
 │   └── tokens.json                    # 设计令牌
-├── RepoCleaner.bat                    # 产品本体（Windows 批处理）
+├── go.mod / go.sum                    # Go 模块与依赖（Fyne）
+├── cmd/repo-cleaner/main.go           # 产品入口
+├── internal/                          # Go 源码：platform / engine / config / i18n / ui
+├── scripts/build.ps1 / build.sh       # 跨平台交叉编译脚本
+├── RepoCleaner.bat                    # v1.x 旧版 Windows 脚本（已弃用）
 ├── config.ini                         # 配置文件（REPO_ROOT / LANG）
 ├── lang.ini                           # 语言配置（[en]/[zh] 文案节）
 ├── README.MD / CHANGELOG.MD / LICENSE # 入口 / 变更历史 / 许可证
@@ -350,7 +357,7 @@ RepoCleaner/
 ├── eslint.config.mjs                  # ESLint 配置
 ├── public/                            # 静态资源
 ├── scripts/check-doc-links.mjs        # 文档链接校验（npm run check:docs）
-├── src/                               # 参考界面应用代码（App Router）
+├── src/                               # 已弃用参考界面应用（v1.x 遗留）
 │   ├── app/                           # layout.tsx / page.tsx / globals.css
 │   ├── components/                    # icons.tsx + ui/ 基础组件
 │   └── lib/                           # i18n.ts + data/（单一数据源）
@@ -374,6 +381,6 @@ RepoCleaner/
 
 <div align="center">
 
-RepoCleaner v1.2.6 · MIT License · [文档中心](./docs/README.md)
+RepoCleaner v2.0.1 · MIT License · [文档中心](./docs/README.md)
 
 </div>

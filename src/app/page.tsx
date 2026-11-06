@@ -1,4 +1,4 @@
-// src/app/page.tsx v1.2.5
+// src/app/page.tsx v2.0.1
 "use client";
 import { useState } from "react";
 
@@ -12,7 +12,8 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AlertCircle, CheckCircle2, FolderTree, ScanLine, ShieldCheck, Trash2 } from "@/components/icons";
 
-// 版本与 build 编号由 next.config.ts 在构建时注入，注入缺失时回退为版本号
+// 页脚是版本号与 build 编号的唯一展示位置，格式 vX.Y.Z · build yymmddhhmm（10 位）
+// 两者由 next.config.ts 在构建时注入，注入缺失时回退为仅显示版本号
 const APP_VERSION = process.env.NEXT_PUBLIC_APP_VERSION ?? "0.0.0";
 const BUILD_ID = process.env.NEXT_PUBLIC_BUILD_ID ?? "";
 

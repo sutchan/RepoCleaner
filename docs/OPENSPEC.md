@@ -1,4 +1,4 @@
-# RepoCleaner 开放规格说明书 (OpenSpec) v1.2.6
+# RepoCleaner 开放规格说明书 (OpenSpec) v2.0.1
 
 > **本文定位**：产品功能规格，定义「做什么」——7 项功能的行为契约、交互方式、环境与兼容性。
 > 开发规范（编码 / 提交 / 分支 / 审查）见 [CONTRIBUTING.md](./CONTRIBUTING.md)；UI 设计规范见 [DESIGN-SYSTEM.md](./DESIGN-SYSTEM.md)；变更历史见 [CHANGELOG.MD](../CHANGELOG.MD)；文档导航见 [docs/README.md](./README.md)。
@@ -11,10 +11,11 @@
 | 项 | 内容 |
 |----|------|
 | 项目名称 | RepoCleaner - 项目清洁助手 |
-| 产品本体 | `RepoCleaner.bat`，Windows 批处理脚本（cmd），无第三方运行时依赖 |
-| 参考界面应用 | 仓库根 `src/` 下的 Next.js 16 应用，是本文功能规格的**可视化参考**，不执行实际清理 |
+| 产品本体 | `repo-cleaner`（Go 编译的跨平台可执行文件，Windows / macOS / Linux 单二进制，**无第三方运行时依赖**）；`RepoCleaner.bat` 为 Windows 旧版兼容脚本（**已弃用**） |
+| 参考界面应用 | 仓库根 `src/` 的 Next.js 应用为 **v1.x 遗留、已弃用的参考界面**（纯展示，不执行真实清理）；v2.0.0 起实际 UI 为 **Go + Fyne 桌面 GUI** |
 | 核心功能 | 一键管理仓库根目录下的多个前端项目：清理冗余缓存、统一管理全局 `node_modules`、节省磁盘空间 |
 | 目标用户 | 前端开发者、全栈开发者、需要管理多个 Node.js 项目的团队 |
+| 支持平台 | Windows / macOS / Linux（单一代码库，交叉编译为各平台单二进制） |
 | 支持项目类型 | Next.js、React、Vue、Vite、常规 Node.js 项目 |
 | 许可证 | MIT（见 [LICENSE](../LICENSE)） |
 
@@ -24,44 +25,36 @@
 
 ## 2. 架构与模块化
 
-### 2.1 批处理脚本模块划分
+### 2.1 应用分层架构（Go）
 
-`RepoCleaner.bat` 按标签（label）分节，各节职责单一：
+`repo-cleaner` 采用分层设计，所有操作系统差异收口到 `internal/platform`，业务与界面各自独立：
 
-| 标签 / 区块 | 职责 |
-|-------------|------|
-| 配置加载（文件开头） | 读取 `config.ini` / `lang.ini`，确定语言 |
-| `:LOAD_LANGUAGE` | 定义中英文全部文案变量，按 `CURRENT_LANG` 覆盖英文值 |
-| `:PARSE_ARGS` | 解析 `-lang` / `-h` / `--help` / 数字 / 路径参数 |
-| `:SHOW_HELP` | 输出帮助信息 |
-| `:RUN_ARG_FUNCTION` | 统一分发数字参数（`ARG_MODE`），并接收可选路径 |
-| `:CHECK_CONFIG` / `:LANG_MENU` / `:INTERACTIVE_INPUT` | 语言选择、目录选择、配置保存 |
-| `:ROOT_SET` / `:MENU` | 规范化根目录、显示主菜单并处理输入 |
-| `:GLOBAL_NODE` ～ `:CLEAN_VITE_CACHE` | 功能 1 ～ 功能 7 实现 |
+| 层 / 包 | 职责 |
+|---------|------|
+| `cmd/repo-cleaner/main.go` | 程序入口：解析参数、目录解析、启动 Fyne GUI |
+| `internal/platform` | **操作系统差异抽象**（关键）：目录扫描、删除、隐藏/系统/只读属性、环境变量持久化、默认 `REPO_ROOT`，按 `build tag` 分 `platform_windows.go` / `platform_unix.go` 实现 |
+| `internal/engine` | 功能 1 ～ 功能 7 的**平台无关**业务逻辑（扫描、写 `.npmrc`、清缓存），只调用 `platform` 接口 |
+| `internal/config` | `config.ini` 读写（去重键、保留未知行）、默认 `REPO_ROOT` / `LANG` |
+| `internal/i18n` | 中文 / 英文文案字典（唯一来源） |
+| `internal/ui` | Fyne 桌面 GUI：主菜单、语言切换、二次确认、进度与结果展示 |
 
-> 规格文档不再标注源码行号范围（行号随修改漂移，属易失真信息）；定位请直接搜索标签名。
+> 新增平台只需在 `internal/platform` 增加对应 `build tag` 实现，`engine` 与 `ui` 零改动。
 
-### 2.2 关键重构决策
+### 2.2 关键设计决策
 
 | 决策 | 原因 | 当前实现 |
 |------|------|----------|
-| 数字参数统一由 `ARG_MODE` + `:RUN_ARG_FUNCTION` 分发 | 原 `ARG_RUN_1`～`ARG_RUN_7` 逻辑重复 | 单一标签 + 7 行条件跳转 |
-| 每个功能自行显示成功消息 | 通用 `SHOW_SUCCESS` 会显示错误文案 | 各功能末尾独立输出 `!Fn_SUCCESS!` |
-| 路径输入使用 `PATH_INPUT` 变量 | 原硬编码英文提示无法实现国际化 | 中英文双语 |
-| 目录扫描统一引号包裹 | 支持含空格路径 | 所有 `for /d %%d in ("!REPO_ROOT!\*")` 均带引号 |
-| 应用代码提升到仓库根 | `prototype/` 只保留设计规范 | 根 `src/`，见 `CONTRIBUTING.md` §3 |
+| 平台差异全部收口到 `internal/platform` | 避免业务 / UI 散落 `runtime.GOOS` 分支 | 接口 + 按 `build tag` 的 Windows / Unix 实现 |
+| 业务与平台解耦 | 跨平台复用同一份功能逻辑 | `engine` 只依赖 `platform` 接口 |
+| 语言文案集中在 `internal/i18n` | 单一数据源，避免散落硬编码 | zh / en 字典，GUI 与日志统一引用 |
+| 危险操作二次确认 | 删除不可逆，防止误删 | 功能 1 需 `Y` 确认；功能 6 / 7 弹窗确认 |
+| UI 选 Fyne（纯 Go） | 单文件零依赖、跨平台一致 | 桌面窗口，复用既有设计令牌配色 |
 
-### 2.3 参考界面应用模块划分
+### 2.3 已弃用的参考界面应用（Next.js，v1.x 遗留）
 
-| 路径 | 职责 |
-|------|------|
-| `src/app/` | 路由与全局样式（`layout.tsx` / `page.tsx` / `globals.css`） |
-| `src/components/icons.tsx` | 内联 SVG 图标，零外部图标依赖 |
-| `src/components/ui/` | 无状态基础组件（alert / badge / button / card / code-block / table / tabs） |
-| `src/lib/i18n.ts` | 唯一 UI 文案字典（zh / en） |
-| `src/lib/data/` | 单一数据源（features / project-types / steps / repos），经 `@/lib/data` 导出 |
+仓库根 `src/` 下的 Next.js 应用是 **v1.x 的参考界面**（纯展示 dashboard，不执行真实清理），自 v2.0.0 起**已弃用**，仅保留作历史参考，不再随产品演进；实际 UI 为 Go + Fyne（见 §2.1）。
 
-> `src/lib/data/repos.ts` 中的扫描结果与容量数字是**演示数据（mock）**，用于展示界面结构，非真实磁盘扫描结果，不得作为事实引用。
+> 仍可 `npm install && npm run dev` 启动作 Web 预览，但属遗留路径。`src/lib/data/repos.ts` 中的扫描结果与容量数字是**演示数据（mock）**，不得作为事实引用。
 
 ---
 
@@ -79,7 +72,8 @@
 | 功能 6 | 清理所有项目缓存 | `:CLEAN_ALL_CACHE` |
 | 功能 7 | 清理 Vite/构建缓存 | `:CLEAN_VITE_CACHE` |
 
-> 菜单上显示的短文案以 `lang.ini` 的 `MENU_OPTIONn` / `Fn_TITLE` 为准；文档只使用上表名称。
+> 菜单上显示的短文案以 `internal/i18n` 文案字典为准；文档只使用上表名称。
+> v2.0.0 起各功能由 `internal/engine` 的 `EnableGlobalNodeModules` / `ResetNodeConfig` / `CleanNextCache` / `RestoreNextCache` / `InstallGlobalDeps` / `CleanAllCaches` / `CleanViteCache` 实现；上表「批处理标签」列仅为 v1.x 历史对照。
 
 所有功能的作用域统一为：**遍历 `REPO_ROOT` 的直接子目录**（`for /d %%d in ("!REPO_ROOT!\*")`），不递归进入更深层级。
 
@@ -100,7 +94,7 @@
   global=true
   prefer-global=true
   ```
-- **已知限制**：`tmp=` 行的值**未加引号**（见 §7.3）。若 `%TEMP%` 含空格，npm 解析该配置可能异常。
+- **已知限制**：`tmp=` 行的值**已加引号**（v2.0.0 修复 L1），兼容含空格的 `%TEMP%` 路径。
 - **预期结果**：项目共享全局依赖；此后仍需先运行功能 5 安装依赖，否则项目会因找不到模块而报错。
 
 ### 3.2 功能 2：重置 Node 配置
@@ -114,16 +108,16 @@
   1. 遍历 `REPO_ROOT` 直接子目录，识别含 `next.config.js` **或** `next.config.ts` 的 Next.js 项目。
   2. `rd /s /q` 删除现有的 `.next` 缓存目录。
   3. 写入一个同名的 `.next` **文件**，阻止 Next.js 再创建 `.next` 目录。
-  4. `attrib +h +s +r` 设置隐藏(H) + 系统(S) + 只读(R) 属性。
+  4. 设置隐藏属性（Windows：`attrib +h +s +r`；macOS：`chflags hidden`；Linux：点前缀 + 只读位），使该文件在文件管理器中默认不可见。
 - **预期结果**：节省磁盘空间，但会影响 Next.js 热更新速度。
 
 ### 3.4 功能 4：恢复 Next.js 缓存
 
 - **操作步骤**：
   1. 与功能 3 相同的项目识别规则。
-  2. `attrib -h -s -r` **先清除** `.next` 文件的隐藏/系统/只读属性。
-  3. `del /f /q` 删除该 `.next` 文件。
-- **实现要点**：`del` 的多个 `/a:` 参数只有最后一个生效，且默认不删除隐藏/系统属性文件；因此必须先 `attrib` 清除属性，否则恢复会静默失败（v1.2.3 修复）。
+  2. **先清除**隐藏/系统/只读属性（Windows：`attrib -h -s -r`；macOS：`chflags nohidden`；Linux：移除只读位）。
+  3. 删除该 `.next` 文件。
+- **实现要点**：必须先清除属性再删除，否则删除会静默失败（沿用 v1.2.3 修复的约束；v2.0.0 在 `internal/platform` 中按平台实现）。
 - **预期结果**：Next.js 下次构建时重新生成 `.next` 目录，恢复正常编译与热更新。
 
 ### 3.5 功能 5：安装常用全局依赖
@@ -166,7 +160,7 @@
 | 项 | 内容 |
 |----|------|
 | 支持语言 | 中文（`zh`）、英文（`en`） |
-| 切换方式 | 菜单 `[L]`；命令行 `-lang en\|zh`；`config.ini` 的 `LANG=` |
+| 切换方式 | GUI 顶部语言按钮；命令行 `-lang en\|zh`；`config.ini` 的 `LANG=` |
 | 默认语言 | `zh` |
 | 文案来源 | 脚本内 `:LOAD_LANGUAGE` 定义的变量；`lang.ini` 的 `[en]/[zh]` 节为文档参考，脚本不从中读取文案 |
 
@@ -176,19 +170,21 @@
 
 优先级：命令行路径参数 → `config.ini` 的 `REPO_ROOT` → 交互式选择。
 
-交互菜单 4 个选项：使用当前目录 (`%CD%`)、使用上级目录 (`%~dp0..\`)、手动输入完整路径、使用默认目录 (`E:\Github`)。输入路径不存在时报错并重新输入；选择保存时以「读旧 → 过滤 → 临时文件 → `move /y`」方式更新 `config.ini`。
+GUI 提供 3 种目录来源：使用当前目录、手动输入完整路径（带目录选择按钮）、使用默认目录（Windows：`E:\Github`；macOS / Linux：`~/Github`）。输入路径不存在时报错并允许重新输入；选择保存时以「读旧 → 过滤目标键 → 补写 → 回写」方式更新 `config.ini`（保留未知行与顺序）。
 
 ### 4.3 命令行参数
 
 | 参数 | 说明 | 示例 |
 |------|------|------|
-| `-lang en\|zh` | 设置语言并写入 `config.ini` | `RepoCleaner.bat -lang en` |
-| `-h` / `--help` | 显示帮助信息 | `RepoCleaner.bat -h` |
-| `1`-`7` | 直接运行对应功能 | `RepoCleaner.bat 1` |
-| 路径 | 指定仓库根目录（支持含空格路径，需引号包裹） | `RepoCleaner.bat "D:\My Projects"` |
-| 数字 + 路径 | 为指定目录直接运行功能 | `RepoCleaner.bat 5 E:\Projects` |
+| `-lang en\|zh` | 设置语言并写入 `config.ini` | `repo-cleaner -lang en` |
+| `-h` / `--help` | 显示帮助信息 | `repo-cleaner -h` |
+| `1`-`7` | 直接运行对应功能（命令行模式，跳过 GUI） | `repo-cleaner 1` |
+| 路径 | 指定仓库根目录（支持含空格路径，需引号包裹） | `repo-cleaner "D:\My Projects"` |
+| 数字 + 路径 | 为指定目录直接运行功能 | `repo-cleaner 5 E:\Projects` |
 
 ### 4.4 主菜单（中文默认）
+
+> v2.0.0 起主菜单为 **Fyne 桌面窗口**（按钮列表，非控制台文本）；下方文本图为 v1.x 菜单对照示意，功能编号与文案保持一致。
 
 ```
 ======================================================================
@@ -215,9 +211,17 @@
 
 ### 4.5 错误处理
 
-- 路径不存在：显示 `PATH_ERROR` 并 `pause` 后返回目录选择。
-- 危险操作：功能 1 需输入 `Y` 二次确认；功能 6 / 7 显示警告并 `pause`。
-- 每个功能完成后显示自己的成功消息与 `pause`。
+- 路径不存在：GUI 弹窗提示（对齐 `PATH_ERROR` 文案），关闭后返回目录选择。
+- 危险操作：功能 1 需 `Y` 二次确认（GUI 确认对话框）；功能 6 / 7 显示警告并弹窗确认。
+- 每个功能完成后在结果区显示该功能的成功消息；命令行模式等同文本输出。
+
+### 4.6 应用页脚与构建标识
+
+- 应用页面的**页脚区**是版本号与 build 编号的唯一展示位置；页眉 / 顶部栏不得出现版本号。
+- 展示格式 `vX.Y.Z · build yymmddhhmm`，示例 `v1.2.3 · build 2611051259`；build 编号为 10 位（2 位年份 + 月日时分，24 小时制）。
+- Go GUI 页脚文本由 `internal/buildinfo.Footer()` 生成；`scripts/build.ps1` / `scripts/build.sh` 在构建期通过 `-ldflags -X` 注入 `BuildID`，未注入时由 `vcs.time` 推导，仍缺失则仅显示版本号。
+- 已弃用 Web 参考界面由 `next.config.ts` 注入 `NEXT_PUBLIC_APP_VERSION` / `NEXT_PUBLIC_BUILD_ID`，在 `<footer id="app-footer">` 展示；注入缺失时回退仅显示版本号。
+- 版本权威源与同步清单见 [`CONTRIBUTING.md` §8.2](./CONTRIBUTING.md)，变更历史见 [CHANGELOG.MD](../CHANGELOG.MD)。
 
 ---
 
@@ -227,10 +231,11 @@
 
 | 项 | 要求 |
 |----|------|
-| 操作系统 | Windows（批处理脚本）；参考界面应用可跨平台开发 |
-| 运行环境 | Windows 命令提示符 `cmd.exe` |
-| 依赖软件 | Node.js ≥ 18 与 npm（功能 1 / 5 需要） |
-| 参考界面应用 | Node.js ≥ 18、npm、Next.js 16（见 `package.json`） |
+| 操作系统 | Windows / macOS / Linux（单一代码库，交叉编译为各平台单二进制） |
+| 运行环境 | 编译后的 `repo-cleaner` 可执行文件，**无第三方运行时依赖** |
+| 构建环境 | Go ≥ 1.25（`go` 工具链）；交叉编译命令见 `CONTRIBUTING.md` §2 |
+| 依赖软件 | Node.js ≥ 18 与 npm（功能 1 / 5 需要，运行时检测） |
+| 已弃用参考界面 | Node.js ≥ 18、npm、Next.js 16（见 `package.json`，仅遗留 Web 预览） |
 
 ### 5.2 文件结构
 
@@ -253,9 +258,13 @@ RepoCleaner/
 │   ├── components/                    # icons.tsx + ui/
 │   └── lib/                           # i18n.ts / utils.ts / data/
 ├── prototype/README.md                # 原型目录说明（无代码、无规范正文）
-├── RepoCleaner.bat                    # 产品本体
+├── go.mod / go.sum                    # Go 模块定义与依赖锁定（Fyne）
+├── cmd/repo-cleaner/main.go           # 程序入口
+├── internal/                          # Go 源码：platform / engine / config / i18n / ui
+├── scripts/build.ps1 / build.sh       # 跨平台交叉编译脚本
+├── RepoCleaner.bat                    # v1.x 旧版 Windows 脚本（已弃用，保留兼容）
 ├── config.ini                         # REPO_ROOT / LANG
-├── lang.ini                           # [en] / [zh] 文案参考节
+├── lang.ini                           # [en] / [zh] 文案参考节（历史保留）
 ├── README.MD / CHANGELOG.MD / LICENSE # 入口、变更历史、许可证
 ├── RepoCleaner.code-workspace
 ├── package.json / package-lock.json / tsconfig.json / next.config.ts
@@ -272,13 +281,13 @@ REPO_ROOT=E:\Github
 LANG=zh
 ```
 
-**`lang.ini`**：首部 `LANG=` 记录当前语言选择；`[en]` / `[zh]` 两节保存中英文文案参考。脚本**不从该节读取文案**（文案在 `:LOAD_LANGUAGE` 中定义），此文件供文档与后续外部化使用。`-lang` 参数不得覆盖本文件。
+**`lang.ini`**：首部 `LANG=` 记录当前语言选择；`[en]` / `[zh]` 两节保存中英文文案参考。Go 程序**不从该节读取文案**（文案在 `internal/i18n` 中定义），此文件为 v1.x 历史保留。`-lang` 参数不得覆盖本文件。
 
 ### 5.4 编码要求
 
 - 所有文本文件：**UTF-8**。
-- 控制台：`chcp 65001` 切换到 UTF-8 代码页（脚本第 3 行）。
-- 缩进：批处理 4 空格；TS/JS/CSS/JSON 2 空格。详见 `CONTRIBUTING.md` §4。
+- Go：`gofmt` 格式化（Tab 缩进）；文件头注释 `// <相对路径> vX.Y.Z`。
+- 缩进：Go 用 `gofmt` 默认（Tab）；TS/JS/CSS/JSON 2 空格；`.bat` 4 空格。详见 `CONTRIBUTING.md` §4。
 
 ### 5.5 代码统计（历史数据，仅供追溯）
 
@@ -298,7 +307,7 @@ LANG=zh
 
 | 变量名 | 说明 | 来源 |
 |--------|------|------|
-| `NODE_PATH` | 全局模块路径 | 功能 1 通过 `setx` 写入用户环境；功能 2 删除 |
+| `NODE_PATH` | 全局模块路径 | 功能 1 写入用户环境（Windows：`setx`；macOS / Linux：写 shell profile）；功能 2 删除 |
 | `TEMP` | 临时目录 | 系统环境变量，写入 `.npmrc` 的 `tmp=` |
 | `REPO_ROOT` / `LANG` | 脚本内部变量 | 命令行 / `config.ini` / 交互输入 |
 
@@ -307,7 +316,7 @@ LANG=zh
 | 文件 | 位置 | 用途 |
 |------|------|------|
 | `.npmrc` | 各项目根目录 | 配置 npm 使用全局模块（功能 1 写、功能 2 删） |
-| `.next` | 各 Next.js 项目根目录 | 功能 3 创建为带 `+h+s+r` 的**文件**以阻止缓存；功能 4 清除属性后删除 |
+| `.next` | 各 Next.js 项目根目录 | 功能 3 创建为带隐藏属性的**文件**以阻止缓存；功能 4 清除属性后删除（属性操作按平台实现） |
 | `config.ini` | 脚本同目录 | 保存 `REPO_ROOT` / `LANG` |
 
 ---
@@ -322,14 +331,14 @@ LANG=zh
 
 ### 7.2 文件属性
 
-- 功能 3：`attrib +h +s +r` 设置隐藏 + 系统 + 只读。
-- 功能 4：**必须**先 `attrib -h -s -r` 清除全部属性，再 `del /f /q` 删除。
+- 功能 3：设置隐藏属性（Windows：`attrib +h +s +r`；macOS：`chflags hidden`；Linux：点前缀 + 只读位）。
+- 功能 4：**必须先清除全部隐藏/系统/只读属性**再删除（Windows：`attrib -h -s -r` 后删除；macOS：`chflags nohidden` 后删除；Linux：移除只读位后删除）。
 
 ### 7.3 已知限制
 
 | 编号 | 限制 | 影响 |
 |------|------|------|
-| L1 | `.npmrc` 的 `tmp=` 值未加引号 | `%TEMP%` 含空格时 npm 可能解析异常 |
+| L1 | ~~`.npmrc` 的 `tmp=` 值未加引号~~ | **v2.0.0 已修复**：`tmp=` 值加引号，兼容含空格的 `TEMP` 路径 |
 | L2 | 功能 1 设置 `NODE_PATH` 后需重开终端才对新进程完全生效 | 当前会话已同步设置，新终端需重开 |
 | L3 | 目录扫描仅覆盖 `REPO_ROOT` 的直接子目录，不递归 | monorepo 深层项目不会被处理 |
 | L4 | 功能 5 不检查 `npm install -g` 的退出码 | 单组安装失败仍显示成功消息 |
@@ -354,25 +363,25 @@ LANG=zh
 在仓库根目录依次执行，四项全部通过方可合并：
 
 ```bash
-npm run type-check     # tsc --noEmit
-npm run lint           # eslint
+go vet ./...           # 静态检查
+go test ./...          # 单元测试（engine / config / i18n 纯逻辑 + 临时目录集成）
+go build ./...         # 编译全部包
 npm run check:docs     # 校验所有 Markdown 相对链接（含大小写）
-npm run build          # next build（含类型检查与静态预渲染）
 ```
 
-预期：`type-check` / `lint` 无输出错误，`check:docs` 报告失效链接 0 个，`build` 输出 `✓ Compiled successfully` 并完成静态页面生成。
+预期：`go vet` 无告警、`go test` 全部通过、`go build` 编译成功、`check:docs` 报告失效链接 0 个。
 
-> `RepoCleaner.bat` 自身无自动化测试；门禁中的 `check:docs` 只校验文档链接，不覆盖批处理行为。批处理验证见 §9.2。
+> 删除类行为通过临时目录集成测试覆盖（`internal/engine` / `internal/platform` 的 `*_test.go`）；`RepoCleaner.bat` 为已弃用旧版，不再纳入自动门禁。
 
-### 9.2 批处理脚本（手动，仅 Windows）
+### 9.2 GUI 手动冒烟（跨平台）
 
-`RepoCleaner.bat` **没有自动化测试**，改动后必须在隔离的临时目录做冒烟验证。完整清单见 [`CONTRIBUTING.md` §9.3](./CONTRIBUTING.md)（帮助信息、`-lang` 写入、语言切换、功能 1 的 Y/非 Y 分支、功能 3 → 4 的 `.next` 文件生成与删除、含空格路径、路径不存在重试）。
+`repo-cleaner` 的 GUI 交互无自动化测试，发版前须在**隔离的临时目录**（放 1～2 个含 `package.json` 的假项目）手动验证：帮助信息、`-lang` 写入、语言切换、功能 1 的确认/取消分支、功能 3 → 4 的 `.next` 文件生成与删除、含空格路径、路径不存在重试。完整清单见 [`CONTRIBUTING.md` §9.3](./CONTRIBUTING.md)。
 
 > 严禁在真实仓库根目录执行删除类验证。
 
 ### 9.3 覆盖范围说明
 
-- 当前仓库**未配置单元测试框架**，也没有 `npm test` 脚本；上述门禁是现有的全部自动检查。
+- Go 模块已配置 `go test ./...`，覆盖 `internal/engine`、`internal/config`、`internal/i18n` 的纯逻辑与 `internal/platform` 的临时目录集成测试；这是当前的全部自动检查。
 - 历史版本文档中的「功能 1～7 ✅ 通过」是当时的手工验证结论，不作为当前自动化覆盖证据。
 
 ---

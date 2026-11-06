@@ -1,4 +1,4 @@
-# RepoCleaner 开发规范与贡献指南 v1.2.6
+# RepoCleaner 开发规范与贡献指南 v2.0.1
 
 > 本文是 RepoCleaner 仓库的**唯一开发规范来源**，规定「如何改代码、如何写文档、如何提交与评审」。
 > 本文存放于 `docs/`；所有贡献者（含 AI 协作会话）在动手前必须阅读本文。
@@ -48,24 +48,27 @@
 
 | 项 | 要求 |
 |----|------|
-| 操作系统 | Windows（运行 `RepoCleaner.bat`）；参考界面应用可跨平台开发 |
-| Node.js | ≥ 18（建议 LTS）；npm 随 Node 安装 |
-| 包管理器 | **npm**（仓库提交 `package-lock.json`，不使用 yarn / pnpm 锁文件） |
-| 框架 | Next.js 16（App Router）+ React 19 + TypeScript 5（strict）+ Tailwind CSS v4 |
+| 操作系统 | 产品支持 Windows / macOS / Linux；本仓库在三个平台上均可开发 |
+| Go | **≥ 1.25**（产品本体 `repo-cleaner`，依赖由 `go.mod` 管理） |
+| GUI 框架 | Fyne v2（唯一 UI 依赖，纯 Go、编译为单二进制） |
+| Node.js | ≥ 18（仅**已弃用**的 `src/` 参考 Web 界面需要） |
 
 在**仓库根目录**执行：
 
 ```bash
-npm install            # 安装依赖（改动 package.json 后同步更新 package-lock.json）
-npm run dev            # 启动开发服务器
-npm run type-check     # TypeScript 类型检查（tsc --noEmit）
-npm run lint           # ESLint 检查
-npm run check:docs     # 校验所有 Markdown 相对链接（含文件名大小写）
-npm run build          # 生产构建（含类型检查 + 静态预渲染）
-npm run start          # 启动生产构建产物（需先 build）
+go build ./...                       # 编译全部包
+go test ./...                        # 运行全部单元 / 集成测试
+go vet ./...                         # 静态检查
+gofmt -l .                           # 列出未格式化文件（应为空）
+go run ./cmd/repo-cleaner            # 本地运行 GUI
+go run ./cmd/repo-cleaner -h         # 命令行帮助
+go build -tags nogui ./...           # 无 C 工具链环境的纯 Go 校验构建
+./scripts/build.ps1                  # 交叉编译全部平台（Windows / PowerShell）
+./scripts/build.sh                   # 交叉编译全部平台（macOS / Linux）
+npm run check:docs                   # 校验所有 Markdown 相对链接（含大小写）
 ```
 
-> 仓库**没有** `npm test` 脚本，不要臆造测试命令。当前质量门禁是 `type-check` + `lint` + `check:docs` + `build` 四项，外加 §9.3 的批处理手动冒烟清单。
+> `npm run dev` / `type-check` / `lint` / `build` 仅服务于已弃用的 `src/` 参考 Web 界面，**不属于产品门禁**。产品质量门禁为 `go vet` + `go test` + `go build` + `check:docs`，外加 §9.3 的 GUI 手动冒烟清单。
 
 ---
 
@@ -93,9 +96,14 @@ RepoCleaner/
 │   ├── DESIGN-SYSTEM.md         # UI 设计规范
 │   └── tokens.json              # 设计令牌
 ├── public/                      # 参考界面应用静态资源（SVG）
-├── scripts/                     # 工程校验脚本
-│   └── check-doc-links.mjs      # 文档相对链接校验（npm run check:docs）
-├── src/                         # 参考界面应用代码（Next.js App Router）
+├── scripts/                     # 工程脚本
+│   ├── check-doc-links.mjs      # 文档相对链接校验（npm run check:docs）
+│   ├── build.ps1                # Go 交叉编译（Windows / PowerShell）
+│   └── build.sh                 # Go 交叉编译（macOS / Linux）
+├── go.mod / go.sum              # Go 模块定义与依赖锁定（Fyne）
+├── cmd/repo-cleaner/main.go     # 产品本体入口（参数解析 / OS 分发 / 启动 GUI）
+├── internal/                    # Go 源码：platform / engine / config / i18n / ui
+├── src/                         # 已弃用参考界面应用（Next.js App Router，v1.x 遗留）
 │   ├── app/                     # 路由与全局样式：layout.tsx / page.tsx / globals.css / favicon.ico
 │   ├── components/
 │   │   ├── icons.tsx            # 内联 SVG 图标（零外部图标依赖）
@@ -106,7 +114,7 @@ RepoCleaner/
 │       └── data/                # 单一数据源：features/project-types/steps/repos + index.ts barrel
 ├── prototype/                   # 原型目录，仅保留 README.md 说明，无代码、无规范正文
 │   └── README.md
-├── RepoCleaner.bat              # 产品本体：Windows 批处理脚本
+├── RepoCleaner.bat              # v1.x 旧版 Windows 脚本（已弃用，保留兼容）
 ├── config.ini                   # 运行配置：REPO_ROOT / LANG
 ├── lang.ini                     # 语言文案参考节 [en] / [zh]
 ├── README.MD / CHANGELOG.MD / LICENSE     # 入口、变更历史、许可证
@@ -118,10 +126,10 @@ RepoCleaner/
 
 ### 3.2 组织规则
 
-1. **所有规范 / 规格文档放 `docs/`**；根只保留入口 `README.MD`、`CHANGELOG.MD`、`LICENSE`。**应用代码一律放根 `src/`**；`prototype/` 只放原型说明，禁止再放回可运行代码或规范正文。
-2. **单一数据源**：业务展示数据只放 `src/lib/data/`，统一经 `@/lib/data` 导出；UI 文案只放 `src/lib/i18n.ts`。禁止在组件内硬编码展示数据或文案。
-3. **路径别名**：统一用 `@/` 指向 `./src/*`（见 `tsconfig.json` `paths`），禁止跨层使用长串 `../../../`。
-4. **新增模块按职责落位**：路由 → `src/app/`；可复用 UI → `src/components/ui/`；图标 → `src/components/icons.tsx`；纯函数 → `src/lib/`；数据 → `src/lib/data/`；规范 → `docs/`；工程校验脚本 → `scripts/`。
+1. **所有规范 / 规格文档放 `docs/`**；根只保留入口 `README.MD`、`CHANGELOG.MD`、`LICENSE`。**产品代码一律放根 `cmd/` 与 `internal/`（Go）**；`src/` 为已弃用参考界面，禁止新增功能代码；`prototype/` 只放原型说明，禁止再放回可运行代码或规范正文。
+2. **单一数据源**：产品 UI 文案只放 `internal/i18n`；`engine` 的业务常量（清理目录清单、依赖包列表、`.npmrc` 模板）集中在其包内定义，禁止散落在 `ui` 层。已弃用的 `src/lib/` 不再新增数据。
+3. **Go 依赖**：只经 `go.mod` 管理（`go get` / `go mod tidy`），提交 `go.sum`；禁止 vendor 目录与多套依赖清单并存。UI 依赖仅限 `fyne.io/fyne/v2`，不得再引入第二套 GUI 框架。
+4. **新增模块按职责落位**：入口 → `cmd/repo-cleaner/`；OS 差异 → `internal/platform/`；业务功能 → `internal/engine/`；配置读写 → `internal/config/`；文案 → `internal/i18n/`；界面 → `internal/ui/`；规范 → `docs/`；工程脚本 → `scripts/`。
 5. **文件行数**：所有源代码文件（`.ts/.tsx/.js/.jsx/.vue/.py/.dart/.go/.java` 等）单文件 **≤ 200 行**。超出时按职责拆分为更小模块（组件拆子组件、逻辑抽纯函数/常量/类型），且**不得改变对外导出契约**。
    - **文档文件（`.md/.markdown/.mdx/.rst`）不拆分**，即使超过 200 行也保持单文件完整连贯。
    - `.bat` 为批处理脚本，不纳入源码 200 行规则，但仍须按标签分节、保持可读。
@@ -133,7 +141,7 @@ RepoCleaner/
 ### 4.1 通用
 
 - **编码**：所有文本文件使用 **UTF-8**；`RepoCleaner.bat` 通过 `chcp 65001` 将控制台切到 UTF-8（不写「GBK/UTF-8」这类模棱两可的表述）。
-- **缩进**：TypeScript / JS / CSS / JSON 用 2 空格；`RepoCleaner.bat` 用 4 空格；禁止 Tab。
+- **缩进**：Go 用 `gofmt` 默认（Tab）；TypeScript / JS / CSS / JSON 用 2 空格；`RepoCleaner.bat` 用 4 空格。
 - **引号**：TS/JS 统一双引号；JSX 属性用双引号；CSS 用双引号（字体名等）。
 - **分号**：TS/JS 语句必须写分号。
 - **注释**：关键逻辑、非直觉判断（尤其批处理的延迟展开与安全边界）必须写**中文注释**；禁止用注释复述显而易见的代码。
@@ -143,7 +151,7 @@ RepoCleaner/
   ```
   头注释中的版本号是**该文件自身的版本**，随「本次实际修改该文件」更新；**未改动的文件不得批量刷新头注释**，因此仓库中不同文件的头注释版本并存属正常现象。
 
-### 4.2 TypeScript / React
+### 4.2 TypeScript / React（已弃用 `src/` 参考界面，规则仅适用遗留代码）
 
 - 启用 `strict`，**禁止 `any`**；需要宽松类型时用 `unknown` + 类型收窄。
 - 组件用**函数组件 + 命名导出**；仅页面/布局用 `export default`。
@@ -170,14 +178,23 @@ RepoCleaner/
 - 禁止 `div1`、`box`、`a` 等无意义命名；主要容器 `id` 全仓库唯一。
 - 新增页面/组件时同步补齐；重构超 200 行文件时一并检查。
 
-### 4.5 Windows 批处理（`RepoCleaner.bat`）
+### 4.5 Windows 批处理（`RepoCleaner.bat`，已弃用）
 
 - 保持 `setlocal enabledelayedexpansion`；块内（`( )` 中）读取块内赋值的变量必须用 `!VAR!` 而非 `%VAR%`。
 - 所有路径变量**必须加双引号**，支持含空格路径。
 - 删除目标只能来自 `for /d` 枚举出的目录变量，禁止把用户输入直接拼接进 `rd` / `del`。
 - 功能 3 生成的 `.next` 文件带 `+h +s +r` 属性；功能 4 必须先 `attrib -h -s -r` 再 `del /f /q`（`del` 的多 `/a:` 只有末项生效，且默认不删隐藏/系统文件）。
 - 危险操作（删除 `node_modules`）前必须有 `Y` 二次确认。
-- 写 `config.ini` 用「读旧文件 → 过滤目标键 → 补写 → 临时文件 → `move /y`」方式，**禁止整文件覆盖 `lang.ini`**（会清空 `[en]/[zh]` 文案节）。
+- 写 `config.ini` 用「读旧文件 → 过滤目标键 → 补写 → 回写」方式，**禁止整文件覆盖 `lang.ini`**（会清空 `[en]/[zh]` 文案节）。
+
+### 4.6 Go（`repo-cleaner` 产品本体）
+
+- 一律通过 `gofmt` 格式化、`go vet ./...` 无告警；导出符号必须有中文 doc 注释（`// FuncName ...`）。
+- 错误处理：必须显式处理 `error`，禁止 `_ =` 吞错误；包装错误用 `fmt.Errorf("...: %w", err)`。
+- 路径一律使用 `path/filepath`，禁止手工拼接 `/` 或 `\`；判定目录用 `os.Stat` + `IsDir`，禁止只靠「路径存在即目录」。
+- 删除类操作只能针对 `platform` 枚举出的路径，禁止把用户输入直接拼接后删除。
+- `ui` 层禁止直接调用 `os.Remove` 等系统调用，必须经 `engine` → `platform`。
+- 单文件 ≤ 200 行（§3.2 规则 5 对 `.go` 同样生效）；超出按职责拆分，不得改变对外导出契约。
 
 ---
 
@@ -185,6 +202,7 @@ RepoCleaner/
 
 | 类别 | 规范 | 示例 |
 |------|------|------|
+| Go 源文件 / 包 | `snake_case.go`；包名小写单词；平台实现用 `build tag` 后缀 | `platform_windows.go`、`engine.go` |
 | React 组件文件 | `PascalCase.tsx`（本仓库 `src/components/ui/` 沿用既有小写文件名，新增文件优先 PascalCase） | `CodeBlock.tsx` |
 | 工具 / hooks / 普通模块 | `camelCase.ts` | `useLang.ts`、`utils.ts` |
 | 数据模块 | 语义复数或主题名，`kebab-case` 可用 | `features.ts`、`project-types.ts` |
@@ -204,10 +222,11 @@ RepoCleaner/
 | `node_modules`、`.next`、`dist`、`build` | 中文意译变体；代码块/行内代码用反引号 |
 | 仓库根目录（`REPO_ROOT`，含多个项目的父目录） | 项目根目录（二者含义不同，禁止混用） |
 | 项目根目录（单个项目，`REPO_ROOT` 的直接子目录） | — |
-| 参考界面应用（根 `src/` 的 Next.js 应用） | prototype 应用、前端工程 |
+| 参考界面应用（根 `src/` 的 Next.js 应用，已弃用） | prototype 应用、前端工程 |
+| 产品本体（`repo-cleaner`，Go 编译的跨平台可执行文件） | Go 版、新版本 |
 | 规范文档目录（`docs/`） | 原型目录（后者专指 `prototype/`） |
 | 原型目录（`prototype/`，仅说明文件） | 设计规范目录（规范在 `docs/`） |
-| 批处理脚本（`RepoCleaner.bat`） | bat 脚本、主程序 |
+| 批处理脚本（`RepoCleaner.bat`，已弃用旧版） | bat 脚本、主程序 |
 | 功能 1 ～ 功能 7（名称见 `OPENSPEC.md` §3.0） | 功能一、F1（仅代码变量名可用 F1_） |
 
 ---
@@ -262,10 +281,10 @@ v1.2.5
 
 ```bash
 git status                  # 确认无 node_modules / .next / *.log / *.tsbuildinfo 被跟踪
-npm run type-check
-npm run lint
+go vet ./...
+go test ./...
+go build ./...
 npm run check:docs
-npm run build
 ```
 
 ---
@@ -311,22 +330,28 @@ npm run build
 
 ### 8.2 版本号单一来源
 
-**唯一权威源：`package.json` 的 `version` 字段。** 参考界面页面的版本号与 build 编号由 `next.config.ts` 在构建时读取 `package.json` 并注入 `NEXT_PUBLIC_APP_VERSION` / `NEXT_PUBLIC_BUILD_ID`，`src/app/page.tsx` 页脚读取展示 —— 禁止在页面/组件中硬编码版本号。
+**唯一权威源：`internal/buildinfo/version.go` 的 `Version` 常量**（Go 产品本体）。`package.json` 的 `version` 保持同步（服务已弃用参考界面与文档引用），禁止在任何页面 / 组件中硬编码版本号。
 
 每次 bump 需同步以下**全局展示位**（各一处）：
 
-- `package.json` → `version`
+- `internal/buildinfo/version.go` → `Version` 常量（产品唯一权威源）
+- `package.json` / `package-lock.json` → `version`（顶层与 `packages[""]` 两处）
 - `README.MD`（根） → 版本徽章 `Version-X.Y.Z` 与页脚版本号
 - `CHANGELOG.MD`（根） → 新增对应版本小节（置于最上方）
 - `docs/tokens.json` → `version`
 - `docs/DESIGN-SYSTEM.md`、`docs/README.md`、`docs/OPENSPEC.md`、`docs/CONTRIBUTING.md`、`prototype/README.md` → 标题版本
 - `.github/` 下新增的 Community Health 文件 → 标题或首行注释版本
-- `package-lock.json` → 顶层与 `packages[""]` 两处 `version`
 - 被改动**代码文件**的头注释版本号
 
 **禁止**：全仓库批量刷写所有源码文件的头注释；未改动文件头注释保持不变（头注释是文件自版本，不等于产品版本，看到旧版本与新版本并存属正常，不是版本漂移）。
 
-**build 编号**：格式 `yyyymmddhhmm`（本地构建时间到分钟），由 `next.config.ts` 自动生成，`dev` / `build` 均生效，无需手工维护。页脚注入缺失时回退为仅显示版本号。
+**页脚版本与 build 编号（强制）**：应用页面的**页脚区**是版本号与 build 编号的唯一展示位置；页眉 / 顶部栏 / 其他区块一律不得出现版本号，页脚若原本展示「更新日期」一律改为 build 编号。
+
+- **格式**：`vX.Y.Z · build yymmddhhmm`（示例 `v1.2.3 · build 2611051259`）。`yymmddhhmm` 是 **10 位**构建时间（2 位年份 + 月 + 日 + 时 + 分，24 小时制），禁止使用 12 位 `yyyymmddhhmm`。
+- **Go 产品本体**：`internal/buildinfo/version.go` 的 `Version` 与 `BuildID`，由 `Footer()` 生成页脚文本；`internal/ui/ui.go` 用 `container.NewBorder` 的 bottom 区渲染（`NewBorder` 底部即页脚，页脚容器在 Web 侧须带 `id="app-footer"`）。`scripts/build.ps1`（`(Get-Date).ToString("yyMMddHHmm")`）/ `scripts/build.sh`（`date +%y%m%d%H%M`）在构建期以 `-ldflags "-X repo-cleaner/internal/buildinfo.BuildID=<10位>"` 注入；未注入时从 `debug.ReadBuildInfo` 的 `vcs.time` 推导本地时间（Go 布局 `0601021504`），仍缺失则回退为仅版本号。CLI `-h` 的 `BuildInfo()` 输出不算页面页眉。
+- **已弃用 Web 参考界面**：`next.config.ts` 从 `package.json` 读取版本并注入 `NEXT_PUBLIC_APP_VERSION` 与 10 位 `NEXT_PUBLIC_BUILD_ID`，`src/app/page.tsx` 的 `<footer id="app-footer">` 展示，注入缺失时回退仅显示版本号。
+- **禁止**：在页面 / 组件硬编码版本号或 build 编号；禁止运行时用 `new Date()` / `time.Now()` 现场生成（必须构建期注入，保证同一构建内稳定）。
+- **验证**：`go test ./internal/buildinfo`（`Footer` 格式、回退、10 位布局）+ `npm run build`（页脚输出须为 `vX.Y.Z · build <10位数字>`）。
 
 ### 8.3 CHANGELOG 写法
 
@@ -352,29 +377,29 @@ npm run build
 - [ ] 功能行为与 `docs/OPENSPEC.md` 对应条目一致；变更功能时已同步规格文档
 - [ ] 新增/修改的 UI 对齐 `docs/DESIGN-SYSTEM.md` 与 `docs/tokens.json`，无硬编码颜色
 - [ ] 主要容器与关键元素已加语义化 `id`（§4.4）
-- [ ] 无 `console.log` / `debugger`；无 `any`；无未使用的 import
-- [ ] `npm run type-check`、`npm run lint`、`npm run check:docs`、`npm run build` 全部通过
+- [ ] 无 `fmt.Println` 调试输出、无吞错（`_ = err`）、无未使用的 import / 变量；Go 代码已 `gofmt` 且导出符号有 doc 注释
+- [ ] `go vet ./...`、`go test ./...`、`go build ./...`、`npm run check:docs` 全部通过
 - [ ] 单文件 ≤ 200 行（代码文件）；超出已按职责拆分且不破坏导出契约
-- [ ] 批处理改动：路径带引号、延迟展开正确、危险操作有二次确认
+- [ ] 平台层改动：路径经 `path/filepath` 处理、删除目标仅来自枚举、危险操作有二次确认
 - [ ] 提交信息格式合规，且含新版本号
 - [ ] 版本号已 bump，`package.json` / README 徽章 / CHANGELOG / 展示位一致
 - [ ] `CHANGELOG.MD` 已新增对应小节；`README.MD` / `docs/OPENSPEC.md` 使用说明随功能变化更新
 - [ ] 文档链接按实际大小写与相对层级书写，新增文档归入 `docs/`
 - [ ] 无密钥 / Token / 真实用户数据入库；`node_modules`、`.next`、`*.log`、`*.tsbuildinfo` 未被跟踪
 
-### 9.3 功能验证（批处理手动冒烟）
+### 9.3 功能验证（GUI 手动冒烟，跨平台）
 
-`RepoCleaner.bat` 无自动化测试，改动后须在**隔离的临时目录**（放 1～2 个含 `package.json` 的假项目）手动验证：
+`repo-cleaner` 的 GUI 交互无自动化测试，发版前须在**隔离的临时目录**（放 1～2 个含 `package.json` 的假项目）手动验证：
 
 | 检查项 | 预期 |
 |--------|------|
-| `RepoCleaner.bat -h` | 输出帮助信息后退出 |
-| `RepoCleaner.bat -lang en` | `config.ini` 写入 `LANG=en` 且不产生重复行，`lang.ini` 文案节完好 |
-| 菜单 `[L]` | 中/英切换生效 |
-| 功能 1（输入 Y） | 生成 `.npmrc`、清理本地 `node_modules`；输入非 Y 则返回菜单且不删除 |
-| 功能 3 → 功能 4 | 生成带 `+h+s+r` 的 `.next` 文件；功能 4 能成功删除该文件（无残留、无报错） |
+| `repo-cleaner -h` | 输出帮助信息后退出 |
+| `repo-cleaner -lang en` | `config.ini` 写入 `LANG=en` 且不产生重复行 |
+| GUI 语言按钮 | 中/英切换生效 |
+| 功能 1（确认） | 生成 `.npmrc`、清理本地 `node_modules`；取消则返回且不删除 |
+| 功能 3 → 功能 4 | 生成带隐藏属性的 `.next` 文件；功能 4 能成功删除该文件（无残留、无报错） |
 | 功能 6 / 7 | 仅清理白名单目录；含空格路径可正确处理 |
-| 路径不存在 | 显示错误并允许重新输入 |
+| 路径不存在 | 弹窗报错并允许重新输入 |
 
 > 严禁在真实仓库根目录做删除类验证。
 
@@ -395,8 +420,8 @@ npm run build
 ## 11. 安全红线
 
 - 代码、配置、日志中不得包含密钥 / Token / 凭据。
-- 用户输入必须校验：批处理路径只用 `if exist` 判定，删除目标只取 `for /d` 枚举值并加引号。
+- 用户输入必须校验：目录用 `os.Stat` + `IsDir` 判定；删除目标只取 `platform` 枚举出的路径，禁止拼接用户输入后删除。
 - 前端不拼接未净化的 HTML（本仓库无 `dangerouslySetInnerHTML`）。
 - 删除类操作必须二次确认，且不得在真实仓库根目录做验证。
 - 发现安全漏洞按 [SECURITY.md](../.github/SECURITY.md) 私密报告，禁止公开披露可复现细节。
-- 依赖定期审计（`npm outdated`）；升级 `next` / `react` 等核心依赖须跑完整门禁。
+- 依赖定期审计：Go 用 `go list -m -u all`，Node 用 `npm outdated`；升级 `fyne.io/fyne/v2` 或 `next` 等核心依赖须跑完整门禁。

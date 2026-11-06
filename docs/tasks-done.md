@@ -1,6 +1,6 @@
 # RepoCleaner 已完成任务 (docs/tasks-done.md)
 
-> 最后更新：2026-11-05
+> 最后更新：2026-11-06
 > 本文件归档已完成的任务（来源：用户初始 8 项综合审查任务 + 后续 v1.2.3–v1.2.6 演进 + 本轮剩余任务）。
 
 ## 一、初始综合审查任务（用户首条指令）
@@ -32,3 +32,4 @@
 | R2 | 复核 RepoCleaner.bat 健壮性与安全性 | 低 | 已完成（核验） | 删除/枚举路径均引号包裹、来源为 `for /d` 枚举非用户输入，无命令注入；F4 此前已修复；无关键缺陷 |
 | R3 | 全量核验 src 应用语义化 ID 覆盖交互元素 | 低 | 已完成（核验） | page.tsx 已为 header/overview/security-note/main-tabs/repo-card-*/tweak-card-*/app-footer 等配置 id，符合 DESIGN-SYSTEM §3.3 |
 | R4 | 确认 DESIGN-SYSTEM §7 差距清单与代码一致 | 低 | 已完成（核验） | §7 G1–G8 含「规划/已实现」标记，亮色主题、Tabs ARIA、清理按钮 onClick 等明确列为未实现，文档与实现一致 |
+| R5 | 页脚版本与 10 位 build 编号规范落地 | 高 | 已完成 | v2.0.1：`internal/buildinfo.Footer()` 统一生成 `vX.Y.Z · build yymmddhhmm`，构建脚本 `-ldflags -X` 注入，Web 侧 `next.config.ts` 改 10 位；规范写入 `CONTRIBUTING.md` §8.2 / `DESIGN-SYSTEM.md` §3.0 / `OPENSPEC.md` §4.6 |

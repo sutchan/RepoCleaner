@@ -4,6 +4,44 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [2.0.1] - 2026-11-06
+
+### Added
+- **应用页脚构建标识** - Go Fyne 主窗口与已弃用 Web 参考界面的页脚统一展示 `vX.Y.Z · build yymmddhhmm`（10 位）；Go 构建脚本以 `-ldflags -X` 注入 `internal/buildinfo.BuildID`，未注入时从 VCS 构建时间推导，仍缺失则仅显示版本号
+- **页脚格式单元测试** - `internal/buildinfo/version_test.go` 校验 `Footer()` 格式、回退与 `yymmddhhmm` 布局
+
+### Changed
+- **build 编号格式** - `next.config.ts` 由 12 位 `yyyymmddhhmm` 改为 10 位 `yymmddhhmm`；`internal/buildinfo.Footer()` 成为页脚文本唯一来源，CLI `-h` 改用「页脚文本 + VCS 短提交号」
+- **规范同步** - `CONTRIBUTING.md` §8.2、`DESIGN-SYSTEM.md` §3.0 / §3.2 / §8、`OPENSPEC.md` §4.6、README 明确页脚为唯一展示位置、10 位格式、构建期注入与回退规则
+- **版本号同步** - `internal/buildinfo/version.go`、`package.json` / `package-lock.json`、README 徽章与页脚、`docs/tokens.json`、各 `docs/*.md` 与 `prototype/README.md` 标题同步至 `2.0.1`
+
+### Fixed
+- **页脚版本重复前缀** - `internal/ui/ui.go` 原 `"v"+buildVersion()` 输出 `vv2.0.0 · ...`，改为直接渲染 `buildinfo.Footer()`
+
+---
+
+## [2.0.0] - 2026-11-05
+
+### Added
+- **产品迁移至 Go（重大版本）** - 新增 Go 模块（`go.mod` + `cmd/repo-cleaner` + `internal/`），产品本体由 `RepoCleaner.bat` 迁移为 Go 编译的跨平台可执行文件 `repo-cleaner`（Windows / macOS / Linux 单二进制，无第三方运行时依赖）
+- **Go 分层架构** - `internal/platform`（OS 差异抽象：目录扫描、删除、隐藏属性、环境变量持久化，按 `build tag` 分 Windows / Unix 实现）/ `internal/engine`（功能 1～7 平台无关业务）/ `internal/config`（`config.ini` 读写）/ `internal/i18n`（中英文案）/ `internal/ui`（Fyne GUI）
+- **Fyne 桌面 GUI** - 主窗口功能按钮 1–7、语言实时切换、危险操作二次确认弹窗、结果日志区、关于区（版本 + 构建信息）
+- **跨平台能力** - 功能 3 / 4 的隐藏属性按平台实现（Windows `attrib`、macOS `chflags`、Linux 点前缀 + 只读位）；`NODE_PATH` 持久化按平台实现；默认目录 Windows `E:\Github`、Unix `~/Github`
+- **单元测试** - `internal/engine` / `internal/config` / `internal/i18n` 纯逻辑测试与 `internal/platform` 临时目录集成测试（`go test ./...`）
+- **交叉编译脚本** - `scripts/build.ps1` / `scripts/build.sh` 一键产出 Windows（amd64 / arm64）、macOS（amd64 / arm64）、Linux（amd64 / arm64）单文件可执行程序
+
+### Changed
+- **L1 修复** - `.npmrc` 的 `tmp=` 值加引号，兼容含空格的 `TEMP` 路径（v1.x 已知限制，见 `OPENSPEC.md` §7.3）
+- **版本单一来源** - 迁移至 `internal/buildinfo/version.go` 的 `Version` 常量；`package.json` 保持同步
+- **弃用旧版** - `RepoCleaner.bat` 标记为已弃用（保留兼容）；`src/` Next.js 参考界面标记为已弃用（纯展示，不执行真实清理）
+- **文档同步至 v2.0.0** - `OPENSPEC`（架构 / 功能 / 交互 / 技术 / 兼容 / 验证）、`CONTRIBUTING`（Go 环境 / 目录 / 风格 / 版本 / 审查 / 安全）、`DESIGN-SYSTEM`（Fyne 界面章节）、根 `README`（跨平台使用 / 构建 / 结构）
+- **版本号同步** - README 徽章与页脚、`package.json` / `package-lock.json`、`docs/tokens.json`、各 `docs/*.md` 与 `prototype/README.md` 标题同步至 `2.0.0`
+
+### Security
+- 删除目标仍只来自目录枚举（`internal/platform` 层），用户输入仅用于指定 `REPO_ROOT`；危险操作保留二次确认
+
+---
+
 ## [1.2.6] - 2026-11-04
 
 ### Added
