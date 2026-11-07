@@ -1,4 +1,4 @@
-// cmd/repo-cleaner/main.go v2.0.0
+// cmd/repo-cleaner/main.go v2.0.2
 
 // 命令 repo-cleaner 是产品入口：解析参数后分流到命令行模式或 Fyne GUI。
 package main
@@ -26,27 +26,28 @@ func main() {
 
 	cfgPath := config.Path()
 	cfg, err := config.Load(cfgPath)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "读取配置失败: %v\n", err)
-	}
-	p := platform.New()
-
 	if *showHelp {
 		printHelp()
 		return
 	}
 	if *langFlag != "" {
 		cfg.Lang = string(i18n.Normalize(*langFlag))
-		if err := config.Save(cfgPath, cfg); err != nil {
-			fmt.Fprintf(os.Stderr, "保存配置失败: %v\n", err)
+		if saveErr := config.Save(cfgPath, cfg); saveErr != nil {
+			fmt.Fprintf(os.Stderr, i18n.Logs(i18n.Normalize(cfg.Lang)).SaveCfgErr, saveErr)
 		}
 	}
 
+	lang := i18n.Normalize(cfg.Lang)
+	d := i18n.Logs(lang)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, d.LoadCfgErr, err)
+	}
+	p := platform.New()
 	fn, pathArg := parseArgs(flag.Args())
 	root := resolveRoot(p, cfg, pathArg)
 
 	if fn > 0 {
-		runCLI(p, cfgPath, &cfg, fn, root)
+		runCLI(p, cfgPath, &cfg, fn, root, lang)
 		return
 	}
 	runGUI(cfg)
@@ -79,30 +80,33 @@ func resolveRoot(p platform.Platform, cfg config.Config, pathArg string) string 
 }
 
 // runCLI 命令行模式：危险操作保留二次确认（对齐 OPENSPEC §4.5）。
-func runCLI(p platform.Platform, cfgPath string, cfg *config.Config, fn int, root string) {
+func runCLI(p platform.Platform, cfgPath string, cfg *config.Config, fn int, root string, lang i18n.Lang) {
+	d := i18n.Logs(lang)
 	if err := platform.ValidateRoot(root); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 	if engine.IsDangerous(fn) {
-		fmt.Print("是否继续? [Y/N]: ")
+		fmt.Print(d.ConfirmCLI)
 		reader := bufio.NewReader(os.Stdin)
 		answer, _ := reader.ReadString('\n')
 		if !strings.EqualFold(strings.TrimSpace(answer), "Y") {
-			fmt.Println("已取消")
+			fmt.Println(d.Cancelled)
 			return
 		}
 	}
-	if err := engine.Run(p, fn, root, engine.StdLogger{}); err != nil {
-		fmt.Fprintf(os.Stderr, "[错误] %v\n", err)
+	if err := engine.Run(p, fn, root, lang, engine.StdLogger{}); err != nil {
+		fmt.Fprintf(os.Stderr, d.ErrorPrefix+"\n", err)
 		os.Exit(1)
 	}
 	// 命令行模式记住本次使用的目录
 	cfg.RepoRoot = root
-	_ = config.Save(cfgPath, *cfg)
+	if err := config.Save(cfgPath, *cfg); err != nil {
+		fmt.Fprintf(os.Stderr, d.SaveCfgErr, err)
+	}
 }
 
-// printHelp 输出帮助信息（对齐 v1.x 行为）。
+// printHelp 输出帮助信息；CLI 帮助固定英文，界面文案取自 internal/i18n。
 func printHelp() {
 	fmt.Println("RepoCleaner - Project Cleaner")
 	fmt.Println()

@@ -1,72 +1,15 @@
-// internal/engine/engine_test.go v2.0.0
+// internal/engine/engine_test.go v2.0.2
 
 package engine
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 
-	"repo-cleaner/internal/platform"
+	"repo-cleaner/internal/i18n"
 )
-
-// captureLogger 收集日志便于断言。
-type captureLogger struct{ lines []string }
-
-func (c *captureLogger) Logf(format string, args ...any) {
-	c.lines = append(c.lines, strings.TrimSpace(fmt.Sprintf(format, args...)))
-}
-
-// stubPlatform 委托真实平台实现（目录枚举 / 删除 / 隐藏属性），
-// 仅替换外部副作用（npm 查询与环境变量持久化），保证测试确定性与无副作用。
-type stubPlatform struct {
-	platform.Platform
-	global string
-	envs   map[string]string
-}
-
-func newStub(t *testing.T) *stubPlatform {
-	t.Helper()
-	return &stubPlatform{Platform: platform.New(), global: t.TempDir(), envs: map[string]string{}}
-}
-
-func (s *stubPlatform) GlobalNodeModulesPath() (string, error) { return s.global, nil }
-func (s *stubPlatform) SetUserEnv(k, v string) error           { s.envs[k] = v; return nil }
-func (s *stubPlatform) RemoveUserEnv(k string) error           { delete(s.envs, k); return nil }
-
-// newProject 在临时仓库根下创建一个假项目。
-func newProject(t *testing.T, root, name string, files map[string][]byte) string {
-	t.Helper()
-	dir := filepath.Join(root, name)
-	if err := os.MkdirAll(dir, 0o755); err != nil {
-		t.Fatal(err)
-	}
-	for rel, content := range files {
-		full := filepath.Join(dir, rel)
-		if err := os.MkdirAll(filepath.Dir(full), 0o755); err != nil {
-			t.Fatal(err)
-		}
-		if err := os.WriteFile(full, content, 0o644); err != nil {
-			t.Fatal(err)
-		}
-	}
-	return dir
-}
-
-func exists(t *testing.T, path string) bool {
-	t.Helper()
-	_, err := os.Stat(path)
-	if err == nil {
-		return true
-	}
-	if os.IsNotExist(err) {
-		return false
-	}
-	t.Fatal(err)
-	return false
-}
 
 func TestCleanAllCaches(t *testing.T) {
 	s := newStub(t)
@@ -78,7 +21,7 @@ func TestCleanAllCaches(t *testing.T) {
 		"src/main.js":         []byte("keep"),
 	})
 	var log captureLogger
-	if err := CleanAllCaches(s, s.DefaultRepoRoot(), &log); err != nil {
+	if err := CleanAllCaches(s, s.DefaultRepoRoot(), i18n.Zh, &log); err != nil {
 		t.Fatal(err)
 	}
 	if exists(t, filepath.Join(proj, "node_modules")) || exists(t, filepath.Join(proj, "dist")) {
@@ -100,13 +43,13 @@ func TestCleanViteCache(t *testing.T) {
 		"node_modules/lib.js": []byte("x"),
 	})
 	var log captureLogger
-	if err := CleanViteCache(s, s.DefaultRepoRoot(), &log); err != nil {
+	if err := CleanViteCache(s, s.DefaultRepoRoot(), i18n.Zh, &log); err != nil {
 		t.Fatal(err)
 	}
 	if exists(t, filepath.Join(proj, ".vite")) {
 		t.Fatal(".vite 应被删除")
 	}
-	if exists(t, filepath.Join(proj, "node_modules")) {
+	if !exists(t, filepath.Join(proj, "node_modules")) {
 		t.Fatal("功能 7 不应删除 node_modules")
 	}
 }
@@ -119,7 +62,7 @@ func TestCleanThenRestoreNextCache(t *testing.T) {
 	})
 	var log captureLogger
 
-	if err := CleanNextCache(s, s.DefaultRepoRoot(), &log); err != nil {
+	if err := CleanNextCache(s, s.DefaultRepoRoot(), i18n.Zh, &log); err != nil {
 		t.Fatal(err)
 	}
 	next := filepath.Join(proj, ".next")
@@ -131,7 +74,7 @@ func TestCleanThenRestoreNextCache(t *testing.T) {
 		t.Fatal(".next 应被替换为文件而非目录")
 	}
 
-	if err := RestoreNextCache(s, s.DefaultRepoRoot(), &log); err != nil {
+	if err := RestoreNextCache(s, s.DefaultRepoRoot(), i18n.Zh, &log); err != nil {
 		t.Fatal(err)
 	}
 	if exists(t, next) {
@@ -147,7 +90,7 @@ func TestEnableAndResetNodeConfig(t *testing.T) {
 	})
 	var log captureLogger
 
-	if err := EnableGlobalNodeModules(s, s.DefaultRepoRoot(), &log); err != nil {
+	if err := EnableGlobalNodeModules(s, s.DefaultRepoRoot(), i18n.Zh, &log); err != nil {
 		t.Fatal(err)
 	}
 	npmrc := filepath.Join(proj, ".npmrc")
@@ -169,7 +112,7 @@ func TestEnableAndResetNodeConfig(t *testing.T) {
 		t.Fatal("功能 1 应清理本地 node_modules")
 	}
 
-	if err := ResetNodeConfig(s, s.DefaultRepoRoot(), &log); err != nil {
+	if err := ResetNodeConfig(s, s.DefaultRepoRoot(), i18n.Zh, &log); err != nil {
 		t.Fatal(err)
 	}
 	if exists(t, npmrc) {
@@ -186,10 +129,10 @@ func TestRunDispatcher(t *testing.T) {
 		"package.json": []byte("{}"),
 	})
 	var log captureLogger
-	if err := Run(s, 7, s.DefaultRepoRoot(), &log); err != nil {
+	if err := Run(s, 7, s.DefaultRepoRoot(), i18n.Zh, &log); err != nil {
 		t.Fatal(err)
 	}
-	if err := Run(s, 9, s.DefaultRepoRoot(), &log); err == nil {
+	if err := Run(s, 9, s.DefaultRepoRoot(), i18n.Zh, &log); err == nil {
 		t.Fatal("未知功能号应返回错误")
 	}
 	if !IsDangerous(1) || !IsDangerous(6) || !IsDangerous(7) {

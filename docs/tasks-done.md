@@ -1,7 +1,7 @@
 # RepoCleaner 已完成任务 (docs/tasks-done.md)
 
 > 最后更新：2026-11-06
-> 本文件归档已完成的任务（来源：用户初始 8 项综合审查任务 + 后续 v1.2.3–v1.2.6 演进 + 本轮剩余任务）。
+> 本文件归档已完成的任务（来源：用户初始 8 项综合审查任务 + 后续 v1.2.3–v1.2.6 演进 + 本轮剩余任务 + v2.0.0 Go 迁移清单）。
 
 ## 一、初始综合审查任务（用户首条指令）
 
@@ -33,3 +33,29 @@
 | R3 | 全量核验 src 应用语义化 ID 覆盖交互元素 | 低 | 已完成（核验） | page.tsx 已为 header/overview/security-note/main-tabs/repo-card-*/tweak-card-*/app-footer 等配置 id，符合 DESIGN-SYSTEM §3.3 |
 | R4 | 确认 DESIGN-SYSTEM §7 差距清单与代码一致 | 低 | 已完成（核验） | §7 G1–G8 含「规划/已实现」标记，亮色主题、Tabs ARIA、清理按钮 onClick 等明确列为未实现，文档与实现一致 |
 | R5 | 页脚版本与 10 位 build 编号规范落地 | 高 | 已完成 | v2.0.1：`internal/buildinfo.Footer()` 统一生成 `vX.Y.Z · build yymmddhhmm`，构建脚本 `-ldflags -X` 注入，Web 侧 `next.config.ts` 改 10 位；规范写入 `CONTRIBUTING.md` §8.2 / `DESIGN-SYSTEM.md` §3.0 / `OPENSPEC.md` §4.6 |
+
+## 四、v2.0.0 Go 迁移清单 G01–G21（2026-11-05 ~ 2026-11-06 全部完成）
+
+| ID | 任务 | 完成版本 | 证据 / 结果 |
+|----|------|----------|-------------|
+| G01 | 初始化 Go module | 2.0.0 | `go.mod`（module `repo-cleaner`，go 1.25，Fyne v2）+ `go.sum` |
+| G02 | `internal/buildinfo/version.go` | 2.0.1 | `Version` 常量 + `Footer()` / `BuildInfo()` + 构建期 `BuildID` 注入与回退；`version_test.go` 覆盖格式 |
+| G03 | `internal/platform` 接口定义 | 2.0.0 | `Platform` 12 个方法 + `HasFile` / `IsNodeProject` / `IsNextProject` / `NormalizeRoot` / `ValidateRoot` |
+| G04 | Windows 平台实现 | 2.0.2 | `platform_windows.go`：`attrib` / `setx` + `reg` / `E:\Github` / `npm root -g`；v2.0.2 消除吞错 |
+| G05 | Unix 平台实现 | 2.0.2 | `platform_unix.go`：`~/.profile` 持久化 / `~/Github`；v2.0.2 补齐 macOS `chflags hidden/nohidden` |
+| G06 | `internal/config` | 2.0.0 | `Load` / `Save`（读旧 → 过滤 → 补写 → 临时文件 → 回写）+ 默认值，`config_test.go` |
+| G07 | `internal/i18n` zh/en 字典 | 2.0.2 | `i18n.go` 界面字典 + `log.go` 执行日志字典；GUI / CLI / engine / nogui 全部引用，无硬编码文案 |
+| G08 | 功能 1 `EnableGlobalNodeModules` | 2.0.0 | `.npmrc` 模板 `tmp=%q`（修复 L1），`engine_test.go` 断言引号 |
+| G09 | 功能 2 `ResetNodeConfig` | 2.0.0 | 删除 `NODE_PATH` 与项目 `.npmrc` |
+| G10 | 功能 3/4 `.next` 缓存 | 2.0.0 | `clean.go`：写同名文件 + `SetHidden`；功能 4 先 `ClearHidden` 再删除 |
+| G11 | 功能 5 `InstallGlobalDeps` | 2.0.2 | 5 组 `npm install -g`，失败组记录双语日志、不中断后续组 |
+| G12 | 功能 6/7 白名单清理 | 2.0.2 | `clean.go` `cleanByWhitelist`；v2.0.2 修正功能 7 保留 `node_modules` 的测试断言 |
+| G13 | 命令行模式 | 2.0.2 | `main.go`：`-h` / `-lang` / 功能号 / 路径；危险操作 CLI `Y/N`，提示走 i18n |
+| G14 | Fyne 主题 | 2.0.0 | `internal/ui/theme.go` 对齐 DESIGN-SYSTEM §2.1 设计令牌 |
+| G15 | 主窗口 | 2.0.2 | `ui.go`：目录输入/选择/保存、语言切换、功能按钮 1–7、结果日志区、页脚；v2.0.2 补「关于」弹窗 |
+| G16 | 危险操作二次确认 | 2.0.0 | `ui.go` `dialog.ShowConfirm`（功能 1/6/7）+ CLI `Y/N` |
+| G17 | `cmd/repo-cleaner/main.go` 入口 | 2.0.2 | 参数解析 → CLI / GUI 分流；`gui.go`（默认）/ `headless.go`（nogui）按 build tag 分发 |
+| G18 | 跨平台交叉编译脚本 | 2.0.2 | `scripts/build.ps1` / `build.sh`：6 目标 + `-ldflags -X` 注入 10 位 build 号；v2.0.2 显式 CGO 与交叉编译器检查，缺工具链跳过并警告 |
+| G19 | `.gitignore` 忽略 Go 产物 | 2.0.0 | `bin/` 已忽略 |
+| G20 | 全量门禁通过 | 2.0.2 | `gofmt -l .`（空）、`go vet -tags nogui ./cmd/... ./internal/...`、`go test -tags nogui ./cmd/... ./internal/...`、`go build -tags nogui ./...` 全绿；`npm run check:docs` / `type-check` / `lint` / `build` 通过。本机无 OpenGL C 工具链，默认 GUI 构建须在具备工具链的机器或 CI 验证 |
+| G21 | 提交并推送 | 2.0.2 | 收尾变更提交至 `main` 并推送 `origin/main` |

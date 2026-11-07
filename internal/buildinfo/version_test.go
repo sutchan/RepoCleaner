@@ -1,4 +1,4 @@
-// internal/buildinfo/version_test.go v2.0.1
+// internal/buildinfo/version_test.go v2.0.2
 
 package buildinfo
 

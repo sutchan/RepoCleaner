@@ -1,4 +1,4 @@
-# RepoCleaner 开发规范与贡献指南 v2.0.1
+# RepoCleaner 开发规范与贡献指南 v2.0.2
 
 > 本文是 RepoCleaner 仓库的**唯一开发规范来源**，规定「如何改代码、如何写文档、如何提交与评审」。
 > 本文存放于 `docs/`；所有贡献者（含 AI 协作会话）在动手前必须阅读本文。
@@ -50,25 +50,29 @@
 |----|------|
 | 操作系统 | 产品支持 Windows / macOS / Linux；本仓库在三个平台上均可开发 |
 | Go | **≥ 1.25**（产品本体 `repo-cleaner`，依赖由 `go.mod` 管理） |
-| GUI 框架 | Fyne v2（唯一 UI 依赖，纯 Go、编译为单二进制） |
+| GUI 框架 | Fyne v2（唯一 UI 依赖；构建需系统 OpenGL / C 工具链，运行为单二进制） |
 | Node.js | ≥ 18（仅**已弃用**的 `src/` 参考 Web 界面需要） |
 
 在**仓库根目录**执行：
 
 ```bash
-go build ./...                       # 编译全部包
-go test ./...                        # 运行全部单元 / 集成测试
-go vet ./...                         # 静态检查
-gofmt -l .                           # 列出未格式化文件（应为空）
-go run ./cmd/repo-cleaner            # 本地运行 GUI
-go run ./cmd/repo-cleaner -h         # 命令行帮助
-go build -tags nogui ./...           # 无 C 工具链环境的纯 Go 校验构建
-./scripts/build.ps1                  # 交叉编译全部平台（Windows / PowerShell）
-./scripts/build.sh                   # 交叉编译全部平台（macOS / Linux）
-npm run check:docs                   # 校验所有 Markdown 相对链接（含大小写）
+gofmt -l .                                      # 列出未格式化文件（应为空）
+go vet ./cmd/... ./internal/...                   # 静态检查
+go test ./cmd/... ./internal/...                  # 单元 / 临时目录集成测试
+go build ./cmd/...                               # 编译产品（需 OpenGL C 工具链）
+npm run check:docs                               # 校验所有 Markdown 相对链接（含大小写）
+
+# 无 OpenGL C 工具链时，Go 命令统一加 -tags nogui（GUI 包按 build tag 排除）
+go vet -tags nogui ./cmd/... ./internal/...
+go test -tags nogui ./cmd/... ./internal/...
+go build -tags nogui ./...
+
+go run ./cmd/repo-cleaner -h                     # 命令行帮助
+./scripts/build.ps1                             # 交叉编译（Windows / PowerShell）
+./scripts/build.sh                              # 交叉编译（macOS / Linux）
 ```
 
-> `npm run dev` / `type-check` / `lint` / `build` 仅服务于已弃用的 `src/` 参考 Web 界面，**不属于产品门禁**。产品质量门禁为 `go vet` + `go test` + `go build` + `check:docs`，外加 §9.3 的 GUI 手动冒烟清单。
+> `npm run dev` / `type-check` / `lint` / `build` 仅服务于已弃用的 `src/` 参考 Web 界面，**不属于产品门禁**。产品质量门禁为 `gofmt` + `go vet` + `go test` + `go build` + `check:docs`，外加 §9.3 的 GUI 手动冒烟清单；无 C 工具链时按 §6.3 加 `-tags nogui`。
 
 ---
 
@@ -127,7 +131,7 @@ RepoCleaner/
 ### 3.2 组织规则
 
 1. **所有规范 / 规格文档放 `docs/`**；根只保留入口 `README.MD`、`CHANGELOG.MD`、`LICENSE`。**产品代码一律放根 `cmd/` 与 `internal/`（Go）**；`src/` 为已弃用参考界面，禁止新增功能代码；`prototype/` 只放原型说明，禁止再放回可运行代码或规范正文。
-2. **单一数据源**：产品 UI 文案只放 `internal/i18n`；`engine` 的业务常量（清理目录清单、依赖包列表、`.npmrc` 模板）集中在其包内定义，禁止散落在 `ui` 层。已弃用的 `src/lib/` 不再新增数据。
+2. **单一数据源**：产品 UI 与执行日志文案只放 `internal/i18n`（界面用 `T()`、日志用 `Logs()`）；`engine` 的业务常量（清理目录清单、依赖包列表、`.npmrc` 模板）集中在其包内定义，禁止散落在 `ui` 层。已弃用的 `src/lib/` 不再新增数据。
 3. **Go 依赖**：只经 `go.mod` 管理（`go get` / `go mod tidy`），提交 `go.sum`；禁止 vendor 目录与多套依赖清单并存。UI 依赖仅限 `fyne.io/fyne/v2`，不得再引入第二套 GUI 框架。
 4. **新增模块按职责落位**：入口 → `cmd/repo-cleaner/`；OS 差异 → `internal/platform/`；业务功能 → `internal/engine/`；配置读写 → `internal/config/`；文案 → `internal/i18n/`；界面 → `internal/ui/`；规范 → `docs/`；工程脚本 → `scripts/`。
 5. **文件行数**：所有源代码文件（`.ts/.tsx/.js/.jsx/.vue/.py/.dart/.go/.java` 等）单文件 **≤ 200 行**。超出时按职责拆分为更小模块（组件拆子组件、逻辑抽纯函数/常量/类型），且**不得改变对外导出契约**。
@@ -280,11 +284,14 @@ v1.2.5
 ### 6.3 提交前检查
 
 ```bash
-git status                  # 确认无 node_modules / .next / *.log / *.tsbuildinfo 被跟踪
-go vet ./...
-go test ./...
-go build ./...
+git status                                   # 确认无 node_modules / .next / *.log / *.tsbuildinfo / bin/ 被跟踪
+gofmt -l .                                   # 输出应为空
+go vet ./cmd/... ./internal/...
+go test ./cmd/... ./internal/...
+go build ./cmd/...
 npm run check:docs
+
+# 无 OpenGL C 工具链时，Go 命令统一改用 -tags nogui（含 go build -tags nogui ./...）
 ```
 
 ---
@@ -378,7 +385,7 @@ npm run check:docs
 - [ ] 新增/修改的 UI 对齐 `docs/DESIGN-SYSTEM.md` 与 `docs/tokens.json`，无硬编码颜色
 - [ ] 主要容器与关键元素已加语义化 `id`（§4.4）
 - [ ] 无 `fmt.Println` 调试输出、无吞错（`_ = err`）、无未使用的 import / 变量；Go 代码已 `gofmt` 且导出符号有 doc 注释
-- [ ] `go vet ./...`、`go test ./...`、`go build ./...`、`npm run check:docs` 全部通过
+- [ ] `gofmt -l .` 输出为空，`go vet` / `go test` / `go build`（按 §6.3 命令，含 `-tags nogui` 回退）与 `npm run check:docs` 全部通过
 - [ ] 单文件 ≤ 200 行（代码文件）；超出已按职责拆分且不破坏导出契约
 - [ ] 平台层改动：路径经 `path/filepath` 处理、删除目标仅来自枚举、危险操作有二次确认
 - [ ] 提交信息格式合规，且含新版本号
@@ -395,7 +402,8 @@ npm run check:docs
 |--------|------|
 | `repo-cleaner -h` | 输出帮助信息后退出 |
 | `repo-cleaner -lang en` | `config.ini` 写入 `LANG=en` 且不产生重复行 |
-| GUI 语言按钮 | 中/英切换生效 |
+| GUI 语言按钮 | 中/英切换生效，执行日志同步切换 |
+| GUI 关于按钮 | 弹窗展示功能说明，不出现版本号 |
 | 功能 1（确认） | 生成 `.npmrc`、清理本地 `node_modules`；取消则返回且不删除 |
 | 功能 3 → 功能 4 | 生成带隐藏属性的 `.next` 文件；功能 4 能成功删除该文件（无残留、无报错） |
 | 功能 6 / 7 | 仅清理白名单目录；含空格路径可正确处理 |

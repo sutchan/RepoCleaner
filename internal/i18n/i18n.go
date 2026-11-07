@@ -1,4 +1,4 @@
-// internal/i18n/i18n.go v2.0.0
+// internal/i18n/i18n.go v2.0.2
 
 // Package i18n 是唯一的 UI 文案来源（zh / en），禁止在 ui / engine 层硬编码文案。
 package i18n
@@ -20,7 +20,8 @@ func Normalize(l string) Lang {
 	return Zh
 }
 
-// Dict 单语言文案字典；功能名称顺序与 OPENSPEC §3.0 一致（下标 0 对应功能 1）。
+// Dict 单语言界面文案；功能名称顺序与 OPENSPEC §3.0 一致（下标 0 对应功能 1）。
+// 执行日志文案见 log.go 的 Logs()。
 type Dict struct {
 	AppTitle       string
 	TargetDir      string
@@ -37,6 +38,7 @@ type Dict struct {
 	Ok             string
 	ErrInvalidRoot string
 	About          string
+	AboutText      string
 	OutputTitle    string
 }
 
@@ -57,6 +59,7 @@ var dicts = map[Lang]Dict{
 		Ok:             "[完成]",
 		ErrInvalidRoot: "错误: 路径不存在!",
 		About:          "关于",
+		AboutText:      "RepoCleaner 通过 7 项功能管理全局依赖与前端项目缓存；危险操作执行前会二次确认。版本与构建信息见窗口页脚。",
 		OutputTitle:    "执行输出",
 	},
 	En: {
@@ -75,11 +78,12 @@ var dicts = map[Lang]Dict{
 		Ok:             "[OK]",
 		ErrInvalidRoot: "ERROR: Path does not exist!",
 		About:          "About",
+		AboutText:      "RepoCleaner manages global dependencies and front-end caches with 7 functions; destructive actions require confirmation. Version and build info are shown in the window footer.",
 		OutputTitle:    "Output",
 	},
 }
 
-// T 返回指定语言文案；非法语言回落中文。
+// T 返回指定语言界面文案；非法语言回落中文。
 func T(l Lang) Dict {
 	if d, ok := dicts[l]; ok {
 		return d

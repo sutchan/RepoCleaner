@@ -1,9 +1,9 @@
-// next.config.ts v2.0.1
+// next.config.ts v2.0.2
 import type { NextConfig } from "next";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-// 版本号唯一来源：package.json 的 version，禁止在页面/组件中硬编码
+// 参考界面版本号来源：package.json 的 version（产品唯一权威源为 internal/buildinfo/version.go 的 Version）
 function readAppVersion(): string {
   try {
     const raw = readFileSync(join(process.cwd(), "package.json"), "utf8");

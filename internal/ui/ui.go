@@ -1,6 +1,6 @@
 //go:build !nogui
 
-// internal/ui/ui.go v2.0.1
+// internal/ui/ui.go v2.0.2
 
 // Package ui 实现 Fyne 桌面 GUI（对齐 docs/DESIGN-SYSTEM.md §3.0）。
 // 本包需要 C 工具链编译（Fyne 依赖 OpenGL）；无 C 工具链环境用 `go build -tags nogui` 校验。
@@ -38,7 +38,9 @@ func Run(cfg config.Config) {
 	// render 按当前语言重建窗口内容（语言切换即整体重绘）。
 	var render func()
 	render = func() {
-		dict := i18n.T(i18n.Lang(cfg.Lang))
+		lang := i18n.Lang(cfg.Lang)
+		dict := i18n.T(lang)
+		logs := i18n.Logs(lang)
 		w.SetTitle(dict.AppTitle)
 
 		output := widget.NewMultiLineEntry()
@@ -58,7 +60,10 @@ func Run(cfg config.Config) {
 				return
 			}
 			cfg.Lang = string(lang)
-			_ = config.Save(cfgPath, cfg)
+			if err := config.Save(cfgPath, cfg); err != nil {
+				dialog.ShowError(err, w)
+				return
+			}
 			render()
 		})
 		langSelect.PlaceHolder(dict.LangLabel)
@@ -86,6 +91,10 @@ func Run(cfg config.Config) {
 			dialog.ShowInformation(dict.Ok, dict.Saved, w)
 		})
 
+		aboutBtn := widget.NewButton(dict.About, func() {
+			dialog.ShowInformation(dict.About, dict.AboutText, w)
+		})
+
 		// runFunction 执行功能；危险操作先弹二次确认（对齐 OPENSPEC §4.5）。
 		runFunction := func(fn int) {
 			root := platform.NormalizeRoot(dirEntry.Text)
@@ -99,8 +108,8 @@ func Run(cfg config.Config) {
 					return
 				}
 				go func() {
-					if err := engine.Run(p, fn, root, logger); err != nil {
-						logger.Logf("[错误] %v", err)
+					if err := engine.Run(p, fn, root, lang, logger); err != nil {
+						logger.Logf(logs.ErrorPrefix, err)
 					}
 				}()
 			}
@@ -125,7 +134,7 @@ func Run(cfg config.Config) {
 
 		top := container.NewVBox(
 			container.NewHBox(widget.NewLabel(dict.TargetDir), dirEntry, browse, saveBtn),
-			container.NewHBox(widget.NewLabel(dict.LangLabel), langSelect),
+			container.NewHBox(widget.NewLabel(dict.LangLabel), langSelect, aboutBtn),
 			widget.NewLabel(dict.RunHint),
 		)
 		// 页脚区（Border bottom）：版本号 + build 编号的唯一展示位置，页眉不放版本号

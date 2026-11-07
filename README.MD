@@ -4,7 +4,7 @@
 
 [![Platform](https://img.shields.io/badge/Platform-Win%20%7C%20macOS%20%7C%20Linux-blue?style=flat)](https://github.com/sutchan/RepoCleaner)
 [![Go](https://img.shields.io/badge/Go-1.25%2B-00ADD8?style=flat&logo=go&logoColor=white)](https://go.dev)
-[![Version](https://img.shields.io/badge/Version-2.0.1-green?style=flat)](https://github.com/sutchan/RepoCleaner)
+[![Version](https://img.shields.io/badge/Version-2.0.2-green?style=flat)](https://github.com/sutchan/RepoCleaner)
 [![License](https://img.shields.io/badge/License-MIT-orange?style=flat)](https://github.com/sutchan/RepoCleaner)
 [![Node](https://img.shields.io/badge/Node.js-339933?style=flat&logo=node.js&logoColor=white)](https://nodejs.org)
 [![Disk](https://img.shields.io/badge/Saves-10GB%2B-red?style=flat)](https://github.com/sutchan/RepoCleaner)
@@ -73,7 +73,7 @@
 4. **按功能按钮选择功能**
 5. **一次配置，所有项目永久干净**
 
-> 应用页脚展示 `vX.Y.Z · build yymmddhhmm`（10 位构建编号，如 `v2.0.1 · build 2611061234`），便于核对当前构建版本与时间；格式与注入规则见[开发规范 §8.2](./docs/CONTRIBUTING.md)。
+> 应用页脚展示 `vX.Y.Z · build yymmddhhmm`（10 位构建编号，如 `v2.0.2 · build 2611061234`），便于核对当前构建版本与时间；格式与注入规则见[开发规范 §8.2](./docs/CONTRIBUTING.md)。
 
 ### 🌟 推荐使用流程
 
@@ -92,7 +92,7 @@
 - 自动获取全局 npm 模块路径（`npm root -g`）
 - 配置系统环境变量 `NODE_PATH`
 - 为所有包含 `package.json` 的项目生成 `.npmrc`，禁用本地依赖生成
-- 清理现有的本地 `node_modules` 目录（执行前需输入 `Y` 确认）
+- 清理现有的本地 `node_modules` 目录（执行前二次确认：GUI 弹窗 / CLI 输入 `Y`）
 
 > 首次使用后，项目将共享全局依赖，不再生成 `node_modules` 文件夹
 
@@ -347,10 +347,10 @@ RepoCleaner/
 ├── scripts/build.ps1 / build.sh       # 跨平台交叉编译脚本
 ├── RepoCleaner.bat                    # v1.x 旧版 Windows 脚本（已弃用）
 ├── config.ini                         # 配置文件（REPO_ROOT / LANG）
-├── lang.ini                           # 语言配置（[en]/[zh] 文案节）
+├── lang.ini                           # v1.x 批处理语言文案（历史保留）
 ├── README.MD / CHANGELOG.MD / LICENSE # 入口 / 变更历史 / 许可证
 ├── RepoCleaner.code-workspace          # VS Code 工作区配置
-├── package.json                       # 根应用依赖、脚本与唯一版本源
+├── package.json                       # 参考界面依赖与版本同步位（产品唯一权威源在 internal/buildinfo/version.go）
 ├── next.config.ts                     # Next.js 配置（注入版本 + build 编号）
 ├── tsconfig.json                      # TypeScript 配置（@/* → ./src/*）
 ├── postcss.config.mjs                 # Tailwind v4 PostCSS 配置
@@ -381,6 +381,6 @@ RepoCleaner/
 
 <div align="center">
 
-RepoCleaner v2.0.1 · MIT License · [文档中心](./docs/README.md)
+RepoCleaner v2.0.2 · MIT License · [文档中心](./docs/README.md)
 
 </div>

@@ -1,4 +1,4 @@
-// internal/engine/engine.go v2.0.0
+// internal/engine/engine.go v2.0.2
 
 // Package engine 实现功能 1 ～ 7 的平台无关业务逻辑；OS 差异一律经 platform.Platform。
 package engine
@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"repo-cleaner/internal/i18n"
 	"repo-cleaner/internal/platform"
 )
 
@@ -40,25 +41,25 @@ var npmGroups = [][]string{
 	{"cross-env", "dotenv", "nodemon", "pm2", "rimraf", "mkdirp"},
 }
 
-// Run 按功能编号（1-7）执行对应功能。
-func Run(p platform.Platform, fn int, repoRoot string, log Logger) error {
+// Run 按功能编号（1-7）执行对应功能，lang 决定执行日志语言。
+func Run(p platform.Platform, fn int, repoRoot string, lang i18n.Lang, log Logger) error {
 	switch fn {
 	case 1:
-		return EnableGlobalNodeModules(p, repoRoot, log)
+		return EnableGlobalNodeModules(p, repoRoot, lang, log)
 	case 2:
-		return ResetNodeConfig(p, repoRoot, log)
+		return ResetNodeConfig(p, repoRoot, lang, log)
 	case 3:
-		return CleanNextCache(p, repoRoot, log)
+		return CleanNextCache(p, repoRoot, lang, log)
 	case 4:
-		return RestoreNextCache(p, repoRoot, log)
+		return RestoreNextCache(p, repoRoot, lang, log)
 	case 5:
-		return InstallGlobalDeps(log)
+		return InstallGlobalDeps(lang, log)
 	case 6:
-		return CleanAllCaches(p, repoRoot, log)
+		return CleanAllCaches(p, repoRoot, lang, log)
 	case 7:
-		return CleanViteCache(p, repoRoot, log)
+		return CleanViteCache(p, repoRoot, lang, log)
 	default:
-		return fmt.Errorf("未知功能编号: %d", fn)
+		return fmt.Errorf("unknown function: %d", fn)
 	}
 }
 
@@ -66,20 +67,21 @@ func Run(p platform.Platform, fn int, repoRoot string, log Logger) error {
 func IsDangerous(fn int) bool { return fn == 1 || fn == 6 || fn == 7 }
 
 // EnableGlobalNodeModules 功能 1：启用全局 node_modules（对齐 OPENSPEC §3.1）。
-func EnableGlobalNodeModules(p platform.Platform, repoRoot string, log Logger) error {
-	log.Logf("[1/4] 获取全局 node_modules 路径...")
+func EnableGlobalNodeModules(p platform.Platform, repoRoot string, lang i18n.Lang, log Logger) error {
+	d := i18n.Logs(lang)
+	log.Logf("%s", d.F1Step1)
 	globalPath, err := p.GlobalNodeModulesPath()
 	if err != nil {
 		return err
 	}
-	log.Logf("Path: %s", globalPath)
+	log.Logf(d.F1Path, globalPath)
 
-	log.Logf("[2/4] 设置 NODE_PATH 环境变量...")
+	log.Logf("%s", d.F1Step2)
 	if err := p.SetUserEnv("NODE_PATH", globalPath); err != nil {
-		log.Logf("[警告] 写入环境变量失败: %v", err)
+		log.Logf(d.EnvSetWarn, err)
 	}
 
-	log.Logf("[3/4] 禁用所有项目的本地 node_modules...")
+	log.Logf("%s", d.F1Step3)
 	dirs, err := p.ListProjectDirs(repoRoot)
 	if err != nil {
 		return err
@@ -89,19 +91,19 @@ func EnableGlobalNodeModules(p platform.Platform, repoRoot string, log Logger) e
 			continue
 		}
 		if err := writeNpmrc(p, dir, globalPath); err != nil {
-			log.Logf("[错误] 写入 %s 失败: %v", dir, err)
+			log.Logf(d.WriteNpmrcErr, dir, err)
 			continue
 		}
-		log.Logf("Configured: %s", filepath.Base(dir))
+		log.Logf(d.Configured, filepath.Base(dir))
 	}
 
-	log.Logf("[4/4] 清理现有本地 node_modules 目录...")
+	log.Logf("%s", d.F1Step4)
 	for _, dir := range dirs {
 		nm := filepath.Join(dir, "node_modules")
 		if info, err := os.Stat(nm); err == nil && info.IsDir() {
-			log.Logf("Cleaning: %s", filepath.Base(dir))
+			log.Logf(d.Cleaning, filepath.Base(dir))
 			if err := p.RemoveAll(nm); err != nil {
-				log.Logf("[错误] 删除失败: %v", err)
+				log.Logf(d.DeleteErr, err)
 			}
 		}
 	}
@@ -116,19 +118,20 @@ func writeNpmrc(p platform.Platform, projectDir, globalPath string) error {
 }
 
 // ResetNodeConfig 功能 2：重置 Node 配置（对齐 OPENSPEC §3.2）。
-func ResetNodeConfig(p platform.Platform, repoRoot string, log Logger) error {
-	log.Logf("删除 NODE_PATH 环境变量...")
+func ResetNodeConfig(p platform.Platform, repoRoot string, lang i18n.Lang, log Logger) error {
+	d := i18n.Logs(lang)
+	log.Logf("%s", d.F2Step1)
 	if err := p.RemoveUserEnv("NODE_PATH"); err != nil {
-		log.Logf("[警告] 删除环境变量失败: %v", err)
+		log.Logf(d.EnvDelWarn, err)
 	}
-	log.Logf("清理项目 .npmrc 配置...")
+	log.Logf("%s", d.F2Step2)
 	dirs, err := p.ListProjectDirs(repoRoot)
 	if err != nil {
 		return err
 	}
 	for _, dir := range dirs {
 		if err := p.RemoveFile(filepath.Join(dir, ".npmrc")); err == nil {
-			log.Logf("Removed: %s", filepath.Base(dir))
+			log.Logf(d.Removed, filepath.Base(dir))
 		}
 	}
 	return nil

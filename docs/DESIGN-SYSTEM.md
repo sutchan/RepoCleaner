@@ -1,4 +1,4 @@
-# RepoCleaner 设计系统 (Design System) v2.0.1
+# RepoCleaner 设计系统 (Design System) v2.0.2
 
 > **本文定位**：RepoCleaner 的**唯一 UI 设计规范来源**，规定设计令牌、界面结构与交互标准。
 > **v2.0.0 起**：实际 UI 为 **Go + Fyne 桌面 GUI**（`internal/ui`），配色沿用本文 §2.1 设计令牌；仓库根 `src/` 的 Next.js 参考界面为 **v1.x 遗留、已弃用**，§3.1 / §3.2 等 Next.js 章节仅作历史参考。
@@ -111,7 +111,8 @@ Go 版 GUI 位于 `internal/ui`，遵循本文 §2.1 配色与 §4 交互标准�
 |------|------|
 | 主窗口 | 标题 + 目标目录展示（可修改并保存到 `config.ini`） |
 | 功能按钮 1–7 | 与 `OPENSPEC.md` §3.0 功能一一对应；危险操作（1 / 6 / 7）先弹确认对话框 |
-| 语言按钮 | 「中文 / English」实时切换全部文案（`internal/i18n`） |
+| 语言按钮 | 「中文 / English」实时切换界面与执行日志文案（`internal/i18n` 的 `T()` / `Logs()`） |
+| 关于按钮 | 弹窗展示功能说明，不出现版本号（版本信息仅页脚） |
 | 结果区 | 展示每个功能的执行日志与成功消息 |
 | 页脚区（Border bottom） | 唯一展示 `vX.Y.Z · build yymmddhhmm`（10 位，如 `v1.2.3 · build 2611051259`），文本来自 `internal/buildinfo.Footer()`；页眉不得出现版本号（见 `CONTRIBUTING.md` §8.2） |
 

@@ -4,6 +4,29 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [2.0.2] - 2026-11-06
+
+### Added
+- **执行日志国际化** - `internal/i18n/log.go` 新增 zh / en 执行日志字典，`engine` / CLI / `nogui` 提示统一走 `i18n.Logs()`，切换语言后日志同步生效
+- **GUI 关于区** - 主窗口顶部新增「关于」按钮弹窗，版本与构建信息仍只在页脚展示
+- **macOS 隐藏属性** - `internal/platform` 的 Unix 实现补齐 `chflags hidden/nohidden`，命令缺失时降级为点前缀隐藏
+
+### Changed
+- **迁移收尾规范同步** - `OPENSPEC.md` 按 Go 实现重写功能 / 交互 / 兼容性描述；`CONTRIBUTING.md` §6.3 与 PR 模板改为 Go 门禁；README 修正唯一版本源与二次确认表述
+- **交叉编译脚本** - `scripts/build.ps1` / `build.sh` 显式启用 CGO 并检查目标交叉编译器，缺工具链时跳过并警告，不静默产出不可运行文件
+- **测试装置拆分** - `internal/engine/engine_test.go` 拆出 `testkit_test.go`，两个文件均 ≤200 行
+
+### Fixed
+- **删除类测试隔离** - `stubPlatform` 覆盖 `DefaultRepoRoot()` 为 `t.TempDir()`，测试不再触碰真实 `E:\Github`
+- **功能 7 白名单断言写反** - 修正 `TestCleanViteCache` 对 `node_modules` 的保留断言，Go 门禁恢复全绿
+- **吞错处理** - GUI 语言 / 配置保存、CLI 保存配置与 Windows `setx` 清空不再静默忽略错误
+
+### Docs
+- **迁移任务归档** - `docs/tasks.md` 的 G01–G21 全部回填完成并归档至 `docs/tasks-done.md`
+- **版本号同步** - `internal/buildinfo/version.go`、`package.json` / `package-lock.json`、README 徽章与页脚、`docs/tokens.json`、各 `docs/*.md` 与 `prototype/README.md` 标题同步至 `2.0.2`
+
+---
+
 ## [2.0.1] - 2026-11-06
 
 ### Added

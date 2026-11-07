@@ -1,6 +1,6 @@
 {
   "name": "repo-cleaner",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "private": true,
   "description": "🧰 一键清理前端项目冗余：统一管理全局 node_modules、禁用 .next/.vite 缓存、清理 dist/build 垃圾。支持 Next.js / React / Vue / Vite，中文/英文双语菜单。",
   "homepage": "https://github.com/sutchan/RepoCleaner#readme",

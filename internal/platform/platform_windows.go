@@ -1,10 +1,11 @@
 //go:build windows
 
-// internal/platform/platform_windows.go v2.0.0
+// internal/platform/platform_windows.go v2.0.2
 
 package platform
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -57,8 +58,13 @@ func (windowsPlatform) SetUserEnv(key, value string) error {
 
 // RemoveUserEnv 对应 v1.x `setx KEY ""` + `reg delete HKCU\Environment /v KEY /f`。
 func (windowsPlatform) RemoveUserEnv(key string) error {
-	_ = run("setx", key, "")
-	return run("reg", "delete", `HKCU\Environment`, "/v", key, "/f")
+	clearErr := run("setx", key, "")
+	delErr := run("reg", "delete", `HKCU\Environment`, "/v", key, "/f")
+	// 变量不存在时 setx 清空会失败，属预期情形；仅当注册表删除也失败时才报错。
+	if delErr != nil {
+		return errors.Join(clearErr, delErr)
+	}
+	return nil
 }
 
 func (windowsPlatform) GlobalNodeModulesPath() (string, error) {

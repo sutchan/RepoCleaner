@@ -1,6 +1,6 @@
 //go:build !windows
 
-// internal/platform/platform_unix.go v2.0.0
+// internal/platform/platform_unix.go v2.0.2
 
 package platform
 
@@ -13,7 +13,7 @@ import (
 	"strings"
 )
 
-// unixPlatform macOS / Linux 实现：chmod 隐藏位、~/.profile 环境变量持久化。
+// unixPlatform macOS / Linux 实现：chflags / 只读位隐藏、~/.profile 环境变量持久化。
 type unixPlatform struct{}
 
 // New 返回当前平台的 Platform 实现（由 build tag 分发）。
@@ -46,14 +46,37 @@ func (unixPlatform) ListProjectDirs(repoRoot string) ([]string, error) {
 func (unixPlatform) RemoveAll(path string) error  { return os.RemoveAll(path) }
 func (unixPlatform) RemoveFile(path string) error { return os.Remove(path) }
 
-// SetHidden 以「只读位 + 点前缀天然隐藏」实现（macOS 可另行 chflags hidden）。
+// SetHidden 隐藏 .next：macOS 用 chflags hidden，并统一设置只读位；
+// Linux 下点前缀天然隐藏，无需额外命令。
 func (unixPlatform) SetHidden(path string) error {
+	if err := applyChflags(path, "hidden"); err != nil {
+		return err
+	}
 	return os.Chmod(path, 0o444)
 }
 
-// ClearHidden 清除只读位（功能 4 必须先于删除）。
+// ClearHidden 先清除隐藏标志再恢复写权限（功能 4 必须先于删除）。
 func (unixPlatform) ClearHidden(path string) error {
+	if err := applyChflags(path, "nohidden"); err != nil {
+		return err
+	}
 	return os.Chmod(path, 0o644)
+}
+
+// applyChflags 仅在 macOS 且系统提供 chflags 时执行；其余 Unix 平台降级为点前缀隐藏。
+func applyChflags(path, flag string) error {
+	if runtime.GOOS != "darwin" {
+		return nil
+	}
+	bin, err := exec.LookPath("chflags")
+	if err != nil {
+		return nil
+	}
+	out, err := exec.Command(bin, flag, path).CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("chflags %s 执行失败: %w: %s", flag, err, strings.TrimSpace(string(out)))
+	}
+	return nil
 }
 
 func (unixPlatform) TempDir() string { return os.TempDir() }

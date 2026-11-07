@@ -31,24 +31,35 @@ PR 标题格式与提交信息一致：<type>: <description>（如 fix: 修复�
 
 <!-- 实际执行过的命令与结果，未执行的项目须说明原因 -->
 
+产品本体（Go，主线门禁）：
+
+- [ ] `gofmt -l .`（输出为空）
+- [ ] `go vet ./cmd/... ./internal/...`
+- [ ] `go test ./cmd/... ./internal/...`
+- [ ] `go build ./cmd/...`
+- [ ] `npm run check:docs`
+
+无 OpenGL C 工具链时，上述 Go 命令统一加 `-tags nogui`；不得因此跳过门禁。
+仅改已弃用 `src/` 参考界面时额外勾选：
+
 - [ ] `npm run type-check`
 - [ ] `npm run lint`
-- [ ] `npm run check:docs`
 - [ ] `npm run build`
-- [ ] `RepoCleaner.bat` 手动冒烟（按 docs/CONTRIBUTING.md §9.3，仅改批处理时必填）
+
+- [ ] GUI 手动冒烟（按 docs/CONTRIBUTING.md §9.3，变更功能 / 界面时必填）
 
 ## 审查清单
 
 - [ ] 行为与 `docs/OPENSPEC.md` 一致，变更功能已同步规格文档
-- [ ] UI 对齐 `docs/DESIGN-SYSTEM.md` / `docs/tokens.json`，无硬编码颜色
-- [ ] 主要容器与关键元素已加语义化 `id`
-- [ ] 无 `console.log` / `debugger` / `any` / 未使用 import
+- [ ] UI 对齐 `docs/DESIGN-SYSTEM.md` / `docs/tokens.json`，无硬编码颜色；界面文案来自 `internal/i18n`
+- [ ] 主要容器与关键元素已加语义化 `id`（Web 参考界面）
+- [ ] 无 `console.log` / `debugger` / `any` / 未使用 import；无吞错（`_ = err`）
 - [ ] 代码文件单文件 ≤ 200 行，超出已拆分且导出契约不变
-- [ ] 批处理：路径带引号、延迟展开正确、危险操作有二次确认
-- [ ] 版本号已 bump，`package.json` / README 徽章 / CHANGELOG / 展示位一致
+- [ ] 平台层改动：路径经 `path/filepath` 处理、删除目标仅来自枚举、危险操作有二次确认；删除类测试仅用 `t.TempDir()`
+- [ ] 版本号已 bump，`internal/buildinfo/version.go` / `package.json` / README 徽章 / CHANGELOG / 展示位一致
 - [ ] `CHANGELOG.MD` 已新增版本小节；相关文档已同步
 - [ ] 新增文档归入 `docs/`，Markdown 相对链接按实际大小写可达
-- [ ] 无密钥 / Token / 真实用户数据；`node_modules`、`.next`、`*.log`、`*.tsbuildinfo` 未被跟踪
+- [ ] 无密钥 / Token / 真实用户数据；`node_modules`、`.next`、`*.log`、`*.tsbuildinfo`、`bin/` 未被跟踪
 - [ ] 已阅读[行为准则](CODE_OF_CONDUCT.md)，PR 描述与讨论保持尊重、就事论事
 - [ ] 本 PR 不含未披露的安全漏洞（安全问题走[私密渠道](SECURITY.md)）
 
