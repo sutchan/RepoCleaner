@@ -4,7 +4,7 @@
 
 [![Platform](https://img.shields.io/badge/Platform-Win%20%7C%20macOS%20%7C%20Linux-blue?style=flat)](https://github.com/sutchan/RepoCleaner)
 [![Go](https://img.shields.io/badge/Go-1.25%2B-00ADD8?style=flat&logo=go&logoColor=white)](https://go.dev)
-[![Version](https://img.shields.io/badge/Version-2.0.2-green?style=flat)](https://github.com/sutchan/RepoCleaner)
+[![Version](https://img.shields.io/badge/Version-2.1.0-green?style=flat)](https://github.com/sutchan/RepoCleaner)
 [![License](https://img.shields.io/badge/License-MIT-orange?style=flat)](https://github.com/sutchan/RepoCleaner)
 [![Node](https://img.shields.io/badge/Node.js-339933?style=flat&logo=node.js&logoColor=white)](https://nodejs.org)
 [![Disk](https://img.shields.io/badge/Saves-10GB%2B-red?style=flat)](https://github.com/sutchan/RepoCleaner)
@@ -51,10 +51,12 @@
 
 - 🖥️ Go 编译的**单文件可执行程序**（Windows / macOS / Linux），零第三方运行时依赖
 - 🎨 Fyne 桌面 GUI，一键操作；也支持命令行模式
+- 🧪 预演模式（dry-run）：先看将要删除什么，再决定是否执行
 - 🌏 中文 / English 双语菜单，可交互或命令行切换
 - ⚙️ 支持命令行参数、配置文件、交互式选择三种运行方式
 - 💾 自动保存仓库根目录配置，一次设置永久生效
 - 🛡️ 危险操作（删除 `node_modules`）前二次确认，避免误删
+- 📊 全局依赖安装逐组检查退出码，失败项汇总提示
 
 ---
 
@@ -73,7 +75,7 @@
 4. **按功能按钮选择功能**
 5. **一次配置，所有项目永久干净**
 
-> 应用页脚展示 `vX.Y.Z · build yymmddhhmm`（10 位构建编号，如 `v2.0.2 · build 2611061234`），便于核对当前构建版本与时间；格式与注入规则见[开发规范 §8.2](./docs/CONTRIBUTING.md)。
+> 应用页脚展示 `vX.Y.Z · build yymmddhhmm`（10 位构建编号，如 `v2.1.0 · build 2611071014`），便于核对当前构建版本与时间；格式与注入规则见[开发规范 §8.2](./docs/CONTRIBUTING.md)。
 
 ### 🌟 推荐使用流程
 
@@ -381,6 +383,6 @@ RepoCleaner/
 
 <div align="center">
 
-RepoCleaner v2.0.2 · MIT License · [文档中心](./docs/README.md)
+RepoCleaner v2.1.0 · MIT License · [文档中心](./docs/README.md)
 
 </div>

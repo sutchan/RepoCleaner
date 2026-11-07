@@ -1,4 +1,4 @@
-// internal/engine/engine.go v2.0.2
+// internal/engine/engine.go v2.1.0
 
 // Package engine 实现功能 1 ～ 7 的平台无关业务逻辑；OS 差异一律经 platform.Platform。
 package engine
@@ -41,33 +41,9 @@ var npmGroups = [][]string{
 	{"cross-env", "dotenv", "nodemon", "pm2", "rimraf", "mkdirp"},
 }
 
-// Run 按功能编号（1-7）执行对应功能，lang 决定执行日志语言。
-func Run(p platform.Platform, fn int, repoRoot string, lang i18n.Lang, log Logger) error {
-	switch fn {
-	case 1:
-		return EnableGlobalNodeModules(p, repoRoot, lang, log)
-	case 2:
-		return ResetNodeConfig(p, repoRoot, lang, log)
-	case 3:
-		return CleanNextCache(p, repoRoot, lang, log)
-	case 4:
-		return RestoreNextCache(p, repoRoot, lang, log)
-	case 5:
-		return InstallGlobalDeps(lang, log)
-	case 6:
-		return CleanAllCaches(p, repoRoot, lang, log)
-	case 7:
-		return CleanViteCache(p, repoRoot, lang, log)
-	default:
-		return fmt.Errorf("unknown function: %d", fn)
-	}
-}
-
-// IsDangerous 返回功能是否为危险操作（需要二次确认）：1 / 6 / 7。
-func IsDangerous(fn int) bool { return fn == 1 || fn == 6 || fn == 7 }
-
 // EnableGlobalNodeModules 功能 1：启用全局 node_modules（对齐 OPENSPEC §3.1）。
-func EnableGlobalNodeModules(p platform.Platform, repoRoot string, lang i18n.Lang, log Logger) error {
+// DryRun 下仅输出预演日志，不写环境变量 / .npmrc / 删除目录。
+func EnableGlobalNodeModules(p platform.Platform, repoRoot string, lang i18n.Lang, opts Options, log Logger) error {
 	d := i18n.Logs(lang)
 	log.Logf("%s", d.F1Step1)
 	globalPath, err := p.GlobalNodeModulesPath()
@@ -77,7 +53,9 @@ func EnableGlobalNodeModules(p platform.Platform, repoRoot string, lang i18n.Lan
 	log.Logf(d.F1Path, globalPath)
 
 	log.Logf("%s", d.F1Step2)
-	if err := p.SetUserEnv("NODE_PATH", globalPath); err != nil {
+	if opts.DryRun {
+		log.Logf(d.DryRunEnv, "NODE_PATH="+globalPath)
+	} else if err := p.SetUserEnv("NODE_PATH", globalPath); err != nil {
 		log.Logf(d.EnvSetWarn, err)
 	}
 
@@ -88,6 +66,10 @@ func EnableGlobalNodeModules(p platform.Platform, repoRoot string, lang i18n.Lan
 	}
 	for _, dir := range dirs {
 		if !platform.IsNodeProject(dir) {
+			continue
+		}
+		if opts.DryRun {
+			log.Logf(d.DryRunWrite, filepath.Join(dir, ".npmrc"))
 			continue
 		}
 		if err := writeNpmrc(p, dir, globalPath); err != nil {
@@ -101,6 +83,10 @@ func EnableGlobalNodeModules(p platform.Platform, repoRoot string, lang i18n.Lan
 	for _, dir := range dirs {
 		nm := filepath.Join(dir, "node_modules")
 		if info, err := os.Stat(nm); err == nil && info.IsDir() {
+			if opts.DryRun {
+				log.Logf(d.DryRunDelete, nm)
+				continue
+			}
 			log.Logf(d.Cleaning, filepath.Base(dir))
 			if err := p.RemoveAll(nm); err != nil {
 				log.Logf(d.DeleteErr, err)
@@ -118,10 +104,13 @@ func writeNpmrc(p platform.Platform, projectDir, globalPath string) error {
 }
 
 // ResetNodeConfig 功能 2：重置 Node 配置（对齐 OPENSPEC §3.2）。
-func ResetNodeConfig(p platform.Platform, repoRoot string, lang i18n.Lang, log Logger) error {
+// DryRun 下仅输出预演日志，不删除环境变量 / .npmrc。
+func ResetNodeConfig(p platform.Platform, repoRoot string, lang i18n.Lang, opts Options, log Logger) error {
 	d := i18n.Logs(lang)
 	log.Logf("%s", d.F2Step1)
-	if err := p.RemoveUserEnv("NODE_PATH"); err != nil {
+	if opts.DryRun {
+		log.Logf(d.DryRunEnvDel, "NODE_PATH")
+	} else if err := p.RemoveUserEnv("NODE_PATH"); err != nil {
 		log.Logf(d.EnvDelWarn, err)
 	}
 	log.Logf("%s", d.F2Step2)
@@ -130,7 +119,14 @@ func ResetNodeConfig(p platform.Platform, repoRoot string, lang i18n.Lang, log L
 		return err
 	}
 	for _, dir := range dirs {
-		if err := p.RemoveFile(filepath.Join(dir, ".npmrc")); err == nil {
+		npmrc := filepath.Join(dir, ".npmrc")
+		if opts.DryRun {
+			if _, err := os.Stat(npmrc); err == nil {
+				log.Logf(d.DryRunDelete, npmrc)
+			}
+			continue
+		}
+		if err := p.RemoveFile(npmrc); err == nil {
 			log.Logf(d.Removed, filepath.Base(dir))
 		}
 	}

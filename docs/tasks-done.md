@@ -33,6 +33,7 @@
 | R3 | 全量核验 src 应用语义化 ID 覆盖交互元素 | 低 | 已完成（核验） | page.tsx 已为 header/overview/security-note/main-tabs/repo-card-*/tweak-card-*/app-footer 等配置 id，符合 DESIGN-SYSTEM §3.3 |
 | R4 | 确认 DESIGN-SYSTEM §7 差距清单与代码一致 | 低 | 已完成（核验） | §7 G1–G8 含「规划/已实现」标记，亮色主题、Tabs ARIA、清理按钮 onClick 等明确列为未实现，文档与实现一致 |
 | R5 | 页脚版本与 10 位 build 编号规范落地 | 高 | 已完成 | v2.0.1：`internal/buildinfo.Footer()` 统一生成 `vX.Y.Z · build yymmddhhmm`，构建脚本 `-ldflags -X` 注入，Web 侧 `next.config.ts` 改 10 位；规范写入 `CONTRIBUTING.md` §8.2 / `DESIGN-SYSTEM.md` §3.0 / `OPENSPEC.md` §4.6 |
+| R6 | dry-run 预演模式 + L4 修复 | 高 | 已完成 | v2.1.0：`engine.Options.DryRun` 贯穿功能 1–7，CLI `-dry-run` / GUI 复选框（会话级），预演跳过确认；功能 5 逐组检查退出码并双语汇总失败组、返回错误；`dryrun_test.go` 覆盖，nogui 门禁全绿，GUI 编译需 C 工具链留待 CI |
 
 ## 四、v2.0.0 Go 迁移清单 G01–G21（2026-11-05 ~ 2026-11-06 全部完成）
 

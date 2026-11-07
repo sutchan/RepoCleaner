@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [2.1.0] - 2026-11-07
+
+### Added
+- **dry-run 预演模式** - `engine.Options.DryRun` 贯穿功能 1–7：仅输出「将写入 / 将删除 / 将设置环境变量 / 将安装」预演日志，不修改任何文件与环境变量；CLI 新增 `-dry-run` 参数，GUI 新增「预演模式」复选框（会话级选择，不写入 `config.ini`）；预演下危险操作跳过二次确认（对齐 `OPENSPEC.md` §4.7）
+- **预演模式单元测试** - `internal/engine/dryrun_test.go` 覆盖功能 1 / 5 / 6 预演行为（不删除文件、不写配置、不执行 npm）与功能 5 失败汇总
+
+### Changed
+- **L4 修复** - 功能 5 检查每组 `npm install -g` 退出码，结束后按双语文案汇总失败组并返回错误（CLI 退出码非 0）；单组失败仍不中断后续组
+- **版本号同步** - `internal/buildinfo/version.go`、`package.json` / `package-lock.json`、README 徽章与页脚、`docs/tokens.json`、各 `docs/*.md` 与 `prototype/README.md` 标题同步至 `2.1.0`
+
+---
+
 ## [2.0.2] - 2026-11-06
 
 ### Added

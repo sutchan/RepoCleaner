@@ -1,4 +1,4 @@
-# RepoCleaner 开放规格说明书 (OpenSpec) v2.0.2
+# RepoCleaner 开放规格说明书 (OpenSpec) v2.1.0
 
 > **本文定位**：产品功能规格，定义「做什么」——7 项功能的行为契约、交互方式、环境与兼容性。
 > 开发规范（编码 / 提交 / 分支 / 审查）见 [CONTRIBUTING.md](./CONTRIBUTING.md)；UI 设计规范见 [DESIGN-SYSTEM.md](./DESIGN-SYSTEM.md)；变更历史见 [CHANGELOG.MD](../CHANGELOG.MD)；文档导航见 [docs/README.md](./README.md)。
@@ -133,7 +133,7 @@
 | 开发工具 | `cross-env` `dotenv` `nodemon` `pm2` `rimraf` `mkdirp` |
 
 - **预期结果**：依赖安装到全局，项目可通过 `NODE_PATH` 直接引用。
-- **注意**：此功能需要网络；单组失败不会中断后续组（`runNpmInstall` 返回错误后仅记录日志，对应 L4）。
+- **注意**：此功能需要网络；单组失败不中断后续组，结束后汇总失败组并以双语文案返回错误（v2.1.0 修复 L4，CLI 退出码非 0）。
 
 ### 3.6 功能 6：清理所有项目缓存
 
@@ -177,6 +177,7 @@ GUI 提供 3 种目录来源：使用当前目录、手动输入完整路径（�
 | 参数 | 说明 | 示例 |
 |------|------|------|
 | `-lang en\|zh` | 设置语言并写入 `config.ini` | `repo-cleaner -lang en` |
+| `-dry-run` | 预演模式：仅显示将要执行的操作，不修改任何文件（见 §4.7） | `repo-cleaner -dry-run 6` |
 | `-h` / `--help` | 显示帮助信息 | `repo-cleaner -h` |
 | `1`-`7` | 直接运行对应功能（命令行模式，跳过 GUI） | `repo-cleaner 1` |
 | 路径 | 指定仓库根目录（支持含空格路径，需引号包裹） | `repo-cleaner "D:\My Projects"` |
@@ -222,6 +223,13 @@ GUI 提供 3 种目录来源：使用当前目录、手动输入完整路径（�
 - Go GUI 页脚文本由 `internal/buildinfo.Footer()` 生成；`scripts/build.ps1` / `scripts/build.sh` 在构建期通过 `-ldflags -X` 注入 `BuildID`，未注入时由 `vcs.time` 推导，仍缺失则仅显示版本号。
 - 已弃用 Web 参考界面由 `next.config.ts` 注入 `NEXT_PUBLIC_APP_VERSION` / `NEXT_PUBLIC_BUILD_ID`，在 `<footer id="app-footer">` 展示；注入缺失时回退仅显示版本号。
 - 版本权威源与同步清单见 [`CONTRIBUTING.md` §8.2](./CONTRIBUTING.md)，变更历史见 [CHANGELOG.MD](../CHANGELOG.MD)。
+
+### 4.7 预演模式 (dry-run)
+
+- **入口**：CLI `-dry-run` 参数；GUI「预演模式 (dry-run)」复选框（会话级选择，不写入 `config.ini`）。
+- **行为**：`engine.Options.DryRun` 贯穿功能 1–7，仅输出「将写入 / 将删除 / 将设置环境变量 / 将安装」预演日志（`[预演]` / `[DRY-RUN]` 前缀），不修改任何文件与环境变量，不执行 `npm install`。
+- **确认**：预演下危险操作（1 / 6 / 7）跳过二次确认。
+- **实现**：预演开关统一在 `internal/engine` 层短路；`internal/platform` 的删除 / 写入 / 环境变量持久化方法在预演下不会被调用。
 
 ---
 
@@ -341,7 +349,7 @@ LANG=zh
 | L1 | ~~`.npmrc` 的 `tmp=` 值未加引号~~ | **v2.0.0 已修复**：`tmp=` 值加引号，兼容含空格的 `TEMP` 路径 |
 | L2 | 功能 1 设置 `NODE_PATH` 后需重开终端才对新进程完全生效 | 当前会话已同步设置，新终端需重开 |
 | L3 | 目录扫描仅覆盖 `REPO_ROOT` 的直接子目录，不递归 | monorepo 深层项目不会被处理 |
-| L4 | 功能 5 不检查 `npm install -g` 的退出码 | 单组安装失败仍显示成功消息 |
+| L4 | ~~功能 5 不检查 `npm install -g` 的退出码~~ | **v2.1.0 已修复**：逐组检查退出码，结束后汇总失败组并返回错误（CLI 退出码非 0） |
 | L5 | ~~功能 6 / 7 使用 `pause` 而非 `Y/N` 二次确认~~ | **v2.0.0 已修复**：GUI 确认弹窗 + CLI `Y/N` |
 
 > 记录限制是为了让规格与实现一致；修复限制时须同步更新本表与 `CHANGELOG.MD`。
@@ -392,10 +400,10 @@ npm run check:docs                          # 校验所有 Markdown 相对链接
 ## 10. 扩展计划
 
 - [ ] 支持更多框架缓存清理（Angular、Svelte）
-- [ ] 添加 dry-run 模式预览待删除文件
 - [ ] 支持自定义清理规则
 - [ ] 添加日志记录功能
-- [ ] 功能 5 检查 `npm install -g` 退出码并汇总失败项（对应 L4）
+- [x] ~~添加 dry-run 模式预览待删除文件~~（v2.1.0 已完成，见 §4.7）
+- [x] ~~功能 5 检查 `npm install -g` 退出码并汇总失败项（对应 L4）~~（v2.1.0 已完成）
 - [x] ~~功能 6 / 7 改为 `Y/N` 二次确认~~（v2.0.0 已完成，见 L5）
 - [ ] 支持递归扫描 monorepo 深层项目（对应 L3）
 - [ ] 添加详细进度显示

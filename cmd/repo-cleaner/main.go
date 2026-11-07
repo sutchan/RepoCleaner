@@ -1,4 +1,4 @@
-// cmd/repo-cleaner/main.go v2.0.2
+// cmd/repo-cleaner/main.go v2.1.0
 
 // 命令 repo-cleaner 是产品入口：解析参数后分流到命令行模式或 Fyne GUI。
 package main
@@ -20,9 +20,11 @@ import (
 
 func main() {
 	langFlag := flag.String("lang", "", "界面语言 en|zh（写入 config.ini）")
+	dryRunFlag := flag.Bool("dry-run", false, "预演模式：仅显示将要执行的操作，不修改任何文件")
 	showHelp := flag.Bool("h", false, "显示帮助")
 	flag.BoolVar(showHelp, "help", false, "显示帮助")
 	flag.Parse()
+	opts := engine.Options{DryRun: *dryRunFlag}
 
 	cfgPath := config.Path()
 	cfg, err := config.Load(cfgPath)
@@ -47,7 +49,7 @@ func main() {
 	root := resolveRoot(p, cfg, pathArg)
 
 	if fn > 0 {
-		runCLI(p, cfgPath, &cfg, fn, root, lang)
+		runCLI(p, cfgPath, &cfg, fn, root, lang, opts)
 		return
 	}
 	runGUI(cfg)
@@ -79,14 +81,14 @@ func resolveRoot(p platform.Platform, cfg config.Config, pathArg string) string 
 	return p.DefaultRepoRoot()
 }
 
-// runCLI 命令行模式：危险操作保留二次确认（对齐 OPENSPEC §4.5）。
-func runCLI(p platform.Platform, cfgPath string, cfg *config.Config, fn int, root string, lang i18n.Lang) {
+// runCLI 命令行模式：危险操作保留二次确认，预演模式跳过（对齐 OPENSPEC §4.5 / §4.7）。
+func runCLI(p platform.Platform, cfgPath string, cfg *config.Config, fn int, root string, lang i18n.Lang, opts engine.Options) {
 	d := i18n.Logs(lang)
 	if err := platform.ValidateRoot(root); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	if engine.IsDangerous(fn) {
+	if engine.IsDangerous(fn) && !opts.DryRun {
 		fmt.Print(d.ConfirmCLI)
 		reader := bufio.NewReader(os.Stdin)
 		answer, _ := reader.ReadString('\n')
@@ -95,7 +97,7 @@ func runCLI(p platform.Platform, cfgPath string, cfg *config.Config, fn int, roo
 			return
 		}
 	}
-	if err := engine.Run(p, fn, root, lang, engine.StdLogger{}); err != nil {
+	if err := engine.Run(p, fn, root, lang, opts, engine.StdLogger{}); err != nil {
 		fmt.Fprintf(os.Stderr, d.ErrorPrefix+"\n", err)
 		os.Exit(1)
 	}
@@ -117,6 +119,7 @@ func printHelp() {
 	fmt.Println("  1-7       Run corresponding function directly (CLI mode)")
 	fmt.Println("  -lang en  Set language to English")
 	fmt.Println("  -lang zh  Set language to Chinese")
+	fmt.Println("  -dry-run  Preview actions without modifying anything")
 	fmt.Println("  -h        Show this help")
 	fmt.Println()
 	fmt.Println("Examples:")
