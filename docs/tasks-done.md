@@ -34,6 +34,8 @@
 | R4 | 确认 DESIGN-SYSTEM §7 差距清单与代码一致 | 低 | 已完成（核验） | §7 G1–G8 含「规划/已实现」标记，亮色主题、Tabs ARIA、清理按钮 onClick 等明确列为未实现，文档与实现一致 |
 | R5 | 页脚版本与 10 位 build 编号规范落地 | 高 | 已完成 | v2.0.1：`internal/buildinfo.Footer()` 统一生成 `vX.Y.Z · build yymmddhhmm`，构建脚本 `-ldflags -X` 注入，Web 侧 `next.config.ts` 改 10 位；规范写入 `CONTRIBUTING.md` §8.2 / `DESIGN-SYSTEM.md` §3.0 / `OPENSPEC.md` §4.6 |
 | R6 | dry-run 预演模式 + L4 修复 | 高 | 已完成 | v2.1.0：`engine.Options.DryRun` 贯穿功能 1–7，CLI `-dry-run` / GUI 复选框（会话级），预演跳过确认；功能 5 逐组检查退出码并双语汇总失败组、返回错误；`dryrun_test.go` 覆盖，nogui 门禁全绿，GUI 编译需 C 工具链留待 CI |
+| V2 | 支持更多框架缓存清理（Angular / Svelte） | 低 | 已完成 | v2.2.0：功能 7 白名单新增 `.angular`、`.svelte-kit`，`WarningVite` 双语文案与 `OPENSPEC.md` §2 / §3.7 同步；新增 `TestCleanAngularSvelteCache`；顺带修复 `config.ini` 跟踪问题（.gitignore + `docs/config.example.ini`） |
+| V6 | 落地 GitHub Actions：门禁工作流 + 全绿后自动发布 Release | 中 | 已完成 | v2.2.0：新增 `.github/workflows/ci.yml`（nogui 全套门禁 + Linux 默认标签 GUI 编译）与 `release.yml`（tag `vX.Y.Z` 触发，gate 重跑门禁 → 三平台矩阵构建 → tag 与版本权威源一致性校验 → SHA256SUMS + CHANGELOG 提取说明 → 自动 Release）；规范落地于 `CONTRIBUTING.md` §8.4；windows/arm64 因 runner 缺交叉工具链暂不产出（已在 §8.4 标注） |
 
 ## 四、v2.0.0 Go 迁移清单 G01–G21（2026-11-05 ~ 2026-11-06 全部完成）
 

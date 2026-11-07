@@ -1,4 +1,4 @@
-// internal/engine/engine_test.go v2.1.0
+// internal/engine/engine_test.go v2.2.0
 
 package engine
 
@@ -51,6 +51,29 @@ func TestCleanViteCache(t *testing.T) {
 	}
 	if !exists(t, filepath.Join(proj, "node_modules")) {
 		t.Fatal("功能 7 不应删除 node_modules")
+	}
+}
+
+func TestCleanAngularSvelteCache(t *testing.T) {
+	s := newStub(t)
+	proj := newProject(t, s.DefaultRepoRoot(), "spa-app", map[string][]byte{
+		"package.json":          []byte("{}"),
+		".angular/cache.json":   []byte("x"),
+		".svelte-kit/output.js": []byte("x"),
+		"src/App.svelte":        []byte("keep"),
+	})
+	var log captureLogger
+	if err := CleanViteCache(s, s.DefaultRepoRoot(), i18n.Zh, Options{}, &log); err != nil {
+		t.Fatal(err)
+	}
+	if exists(t, filepath.Join(proj, ".angular")) {
+		t.Fatal(".angular 应被删除")
+	}
+	if exists(t, filepath.Join(proj, ".svelte-kit")) {
+		t.Fatal(".svelte-kit 应被删除")
+	}
+	if !exists(t, filepath.Join(proj, "src", "App.svelte")) {
+		t.Fatal("白名单之外的文件必须保留")
 	}
 }
 

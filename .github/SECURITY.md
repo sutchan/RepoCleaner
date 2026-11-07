@@ -1,6 +1,6 @@
-# 安全策略 (Security Policy) v1.2.6
+# 安全策略 (Security Policy) v2.2.0
 
-RepoCleaner 是一个会**删除文件与目录**的 Windows 批处理工具，安全边界格外重要。本项目认真对待安全报告，感谢负责任地披露问题。
+RepoCleaner 是一个会**删除文件与目录**的跨平台工具（Go 编译的单文件可执行程序，支持 Windows / macOS / Linux），安全边界格外重要。本项目认真对待安全报告，感谢负责任地披露问题。
 
 ## 支持的版本
 
@@ -8,8 +8,8 @@ RepoCleaner 是一个会**删除文件与目录**的 Windows 批处理工具，�
 
 | 版本 | 安全修复 |
 |------|----------|
-| 最新 `1.2.x` | ✅ 支持 |
-| 更早的 `1.x` | ❌ 不支持，请先升级 |
+| 最新 `2.2.x` | ✅ 支持 |
+| 更早的 `2.x` / `1.x` | ❌ 不支持，请先升级 |
 | 未发布的开发分支 | ❌ 不提供承诺 |
 
 版本历史与已修复问题见 [CHANGELOG.MD](../CHANGELOG.MD)（`Security` 分组）。
@@ -28,8 +28,8 @@ https://github.com/sutchan/RepoCleaner/security/advisories/new
 
 ### 报告请包含
 
-- 受影响的产品版本与运行方式（交互式 / 命令行参数）
-- Windows 版本、Node.js 与 npm 版本
+- 受影响的产品版本与运行方式（GUI / 命令行参数）
+- 操作系统与版本（Windows / macOS / Linux）；涉及功能 1 / 5 时附 Node.js 与 npm 版本
 - 复现步骤与最小可复现环境（**必须**在隔离的临时目录，见下方安全边界）
 - 实际影响与受影响的功能编号（功能 1～7，见 [OPENSPEC.md](../docs/OPENSPEC.md) §3）
 - 日志或截图（请脱敏，移除真实路径、用户名、密钥与仓库内容）
@@ -43,18 +43,18 @@ https://github.com/sutchan/RepoCleaner/security/advisories/new
 以下为设计上的既定行为，理解它们有助于判断报告是否属于安全漏洞：
 
 - **删除不可逆**：功能 1、6、7 会删除 `node_modules`、`.next`、`dist`、`build`、lock 文件等；运行前务必备份。
-- **二次确认**：功能 1 要求输入 `Y` 确认；功能 6 / 7 显示警告并 `pause`。已知限制见 [OPENSPEC.md](../docs/OPENSPEC.md) §7.3。
-- **路径来源受限**：删除目标只取自 `for /d` 枚举出的 `REPO_ROOT` 直接子目录并加引号，不接受任意用户拼接路径；详见[开发规范](../docs/CONTRIBUTING.md) §4.5 与 §11。
+- **二次确认**：功能 1 / 6 / 7 属危险操作，GUI 弹确认窗、CLI 输入 `Y` 确认（预演模式 `-dry-run` 下跳过确认，但也绝不修改文件）。
+- **路径来源受限**：删除目标只取自 `internal/platform.ListProjectDirs`（`os.ReadDir`）枚举出的 `REPO_ROOT` 直接子目录，经 `path/filepath` 拼接，不接受任意用户拼接路径；详见[开发规范](../docs/CONTRIBUTING.md) §11 与 [OPENSPEC.md](../docs/OPENSPEC.md) §7.1。
 - **不做真实删除验证**：任何验证都必须在隔离的临时目录进行，严禁在真实仓库根目录执行删除类功能。
 
-**特别值得报告**的情形：可导致删除超出 `REPO_ROOT` 直接子目录范围的路径（如路径穿越、引号注入、`for /d` 变量被污染）、绕过二次确认、或在未确认时执行删除。
+**特别值得报告**的情形：可导致删除超出 `REPO_ROOT` 直接子目录范围的路径（如路径穿越、枚举结果被污染）、绕过二次确认、或在未确认时执行删除。
 
 ## 不属于安全漏洞的情况
 
 - **误删文件或数据丢失**：属使用风险，请见 [README.MD](../README.MD)「注意事项」与「常见问题 FAQ」；本项目不对数据丢失负责。
 - **功能建议 / 使用疑问**：请用 [Issue 模板](../.github/ISSUE_TEMPLATE) 或查阅[支持指南](SUPPORT.md)。
 - **npm、`next` 等上游依赖的漏洞**：请向对应上游项目报告；本仓库仅通过升级依赖处理。
-- **参考界面应用的展示性问题**：根 `src/` 为纯展示 dashboard，不执行真实清理；若涉及 XSS / 密钥泄露等仍请按上述私密渠道报告。
+- **参考界面应用的展示性问题**：根 `src/` 为纯展示 dashboard（已弃用），不执行真实清理；若涉及 XSS / 密钥泄露等仍请按上述私密渠道报告。
 
 ## 相关文件
 

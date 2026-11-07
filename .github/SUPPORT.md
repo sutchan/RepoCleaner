@@ -1,4 +1,4 @@
-# 支持指南 (Support) v1.2.6
+# 支持指南 (Support) v2.2.0
 
 RepoCleaner 由个人维护，**不提供实时支持，也不承诺响应时间或服务等级**。多数问题可先从文档中找到答案。
 
@@ -24,8 +24,8 @@ RepoCleaner 由个人维护，**不提供实时支持，也不承诺响应时间
 
 一个有效的报告应包含：
 
-- RepoCleaner 版本号（见 [CHANGELOG.MD](../CHANGELOG.MD) 或脚本头部）
-- Windows 版本、Node.js 与 npm 版本
+- RepoCleaner 版本号（GUI 页脚 / `repo-cleaner -h` 输出 / [CHANGELOG.MD](../CHANGELOG.MD)）
+- 操作系统与版本（Windows / macOS / Linux）；涉及功能 1 / 5 时附 Node.js 与 npm 版本
 - 运行方式（双击交互 / 命令行参数，给出完整命令）
 - `REPO_ROOT` 的**目录结构示意**（可用假项目名，不要贴真实路径或私有仓库名）
 - 复现步骤、预期行为、实际行为

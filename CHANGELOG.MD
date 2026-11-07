@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [2.2.0] - 2026-11-07
+
+### Added
+- **Angular / Svelte 缓存清理（V2）** - 功能 7 白名单新增 `.angular`、`.svelte-kit`（v2.2.0 起适合 Vite / Turborepo / Angular / Svelte 项目）；`WarningVite` 双语警告文案同步；新增 `TestCleanAngularSvelteCache`
+- **配置示例模板** - 新增 `docs/config.example.ini`
+
+### Changed
+- **`config.ini` 不再入库** - 该文件含开发者本机 `REPO_ROOT` 路径，属运行时个人配置：`.gitignore` 排除、移出 Git 跟踪；`OPENSPEC.md` §5.2 / §5.3 / 新增 §9.1a 与 `CONTRIBUTING.md` 目录树同步标注
+- **版本号同步** - `internal/buildinfo/version.go`、`package.json` / `package-lock.json`、README 徽章与页脚、`docs/tokens.json`、各 `docs/*.md` 与 `prototype/README.md` 标题同步至 `2.2.0`
+
+### Docs
+- **发布规范与落地（`CONTRIBUTING.md` §8.4）** - 新增「发布流程与 Release 自动化」规范并同步落地：GitHub Actions 所有工作流全绿后自动发布 Release；新增 `.github/workflows/ci.yml`（门禁 + GUI 编译验证）与 `.github/workflows/release.yml`（tag `vX.Y.Z` 驱动，gate 重跑门禁 → 三平台矩阵构建 5 目标二进制 → tag 与版本权威源一致性校验 → SHA256SUMS + CHANGELOG 提取说明 → 自动创建 Release）；`docs/README.md` 摘要与 §9.2 审查清单同步；windows/arm64 因 runner 缺交叉工具链暂不产出（§8.4 已标注）
+- **全量文档审计** - `SECURITY.md` 从「Windows 批处理工具」改写为 Go 跨平台产品实况（版本表、报告内容、安全边界 `os.ReadDir` 枚举 / dry-run 行为）；`SUPPORT.md` 与 Issue 模板（bug_report / feature_request）版本头同步 2.2.0、报告内容改为跨平台（OS 字段、版本获取方式、复现示例 `RepoCleaner.bat` → `repo-cleaner`）；README 补 Angular / Svelte 适配类型、功能 7 新清理项、`-dry-run` 参数与示例、workflows 目录、构建步骤细化；`CONTRIBUTING.md` §3.1 目录树补 `workflows/`；`OPENSPEC.md` §4.4 菜单示意标注 v1.x 历史来源；`prototype/README.md` 修正「正式」与已弃用的措辞冲突；`docs/README.md` §3 目录树从 v1.x 快照重写为 Go 产品实况（补 `cmd/` / `internal/` / `workflows/` / build 脚本 / 配置示例，`src/` 标注已弃用）、§4 补 Go 门禁与构建命令、§1 文档地图补 `config.example.ini`
+
+---
+
 ## [2.1.0] - 2026-11-07
 
 ### Added

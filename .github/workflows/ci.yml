@@ -1,0 +1,66 @@
+# .github/workflows/ci.yml v2.2.0
+# 仓库级自动门禁（行为契约见 docs/CONTRIBUTING.md §8.4 / §9.1）：
+# gofmt + go vet + go test + go build + npm run check:docs，
+# 另含 Fyne GUI（默认构建标签，需 OpenGL / C 工具链）编译验证。
+name: ci
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: gate (nogui + docs)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.25'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: gofmt
+        run: test -z "$(gofmt -l ./cmd ./internal)"
+
+      - name: go vet (nogui)
+        run: go vet -tags nogui ./...
+
+      - name: go test (nogui)
+        run: go test -tags nogui -count=1 ./...
+
+      - name: go build (nogui)
+        run: go build -tags nogui ./...
+
+      - name: npm ci
+        run: npm ci
+
+      - name: check:docs
+        run: npm run check:docs
+
+  gui-build:
+    name: gui build (linux, default tags)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.25'
+
+      - name: Install OpenGL / X11 dev libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgl1-mesa-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libxxf86vm-dev
+
+      - name: go build (default tags, Fyne GUI)
+        run: go build -trimpath ./cmd/repo-cleaner

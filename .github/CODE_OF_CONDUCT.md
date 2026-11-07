@@ -1,4 +1,4 @@
-# 贡献者行为准则 (Code of Conduct) v1.2.6
+# 贡献者行为准则 (Code of Conduct) v2.2.0
 
 > 本文件改编自 [Contributor Covenant v2.1](https://www.contributor-covenant.org/version/2/1/code_of_conduct/)。
 > 适用于本仓库的所有社区空间（Issue、PR、讨论、评论）以及以项目名义进行的公开交流。

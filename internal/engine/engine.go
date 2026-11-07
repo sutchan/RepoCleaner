@@ -1,4 +1,4 @@
-// internal/engine/engine.go v2.1.0
+// internal/engine/engine.go v2.2.0
 
 // Package engine 实现功能 1 ～ 7 的平台无关业务逻辑；OS 差异一律经 platform.Platform。
 package engine
@@ -29,8 +29,8 @@ var cleanDirsF6 = []string{"node_modules", ".next", ".nuxt", "dist", "build"}
 // 功能 6 清理锁文件白名单。
 var lockFilesF6 = []string{"package-lock.json", "yarn.lock", "pnpm-lock.yaml"}
 
-// 功能 7 清理白名单（对齐 OPENSPEC §3.7）。
-var cleanDirsF7 = []string{".vite", ".turbo", ".nuxt", "dist", "build", "coverage", ".nyc_output"}
+// 功能 7 清理白名单（对齐 OPENSPEC §3.7；v2.2.0 起含 Angular / Svelte 缓存）。
+var cleanDirsF7 = []string{".vite", ".turbo", ".nuxt", ".angular", ".svelte-kit", "dist", "build", "coverage", ".nyc_output"}
 
 // npmGroups 功能 5 安装分组（对齐 OPENSPEC §3.5）。
 var npmGroups = [][]string{

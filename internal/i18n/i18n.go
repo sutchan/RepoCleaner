@@ -1,4 +1,4 @@
-// internal/i18n/i18n.go v2.1.0
+// internal/i18n/i18n.go v2.2.0
 
 // Package i18n 是唯一的 UI 文案来源（zh / en），禁止在 ui / engine 层硬编码文案。
 package i18n
@@ -56,7 +56,7 @@ var dicts = map[Lang]Dict{
 		DryRunLabel:    "预演模式 (dry-run)",
 		WarningF1:      "警告: 这将删除所有项目的本地 node_modules!",
 		WarningAll:     "警告: 这将永久删除所有缓存文件!",
-		WarningVite:    "警告: 这将删除 .vite/.turbo/dist 等目录!",
+		WarningVite:    "警告: 这将删除 .vite/.turbo/.angular 等构建缓存目录!",
 		Confirm:        "是否继续?",
 		Ok:             "[完成]",
 		ErrInvalidRoot: "错误: 路径不存在!",
@@ -76,7 +76,7 @@ var dicts = map[Lang]Dict{
 		DryRunLabel:    "Dry-run mode",
 		WarningF1:      "WARNING: This will delete all local node_modules!",
 		WarningAll:     "WARNING: This will permanently delete all cache files!",
-		WarningVite:    "WARNING: This will delete .vite/.turbo/dist directories!",
+		WarningVite:    "WARNING: This will delete .vite/.turbo/.angular and other build cache directories!",
 		Confirm:        "Continue?",
 		Ok:             "[OK]",
 		ErrInvalidRoot: "ERROR: Path does not exist!",

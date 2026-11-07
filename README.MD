@@ -4,7 +4,7 @@
 
 [![Platform](https://img.shields.io/badge/Platform-Win%20%7C%20macOS%20%7C%20Linux-blue?style=flat)](https://github.com/sutchan/RepoCleaner)
 [![Go](https://img.shields.io/badge/Go-1.25%2B-00ADD8?style=flat&logo=go&logoColor=white)](https://go.dev)
-[![Version](https://img.shields.io/badge/Version-2.1.0-green?style=flat)](https://github.com/sutchan/RepoCleaner)
+[![Version](https://img.shields.io/badge/Version-2.2.0-green?style=flat)](https://github.com/sutchan/RepoCleaner)
 [![License](https://img.shields.io/badge/License-MIT-orange?style=flat)](https://github.com/sutchan/RepoCleaner)
 [![Node](https://img.shields.io/badge/Node.js-339933?style=flat&logo=node.js&logoColor=white)](https://nodejs.org)
 [![Disk](https://img.shields.io/badge/Saves-10GB%2B-red?style=flat)](https://github.com/sutchan/RepoCleaner)
@@ -15,7 +15,7 @@
 
 > 一键让所有前端项目保持干净：无冗余 `node_modules`、无 `.next` 缓存、无打包垃圾。
 
-适配项目类型：**Next.js / React / Vue / Vite / 常规 Node 项目**
+适配项目类型：**Next.js / React / Vue / Vite / Angular / Svelte / 常规 Node 项目**
 
 ---
 
@@ -45,7 +45,7 @@
 | Next.js 项目产生大量 `.next` 缓存文件 | 禁用/启用 `.next` 缓存一键切换 |
 | 项目打包产生 `dist`/`build` 垃圾文件 | 一键清理所有缓存 |
 | 依赖混乱、无法统一管理 | 统一安装到全局，告别重复安装 |
-| Vite / Turborepo 等构建缓存膨胀 | 专清 `.vite`/`.turbo`/`coverage` 等目录 |
+| Vite / Turborepo / Angular / Svelte 构建缓存膨胀 | 专清 `.vite`/`.turbo`/`.angular`/`.svelte-kit`/`coverage` 等目录 |
 
 **特性**
 
@@ -69,13 +69,13 @@
 
 ### 使用步骤
 
-1. **下载或构建 `repo-cleaner` 可执行文件**（源码构建：`go build -o repo-cleaner ./cmd/repo-cleaner`）
+1. **下载或构建 `repo-cleaner` 可执行文件**（源码构建：`./scripts/build.ps1` / `./scripts/build.sh` 交叉编译到 `bin/`；本机快速构建 `go build -o repo-cleaner ./cmd/repo-cleaner`，Fyne GUI 需 C 工具链）
 2. **运行（Windows 双击，macOS/Linux 命令行执行）**
 3. **选择仓库根目录**（支持手动输入、目录选择、保存配置）
 4. **按功能按钮选择功能**
 5. **一次配置，所有项目永久干净**
 
-> 应用页脚展示 `vX.Y.Z · build yymmddhhmm`（10 位构建编号，如 `v2.1.0 · build 2611071014`），便于核对当前构建版本与时间；格式与注入规则见[开发规范 §8.2](./docs/CONTRIBUTING.md)。
+> 应用页脚展示 `vX.Y.Z · build yymmddhhmm`（10 位构建编号，如 `v2.2.0 · build 2611071100`），便于核对当前构建版本与时间；格式与注入规则见[开发规范 §8.2](./docs/CONTRIBUTING.md)。
 
 ### 🌟 推荐使用流程
 
@@ -83,7 +83,7 @@
 |------|------|
 | 首次配置 | 运行 `[1]` 启用全局 node_modules → 运行 `[5]` 安装所有常用依赖 → 运行 `[3]` 禁用 `.next` 缓存 |
 | 空间不足 | 运行 `[6]` 清理所有缓存 |
-| Vite 项目 | 运行 `[7]` 清理 Vite/构建缓存 |
+| Vite / Turborepo / Angular / Svelte 项目 | 运行 `[7]` 清理 Vite/构建缓存 |
 
 ---
 
@@ -153,6 +153,8 @@ cross-env dotenv nodemon pm2 rimraf mkdirp
 | `.vite` | Vite 缓存目录 |
 | `.turbo` | Turborepo 缓存 |
 | `.nuxt` | Nuxt 缓存 |
+| `.angular` | Angular 缓存（v2.2.0 新增） |
+| `.svelte-kit` | SvelteKit 生成目录（v2.2.0 新增） |
 | `dist` | 打包输出目录 |
 | `build` | 构建输出目录 |
 | `coverage` | 测试覆盖率报告 |
@@ -198,6 +200,7 @@ repo-cleaner [选项] [功能号] [目录路径]
 | 参数 | 说明 |
 |------|------|
 | `-lang en\|zh` | 设置语言 |
+| `-dry-run` | 预演模式：仅显示将要执行的操作，不修改任何文件 |
 | `-h` 或 `--help` | 显示帮助信息 |
 | `1-7` | 直接运行对应功能 |
 | 目录路径 | 指定仓库根目录 |
@@ -210,6 +213,7 @@ repo-cleaner E:\Github             # 指定仓库根目录
 repo-cleaner 1                     # 命令行直接启用全局 node_modules
 repo-cleaner -lang en              # 使用英文
 repo-cleaner 5 E:\Projects         # 为指定路径安装全局依赖
+repo-cleaner -dry-run 6            # 预演清理所有项目缓存（不删除任何文件）
 ```
 
 ---
@@ -221,7 +225,7 @@ repo-cleaner 5 E:\Projects         # 为指定路径安装全局依赖
 ### 仓库描述（Description）
 
 ```
-🧰 一键清理前端项目冗余：统一管理全局 node_modules、禁用 .next/.vite 缓存、清理 dist/build 垃圾。支持 Next.js / React / Vue / Vite，中文/英文双语菜单，单仓库可节省数 GB 磁盘空间。
+🧰 一键清理前端项目冗余：统一管理全局 node_modules、禁用 .next/.vite 缓存、清理 dist/build 垃圾。支持 Next.js / React / Vue / Vite / Angular / Svelte，中文/英文双语菜单，单仓库可节省数 GB 磁盘空间。
 ```
 
 ### 主页（Website）
@@ -243,6 +247,8 @@ nextjs
 react
 vuejs
 vite
+angular
+svelte
 npm
 cache-cleaner
 developer-tools
@@ -290,7 +296,7 @@ A：支持。所有目录扫描均已做引号包裹处理，可正确识别含�
 |------|------|
 | [docs/README.md](./docs/README.md) | 文档中心：文档地图、职责边界、按角色阅读路径 |
 | [docs/OPENSPEC.md](./docs/OPENSPEC.md) | 产品功能规格：7 项功能行为契约、交互、兼容性、已知限制 |
-| [docs/CONTRIBUTING.md](./docs/CONTRIBUTING.md) | 开发规范：编码风格、命名约定、目录组织、提交信息格式、分支管理、代码审查流程、版本规则、术语表 |
+| [docs/CONTRIBUTING.md](./docs/CONTRIBUTING.md) | 开发规范：编码风格、命名约定、目录组织、提交信息格式、分支管理、代码审查流程、版本规则、发布流程、术语表 |
 | [docs/DESIGN-SYSTEM.md](./docs/DESIGN-SYSTEM.md) | UI 设计规范：设计令牌、组件库、交互、响应式、a11y、规范与实现差距清单 |
 | [docs/tokens.json](./docs/tokens.json) | 机器可读设计令牌 |
 | [.github/CODE_OF_CONDUCT.md](./.github/CODE_OF_CONDUCT.md) | 行为准则 |
@@ -334,6 +340,7 @@ npm run build        # 生产构建
 ```
 RepoCleaner/
 ├── .github/                           # Community Health Files
+│   ├── workflows/                     # ci.yml（门禁）+ release.yml（全绿后自动发布 Release）
 │   ├── CODE_OF_CONDUCT.md / SECURITY.md / SUPPORT.md
 │   ├── FUNDING.yml / CODEOWNERS / PULL_REQUEST_TEMPLATE.md
 │   └── ISSUE_TEMPLATE/                # config.yml + bug_report.yml + feature_request.yml
@@ -348,7 +355,7 @@ RepoCleaner/
 ├── internal/                          # Go 源码：platform / engine / config / i18n / ui
 ├── scripts/build.ps1 / build.sh       # 跨平台交叉编译脚本
 ├── RepoCleaner.bat                    # v1.x 旧版 Windows 脚本（已弃用）
-├── config.ini                         # 配置文件（REPO_ROOT / LANG）
+├── config.ini                         # 运行配置（REPO_ROOT / LANG，本机生成不入库；示例见 docs/config.example.ini）
 ├── lang.ini                           # v1.x 批处理语言文案（历史保留）
 ├── README.MD / CHANGELOG.MD / LICENSE # 入口 / 变更历史 / 许可证
 ├── RepoCleaner.code-workspace          # VS Code 工作区配置
@@ -383,6 +390,6 @@ RepoCleaner/
 
 <div align="center">
 
-RepoCleaner v2.1.0 · MIT License · [文档中心](./docs/README.md)
+RepoCleaner v2.2.0 · MIT License · [文档中心](./docs/README.md)
 
 </div>

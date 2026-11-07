@@ -1,6 +1,6 @@
-# 缺陷报告模板 v1.2.6
+# 缺陷报告模板 v2.2.0
 name: 缺陷报告
-description: 报告 RepoCleaner.bat 或参考界面应用的功能异常
+description: 报告 repo-cleaner（Go 产品本体）或参考界面应用的功能异常
 title: "[Bug]: "
 labels: ["bug"]
 body:
@@ -18,8 +18,8 @@ body:
     id: version
     attributes:
       label: RepoCleaner 版本
-      description: 见脚本头部注释或 CHANGELOG.MD，如 v1.2.6
-      placeholder: v1.2.6
+      description: 见 GUI 页脚 / repo-cleaner -h 输出 / CHANGELOG.MD，如 v2.2.0
+      placeholder: v2.2.0
     validations:
       required: true
 
@@ -43,10 +43,11 @@ body:
       required: true
 
   - type: input
-    id: windows
+    id: os
     attributes:
-      label: Windows 版本
-      placeholder: Windows 11 23H2
+      label: 操作系统与版本
+      description: Windows / macOS / Linux 及具体版本
+      placeholder: Windows 11 23H2（或 macOS 15.1 / Ubuntu 24.04）
     validations:
       required: true
 
@@ -66,8 +67,8 @@ body:
       description: 请给出完整命令或菜单操作序列；涉及目录时给出结构示意（用假项目名）
       placeholder: |
         1. 在隔离临时目录创建 repo-a（含 package.json）
-        2. 运行 RepoCleaner.bat "C:\Temp\sandbox"
-        3. 选择 [6]
+        2. 运行 repo-cleaner "C:\Temp\sandbox"（或 GUI 中选择该目录）
+        3. 运行 [6]
     validations:
       required: true
 

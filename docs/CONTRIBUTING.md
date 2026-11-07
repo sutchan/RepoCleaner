@@ -1,4 +1,4 @@
-# RepoCleaner 开发规范与贡献指南 v2.1.0
+# RepoCleaner 开发规范与贡献指南 v2.2.0
 
 > 本文是 RepoCleaner 仓库的**唯一开发规范来源**，规定「如何改代码、如何写文档、如何提交与评审」。
 > 本文存放于 `docs/`；所有贡献者（含 AI 协作会话）在动手前必须阅读本文。
@@ -83,6 +83,7 @@ go run ./cmd/repo-cleaner -h                     # 命令行帮助
 ```
 RepoCleaner/
 ├── .github/                     # Community Health Files（禁止创建 .github/readme.md）
+│   ├── workflows/               # ci.yml（门禁）+ release.yml（全绿后自动发布 Release，见 §8.4）
 │   ├── CODE_OF_CONDUCT.md       # 行为准则
 │   ├── SECURITY.md              # 安全策略与私密漏洞报告
 │   ├── SUPPORT.md               # 支持指南
@@ -119,7 +120,7 @@ RepoCleaner/
 ├── prototype/                   # 原型目录，仅保留 README.md 说明，无代码、无规范正文
 │   └── README.md
 ├── RepoCleaner.bat              # v1.x 旧版 Windows 脚本（已弃用，保留兼容）
-├── config.ini                   # 运行配置：REPO_ROOT / LANG
+├── config.ini                   # 运行配置：REPO_ROOT / LANG（本机生成，v2.2.0 起不入库，示例见 docs/config.example.ini）
 ├── lang.ini                     # 语言文案参考节 [en] / [zh]
 ├── README.MD / CHANGELOG.MD / LICENSE     # 入口、变更历史、许可证
 ├── RepoCleaner.code-workspace   # VS Code 工作区配置，禁止删除
@@ -366,6 +367,25 @@ npm run check:docs
 - 分组用 `Added` / `Changed` / `Fixed` / `Docs` / `Security`，条目以 `- **要点** - 说明` 书写。
 - 历史版本号与历史条目的原始措辞是**历史记录，不得改写**；批量替换版本文本或统一术语时必须排除 `CHANGELOG.MD` 的历史小节（其中仍保留 `NextJS` 等旧写法属正常，不算术语违规）。
 
+### 8.4 发布流程与 Release 自动化
+
+**规则（强制）**：GitHub Actions **所有工作流全部通过**是发布 Release 的前置条件；全绿后由发布工作流自动创建 GitHub Release 并上传产物。禁止在 CI 未全绿时手动上传或跳过 CI 发版。
+
+| 项 | 约定 |
+|----|------|
+| 触发 | push 符合 `vX.Y.Z` 的 tag（必须与 §8.2 权威源 `Version` 一致） |
+| 全绿门槛 | 仓库内**每一个**工作流（门禁、发布及后续新增的任何 workflow）在本次运行中全部成功 |
+| 发布动作 | 全部工作流成功后，发布 job 以该 tag 创建 Release：标题 `vX.Y.Z`，说明取 `CHANGELOG.MD` 对应版本小节，附件为 6 目标二进制 + SHA256 校验和（目标矩阵与 `scripts/build.ps1` / `build.sh` 一致，build 号按 §8.2 在构建期 `-ldflags` 注入） |
+| 一致性校验 | 发布前校验 tag == `internal/buildinfo/version.go` 的 `Version` == `package.json`；不一致即失败，不得发布 |
+| 失败处理 | 任一工作流失败则本次不发布；修复后删除并重新打同一 tag 重跑，禁止在失败状态下手工发版 |
+
+**当前状态：已落地（v2.2.0）**——实现为两个工作流：
+
+- [`.github/workflows/ci.yml`](../.github/workflows/ci.yml)：`push`（`main` 与 `v*` tag）与 `pull_request` 触发；`check` job 执行 §9.1 全部仓库级门禁（nogui），`gui-build` job 在 ubuntu 安装 OpenGL / X11 开发库后以**默认构建标签**完整编译 Fyne GUI（补齐本机无 C 工具链的验证缺口）。
+- [`.github/workflows/release.yml`](../.github/workflows/release.yml)：`push` `vX.Y.Z` tag 触发；`gate` job 重跑同一套门禁，`build` job 按三平台矩阵产出二进制（ubuntu：linux/amd64、linux/arm64、windows/amd64；macos：darwin/amd64、darwin/arm64；windows：windows/amd64），`release` job 校验 tag == 版本权威源 == `package.json`、生成 `SHA256SUMS.txt`、从 `CHANGELOG.MD` 提取对应小节作 Release 说明，全部成功后 `gh release create` 自动发布。
+- **全绿语义**：发布 job 以 `needs: [gate, build]` 保证发布工作流自身全绿；tag push 同时触发 `ci.yml`，同一提交上两工作流均绿才完成发布闭环。**后续新增任何工作流时，必须确保失败可阻断 release job**（如经 `workflow_run` 汇总），维持「所有工作流全绿」门槛。
+- **已知缺口**：GitHub 托管 runner 无 `aarch64-w64-mingw32-gcc`，CI 不产出 `windows/arm64`（本地 `scripts/build.ps1` 具备该交叉工具链时可补齐）；产物缺失不阻断发布，`SHA256SUMS.txt` 仅覆盖实际产出文件。
+
 ---
 
 ## 9. 代码审查流程
@@ -392,6 +412,7 @@ npm run check:docs
 - [ ] 版本号已 bump，`package.json` / README 徽章 / CHANGELOG / 展示位一致
 - [ ] `CHANGELOG.MD` 已新增对应小节；`README.MD` / `docs/OPENSPEC.md` 使用说明随功能变化更新
 - [ ] 文档链接按实际大小写与相对层级书写，新增文档归入 `docs/`
+- [ ] GitHub Actions 所有工作流全绿；发布类变更已按 §8.4 校验 tag 与版本权威源一致性
 - [ ] 无密钥 / Token / 真实用户数据入库；`node_modules`、`.next`、`*.log`、`*.tsbuildinfo` 未被跟踪
 
 ### 9.3 功能验证（GUI 手动冒烟，跨平台）

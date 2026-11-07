@@ -1,4 +1,4 @@
-# RepoCleaner 开放规格说明书 (OpenSpec) v2.1.0
+# RepoCleaner 开放规格说明书 (OpenSpec) v2.2.0
 
 > **本文定位**：产品功能规格，定义「做什么」——7 项功能的行为契约、交互方式、环境与兼容性。
 > 开发规范（编码 / 提交 / 分支 / 审查）见 [CONTRIBUTING.md](./CONTRIBUTING.md)；UI 设计规范见 [DESIGN-SYSTEM.md](./DESIGN-SYSTEM.md)；变更历史见 [CHANGELOG.MD](../CHANGELOG.MD)；文档导航见 [docs/README.md](./README.md)。
@@ -16,7 +16,7 @@
 | 核心功能 | 一键管理仓库根目录下的多个前端项目：清理冗余缓存、统一管理全局 `node_modules`、节省磁盘空间 |
 | 目标用户 | 前端开发者、全栈开发者、需要管理多个 Node.js 项目的团队 |
 | 支持平台 | Windows / macOS / Linux（单一代码库，交叉编译为各平台单二进制） |
-| 支持项目类型 | Next.js、React、Vue、Vite、常规 Node.js 项目 |
+| 支持项目类型 | Next.js、React、Vue、Vite、Angular、Svelte、常规 Node.js 项目 |
 | 许可证 | MIT（见 [LICENSE](../LICENSE)） |
 
 > **目录概念**：「仓库根目录」指 `REPO_ROOT` 指向的、包含多个项目的父目录（默认 `E:\Github`）；「项目根目录」指其中一个项目目录，是 `REPO_ROOT` 的直接子目录。二者不可混用。
@@ -146,8 +146,8 @@
 ### 3.7 功能 7：清理 Vite/构建缓存
 
 - **前置**：显示警告并要求二次确认（GUI 确认弹窗 / CLI 输入 `Y`）。
-- **清理项**：`.vite`、`.turbo`、`.nuxt`、`dist`、`build`、`coverage`、`.nyc_output`
-- **预期结果**：清理构建缓存，适合 Vite / Turborepo 项目。
+- **清理项**：`.vite`、`.turbo`、`.nuxt`、`.angular`、`.svelte-kit`、`dist`、`build`、`coverage`、`.nyc_output`
+- **预期结果**：清理构建缓存，适合 Vite / Turborepo / Angular / Svelte 项目（v2.2.0 起含 Angular `.angular` 与 Svelte `.svelte-kit`）。
 
 > 功能 6 与功能 7 有重叠项（`dist`、`build`、`.nuxt`），属预期设计：功能 6 面向「全量清理」，功能 7 面向「仅构建缓存」。
 
@@ -183,7 +183,9 @@ GUI 提供 3 种目录来源：使用当前目录、手动输入完整路径（�
 | 路径 | 指定仓库根目录（支持含空格路径，需引号包裹） | `repo-cleaner "D:\My Projects"` |
 | 数字 + 路径 | 为指定目录直接运行功能 | `repo-cleaner 5 E:\Projects` |
 
-### 4.4 主菜单（中文默认）
+### 4.4 主菜单
+
+> 下图为 **v1.x 批处理菜单的历史示意**；v2.0.0 起 GUI 为 Fyne 功能按钮布局（功能 1–7 + 目录/语言/预演/关于 + 结果区），按钮文案以 `internal/i18n` 界面字典为准，命令行交互提示以 `internal/i18n` 日志字典为准。
 
 > v2.0.0 起主菜单为 **Fyne 桌面窗口**（按钮列表，非控制台文本）；下方文本图为 v1.x 菜单对照示意，功能编号与文案保持一致。
 
@@ -271,7 +273,7 @@ RepoCleaner/
 ├── internal/                          # Go 源码：platform / engine / config / i18n / ui
 ├── scripts/build.ps1 / build.sh       # 跨平台交叉编译脚本
 ├── RepoCleaner.bat                    # v1.x 旧版 Windows 脚本（已弃用，保留兼容）
-├── config.ini                         # REPO_ROOT / LANG
+├── config.ini                         # REPO_ROOT / LANG（本机生成，v2.2.0 起不入库；示例见 docs/config.example.ini）
 ├── lang.ini                           # [en] / [zh] 文案参考节（历史保留）
 ├── README.MD / CHANGELOG.MD / LICENSE # 入口、变更历史、许可证
 ├── RepoCleaner.code-workspace
@@ -282,7 +284,7 @@ RepoCleaner/
 
 ### 5.3 配置文件格式
 
-**`config.ini`**（Go 程序实际读取，位于可执行文件同目录）：
+**`config.ini`**（Go 程序实际读取，位于可执行文件同目录；含开发者本机路径，**v2.2.0 起不入库**，复制 [`docs/config.example.ini`](./config.example.ini) 作为起点）：
 
 ```ini
 REPO_ROOT=E:\Github
@@ -382,7 +384,14 @@ npm run check:docs                          # 校验所有 Markdown 相对链接
 
 无 OpenGL C 工具链时，上述 Go 命令统一加 `-tags nogui`（`go build -tags nogui ./...`），GUI 包按 build tag 排除；不得以此为由跳过门禁。
 
+同一组门禁在 GitHub Actions 执行（`.github/workflows/ci.yml`，另含默认标签的 Fyne GUI 编译验证）；发布流程见 [`CONTRIBUTING.md` §8.4](./CONTRIBUTING.md)：所有工作流全绿后自动发布 Release。
+
 > 删除类行为通过临时目录集成测试覆盖（`internal/engine` / `internal/platform` 的 `*_test.go`）；`RepoCleaner.bat` 为已弃用旧版，不再纳入自动门禁。
+
+### 9.1a config.ini 跟踪策略（v2.2.0）
+
+- `config.ini` 含开发者本机 `REPO_ROOT` 路径，自 v2.2.0 起 **不入库**（`.gitignore` 排除，历史跟踪已移除）。
+- 新环境复制 [`docs/config.example.ini`](./config.example.ini) 为 `config.ini`，或让程序按内部默认值自动生成。
 
 ### 9.2 GUI 手动冒烟（跨平台）
 
@@ -399,7 +408,7 @@ npm run check:docs                          # 校验所有 Markdown 相对链接
 
 ## 10. 扩展计划
 
-- [ ] 支持更多框架缓存清理（Angular、Svelte）
+- [x] ~~支持更多框架缓存清理（Angular、Svelte）~~（v2.2.0 已完成，见 §3.7）
 - [ ] 支持自定义清理规则
 - [ ] 添加日志记录功能
 - [x] ~~添加 dry-run 模式预览待删除文件~~（v2.1.0 已完成，见 §4.7）

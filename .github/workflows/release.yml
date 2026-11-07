@@ -1,0 +1,132 @@
+# .github/workflows/release.yml v2.2.0
+# 发布工作流（行为契约见 docs/CONTRIBUTING.md §8.4）：
+# push vX.Y.Z tag 触发 → gate 重跑全部门禁 → 三平台矩阵构建产物
+# → 全部成功且 tag 与版本权威源一致后，自动创建 GitHub Release 并上传二进制 + SHA256SUMS。
+#
+# 目标矩阵与 scripts/build.ps1 / build.sh 对齐；windows/arm64 因 GitHub 托管
+# runner 无 aarch64-w64-mingw32 交叉工具链暂不产出（build.ps1 本地构建可补齐）。
+name: release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  gate:
+    name: gate (nogui + docs)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.25'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: gofmt
+        run: test -z "$(gofmt -l ./cmd ./internal)"
+
+      - name: go vet (nogui)
+        run: go vet -tags nogui ./...
+
+      - name: go test (nogui)
+        run: go test -tags nogui -count=1 ./...
+
+      - name: go build (nogui)
+        run: go build -tags nogui ./...
+
+      - name: npm ci
+        run: npm ci
+
+      - name: check:docs
+        run: npm run check:docs
+
+  build:
+    needs: gate
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-latest,  goos: linux,   goarch: amd64, cc: '',                       apt: '' }
+          - { os: ubuntu-latest,  goos: linux,   goarch: arm64, cc: aarch64-linux-gnu-gcc,    apt: gcc-aarch64-linux-gnu }
+          - { os: ubuntu-latest,  goos: windows, goarch: amd64, cc: x86_64-w64-mingw32-gcc,   apt: gcc-mingw-w64-x86-64 }
+          - { os: macos-latest,   goos: darwin,  goarch: amd64, cc: '',                       apt: '' }
+          - { os: macos-latest,   goos: darwin,  goarch: arm64, cc: '',                       apt: '' }
+          - { os: windows-latest, goos: windows, goarch: amd64, cc: '',                       apt: '' }
+
+    name: build ${{ matrix.goos }}/${{ matrix.goarch }}
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.25'
+
+      - name: Install cross toolchain
+        if: matrix.apt != ''
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ${{ matrix.apt }}
+
+      - name: Build
+        shell: bash
+        run: |
+          BUILD_ID=$(date -u +%y%m%d%H%M)
+          export GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} CGO_ENABLED=1
+          if [ -n "${{ matrix.cc }}" ]; then export CC="${{ matrix.cc }}"; fi
+          NAME="repo-cleaner-${GOOS}-${GOARCH}"
+          if [ "$GOOS" = "windows" ]; then NAME="$NAME.exe"; fi
+          echo "build $NAME (build $BUILD_ID)"
+          go build -trimpath -ldflags "-s -w -X repo-cleaner/internal/buildinfo.BuildID=$BUILD_ID" -o "dist/$NAME" ./cmd/repo-cleaner
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: dist/
+
+  release:
+    needs: [gate, build]
+    name: release (version check + publish)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: dist-*
+          path: dist
+          merge-multiple: true
+
+      - name: Verify version consistency (tag == buildinfo == package.json)
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          VFILE=$(grep -oP 'const Version = "\K[^"]+' internal/buildinfo/version.go)
+          PJSON=$(node -p "require('./package.json').version")
+          echo "tag=$TAG version.go=$VFILE package.json=$PJSON"
+          [ "v$VFILE" = "$TAG" ] || { echo "tag 与 internal/buildinfo/version.go 不一致，终止发布"; exit 1; }
+          [ "$PJSON" = "$VFILE" ] || { echo "package.json 与版本权威源不一致，终止发布"; exit 1; }
+
+      - name: Checksums and release notes
+        run: |
+          (cd dist && sha256sum -- * > SHA256SUMS.txt)
+          V=$(grep -oP 'const Version = "\K[^"]+' internal/buildinfo/version.go)
+          awk -v pat="^## \\[$V\\]" 'f && /^## /{exit} $0 ~ pat {f=1} f' CHANGELOG.MD > release-notes.md
+          test -s release-notes.md || { echo "CHANGELOG.MD 中未找到 [$V] 小节"; exit 1; }
+          head -3 release-notes.md
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" dist/* --title "$GITHUB_REF_NAME" --notes-file release-notes.md --verify-tag

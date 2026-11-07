@@ -1,4 +1,4 @@
-# RepoCleaner 文档中心 v2.1.0
+# RepoCleaner 文档中心 v2.2.0
 
 > 本目录是 RepoCleaner **所有规范与规格文档的唯一归档位置**。
 > 仓库根只保留面向使用者的入口 [README.MD](../README.MD)、变更历史 [CHANGELOG.MD](../CHANGELOG.MD) 与 [LICENSE](../LICENSE)。
@@ -12,9 +12,10 @@
 |------|------|--------|----------|
 | [README.MD](../README.MD) | 使用者入口 | 功能介绍、快速开始、参数、FAQ、文档索引 | 开发规范、版本历史明细 |
 | [docs/OPENSPEC.md](./OPENSPEC.md) | 产品功能规格 | 7 项功能的行为契约、交互、环境变量、兼容性、已知限制 | 编码风格、提交/分支规则 |
-| [docs/CONTRIBUTING.md](./CONTRIBUTING.md) | 开发规范（**唯一来源**） | 编码风格、命名约定、目录组织、提交格式、分支管理、代码审查、版本规则、术语表、安全红线 | 功能介绍、设计令牌 |
+| [docs/CONTRIBUTING.md](./CONTRIBUTING.md) | 开发规范（**唯一来源**） | 编码风格、命名约定、目录组织、提交格式、分支管理、代码审查、版本规则、发布流程、术语表、安全红线 | 功能介绍、设计令牌 |
 | [docs/DESIGN-SYSTEM.md](./DESIGN-SYSTEM.md) | UI 设计规范（**唯一来源**） | 设计令牌、组件库、交互、响应式、a11y、规范与实现差距清单 | 业务功能、开发流程 |
 | [docs/tokens.json](./tokens.json) | 机器可读设计令牌 | 与 DESIGN-SYSTEM.md §2 对齐的颜色/字体/间距/圆角/动效值 | 不作为产品版本号来源 |
+| [docs/config.example.ini](./config.example.ini) | 运行配置示例模板 | `config.ini`（本机生成、不入库）的起点，见 `OPENSPEC.md` §5.3 | 不含真实本机路径 |
 | [CHANGELOG.MD](../CHANGELOG.MD) | 唯一版本历史 | 按版本倒序的变更明细 | 功能规格、规范正文 |
 | [prototype/README.md](../prototype/README.md) | 原型目录说明 | 原型现状与本目录用途 | 不复述设计规范正文 |
 | [.github/PULL_REQUEST_TEMPLATE.md](../.github/PULL_REQUEST_TEMPLATE.md) | PR 审查清单 | 提交 PR 时逐项勾选 | — |
@@ -64,21 +65,27 @@ GitHub 会自动识别仓库根、`docs/` 与 `.github/` 下的特定文件。�
 ```
 RepoCleaner/
 ├── README.MD / CHANGELOG.MD / LICENSE          # 入口、变更历史、许可证
-├── RepoCleaner.bat / config.ini / lang.ini      # 产品本体与运行配置
+├── cmd/repo-cleaner/                           # 产品本体入口（Go）
+├── internal/                                   # Go 实现：buildinfo / config / engine / i18n / logs / platform / ui
+├── go.mod / go.sum                             # Go 模块定义与依赖锁定
+├── RepoCleaner.bat / lang.ini                  # v1.x 旧版 Windows 脚本与文案参考（已弃用，保留兼容）
+├── config.ini                                  # 运行配置（本机生成不入库；示例见 docs/config.example.ini）
 ├── docs/                                       # 本目录：所有规范与规格
 │   ├── README.md          # 文档中心（本文）
 │   ├── OPENSPEC.md        # 产品功能规格
 │   ├── CONTRIBUTING.md    # 开发规范
 │   ├── DESIGN-SYSTEM.md   # UI 设计规范
+│   ├── config.example.ini # 运行配置示例模板
 │   └── tokens.json        # 设计令牌
 ├── prototype/README.md                         # 原型目录说明（无规范正文、无代码）
-├── src/                                        # 参考界面应用（Next.js App Router）
+├── src/                                        # 参考界面应用（Next.js App Router，v2.0.0 起已弃用）
 │   ├── app/               # layout.tsx / page.tsx / globals.css
 │   ├── components/        # icons.tsx + ui/
 │   └── lib/               # i18n.ts / utils.ts / data/
 ├── public/                                     # 静态资源
-├── scripts/check-doc-links.mjs                 # 文档链接校验门禁
+├── scripts/                                    # check-doc-links.mjs（文档门禁）+ build.ps1 / build.sh（交叉编译）
 ├── .github/                                    # Community Health Files
+│   ├── workflows/                             # ci.yml（门禁）+ release.yml（全绿后自动发布 Release）
 │   ├── CODE_OF_CONDUCT.md                     # 行为准则
 │   ├── SECURITY.md                            # 安全策略
 │   ├── SUPPORT.md                             # 支持指南
@@ -89,7 +96,7 @@ RepoCleaner/
 │       ├── config.yml                         # 模板配置与联系入口
 │       ├── bug_report.yml                     # 缺陷报告表单
 │       └── feature_request.yml                # 功能建议表单
-└── package.json / tsconfig.json / next.config.ts / ...  # 工程配置
+└── package.json / tsconfig.json / next.config.ts / ...  # 参考界面工程配置
 ```
 
 完整目录规则见 [CONTRIBUTING.md §3](./CONTRIBUTING.md)。
@@ -101,16 +108,26 @@ RepoCleaner/
 在**仓库根目录**执行：
 
 ```bash
-npm install            # 安装依赖
-npm run dev            # 开发预览
+npm install            # 安装依赖（参考界面工程）
+npm run dev            # 开发预览（参考界面）
 npm run type-check     # TypeScript 类型检查
 npm run lint           # ESLint
 npm run check:docs     # 校验所有 Markdown 相对链接（含文件名大小写）
-npm run build          # 生产构建
+npm run build          # 生产构建（参考界面）
 npm run start          # 启动构建产物
 ```
 
-`RepoCleaner.bat` 无自动化测试，改动后按 [CONTRIBUTING.md §9.3](./CONTRIBUTING.md) 在隔离目录手动冒烟验证。
+Go 产品本体（产品当前形态）的门禁与构建：
+
+```bash
+gofmt -l ./cmd ./internal          # 格式检查（应无输出）
+go vet -tags nogui ./...           # 静态检查（无 C 工具链时）
+go test -tags nogui -count=1 ./... # 单元测试
+go build -tags nogui ./...         # 编译（GUI 完整构建需 C 工具链）
+./scripts/build.ps1                # Windows 交叉编译 6 目标到 bin/
+```
+
+同一组门禁在 GitHub Actions 执行（`.github/workflows/ci.yml`）；发布流程见 `CONTRIBUTING.md` §8.4。
 
 ---
 
