@@ -1,6 +1,6 @@
 //go:build !nogui
 
-// internal/ui/ui.go v2.1.0
+// internal/ui/ui.go v2.3.0
 
 // Package ui 实现 Fyne 桌面 GUI（对齐 docs/DESIGN-SYSTEM.md §3.0）。
 // 本包需要 C 工具链编译（Fyne 依赖 OpenGL）；无 C 工具链环境用 `go build -tags nogui` 校验。
@@ -19,6 +19,7 @@ import (
 	"repo-cleaner/internal/config"
 	"repo-cleaner/internal/engine"
 	"repo-cleaner/internal/i18n"
+	"repo-cleaner/internal/logs"
 	"repo-cleaner/internal/platform"
 )
 
@@ -99,6 +100,10 @@ func Run(cfg config.Config) {
 		dryRunCheck := widget.NewCheck(dict.DryRunLabel, nil)
 		dryRunCheck.SetChecked(false)
 
+		// 递归扫描复选框：会话级选择（V1 monorepo，深度 2 层）。
+		recursiveCheck := widget.NewCheck(dict.RecursiveLabel, nil)
+		recursiveCheck.SetChecked(cfg.Recursive)
+
 		// runFunction 执行功能；危险操作先弹二次确认，预演模式跳过确认（对齐 OPENSPEC §4.5 / §4.7）。
 		runFunction := func(fn int) {
 			root := platform.NormalizeRoot(dirEntry.Text)
@@ -107,14 +112,21 @@ func Run(cfg config.Config) {
 				return
 			}
 			cfg.RepoRoot = root
-			opts := engine.Options{DryRun: dryRunCheck.Checked}
+			opts := engine.Options{
+				DryRun:         dryRunCheck.Checked,
+				Recursive:      recursiveCheck.Checked,
+				ExtraCleanDirs: cfg.ExtraCleanDirs,
+			}
 			do := func(confirmed bool) {
 				if !confirmed {
 					return
 				}
 				go func() {
-					if err := engine.Run(p, fn, root, lang, opts, logger); err != nil {
-						logger.Logf(logs.ErrorPrefix, err)
+					// V4：执行日志同时追加写入 repo-cleaner.log。
+					fileLog := logs.NewFileLogger(logs.DefaultPath(), logger)
+					defer fileLog.Close()
+					if err := engine.Run(p, fn, root, lang, opts, fileLog); err != nil {
+						fileLog.Logf(logs.ErrorPrefix, err)
 					}
 				}()
 			}
@@ -140,7 +152,7 @@ func Run(cfg config.Config) {
 		top := container.NewVBox(
 			container.NewHBox(widget.NewLabel(dict.TargetDir), dirEntry, browse, saveBtn),
 			container.NewHBox(widget.NewLabel(dict.LangLabel), langSelect, aboutBtn),
-			container.NewHBox(widget.NewLabel(dict.RunHint), dryRunCheck),
+			container.NewHBox(widget.NewLabel(dict.RunHint), dryRunCheck, recursiveCheck),
 		)
 		// 页脚区（Border bottom）：版本号 + build 编号的唯一展示位置，页眉不放版本号
 		w.SetContent(container.NewBorder(top,

@@ -4,7 +4,7 @@
 
 [![Platform](https://img.shields.io/badge/Platform-Win%20%7C%20macOS%20%7C%20Linux-blue?style=flat)](https://github.com/sutchan/RepoCleaner)
 [![Go](https://img.shields.io/badge/Go-1.25%2B-00ADD8?style=flat&logo=go&logoColor=white)](https://go.dev)
-[![Version](https://img.shields.io/badge/Version-2.2.0-green?style=flat)](https://github.com/sutchan/RepoCleaner)
+[![Version](https://img.shields.io/badge/Version-2.3.0-green?style=flat)](https://github.com/sutchan/RepoCleaner)
 [![License](https://img.shields.io/badge/License-MIT-orange?style=flat)](https://github.com/sutchan/RepoCleaner)
 [![Node](https://img.shields.io/badge/Node.js-339933?style=flat&logo=node.js&logoColor=white)](https://nodejs.org)
 [![Disk](https://img.shields.io/badge/Saves-10GB%2B-red?style=flat)](https://github.com/sutchan/RepoCleaner)
@@ -50,12 +50,12 @@
 **特性**
 
 - 🖥️ Go 编译的**单文件可执行程序**（Windows / macOS / Linux），零第三方运行时依赖
-- 🎨 Fyne 桌面 GUI，一键操作；也支持命令行模式
+- 🎨 Fyne 桌面 GUI，一键操作；给出功能号 1–7 时进入**非交互命令行模式**
 - 🧪 预演模式（dry-run）：先看将要删除什么，再决定是否执行
-- 🌏 中文 / English 双语菜单，可交互或命令行切换
-- ⚙️ 支持命令行参数、配置文件、交互式选择三种运行方式
-- 💾 自动保存仓库根目录配置，一次设置永久生效
-- 🛡️ 危险操作（删除 `node_modules`）前二次确认，避免误删
+- 🌏 中文 / English 双语界面与执行日志（GUI 按钮 / `-lang` / `config.ini` 切换）
+- ⚙️ 目录来源：GUI 输入框与目录选择、`config.ini`、CLI 位置路径（须与功能号同用）
+- 💾 仓库根目录可保存到 `config.ini`，一次设置长期生效
+- 🛡️ 危险操作（功能 1 / 6 / 7）前二次确认，避免误删
 - 📊 全局依赖安装逐组检查退出码，失败项汇总提示
 
 ---
@@ -66,16 +66,18 @@
 
 - Windows / macOS / Linux 系统
 - 已安装 Node.js 和 npm（建议 Node 18+；功能 1 / 5 需要）
+- 源码构建需 Go ≥ 1.25；Fyne GUI 编译需 C 工具链与系统 OpenGL
 
 ### 使用步骤
 
 1. **下载或构建 `repo-cleaner` 可执行文件**（源码构建：`./scripts/build.ps1` / `./scripts/build.sh` 交叉编译到 `bin/`；本机快速构建 `go build -o repo-cleaner ./cmd/repo-cleaner`，Fyne GUI 需 C 工具链）
-2. **运行（Windows 双击，macOS/Linux 命令行执行）**
-3. **选择仓库根目录**（支持手动输入、目录选择、保存配置）
-4. **按功能按钮选择功能**
+2. **运行**：不带参数启动 GUI（Windows 双击，macOS/Linux 命令行执行）；带功能号 `1`–`7` 则直接进入命令行模式
+3. **选择仓库根目录**（GUI 输入框 / 目录选择按钮，可保存到 `config.ini`；CLI 用位置路径）
+4. **按功能按钮（GUI）或功能号（CLI）选择功能**
 5. **一次配置，所有项目永久干净**
 
-> 应用页脚展示 `vX.Y.Z · build yymmddhhmm`（10 位构建编号，如 `v2.2.0 · build 2611071100`），便于核对当前构建版本与时间；格式与注入规则见[开发规范 §8.2](./docs/CONTRIBUTING.md)。
+> 位置路径只在给出功能号 1–7 时生效；单独给路径会启动 GUI 并忽略该路径。
+> 应用页脚展示 `vX.Y.Z · build yymmddhhmm`（10 位构建编号，如 `v2.2.1 · build 2611071100`），便于核对当前构建版本与时间；格式与注入规则见[开发规范 §8.2](./docs/CONTRIBUTING.md)。
 
 ### 🌟 推荐使用流程
 
@@ -166,23 +168,27 @@ cross-env dotenv nodemon pm2 rimraf mkdirp
 
 ### 目录选择方式
 
-运行脚本时支持多种目录选择方式：
+运行程序时可通过以下方式指定仓库根目录：
 
 | 方式 | 说明 |
 |------|------|
-| 命令行参数 | `repo-cleaner "D:\Projects"` |
-| 配置文件 | 同目录下的 `config.ini` |
-| GUI 选择 | 运行后在窗口中选择 / 输入目录 |
+| CLI 位置路径 | 须与功能号同用，如 `repo-cleaner 6 "D:\Projects"` |
+| 配置文件 | **可执行文件同目录**的 `config.ini`（`REPO_ROOT=`；本机生成、不入库，示例见 [`docs/config.example.ini`](./docs/config.example.ini)） |
+| GUI | 窗口输入框 / 目录选择按钮，可用「保存」写回 `config.ini` |
+
+> 不带功能号时启动 GUI，位置路径被忽略；GUI 使用 `config.ini` 的 `REPO_ROOT`，缺省时取平台默认目录。
 
 ### 语言切换
 
-支持中文/英文界面切换：
+支持中文/英文界面与执行日志切换：
 
 | 方式 | 说明 |
 |------|------|
-| 界面按钮 | GUI 顶部「中文 / English」实时切换 |
-| 命令行参数 | `repo-cleaner -lang en` |
-| 配置文件 | 在 `config.ini` 中添加 `LANG=zh` 或 `LANG=en` |
+| GUI 下拉框 | 顶部「中文 / English」实时切换并写入 `config.ini` |
+| 命令行参数 | `repo-cleaner -lang en`（写入 `LANG=en`） |
+| 配置文件 | `config.ini` 中 `LANG=zh` 或 `LANG=en` |
+
+> 语言仅 `zh` / `en` 两种：除 `en` 外的任何值（含非法值、空值）均回落中文 `zh`。
 
 ### 配置文件示例
 
@@ -199,21 +205,24 @@ repo-cleaner [选项] [功能号] [目录路径]
 
 | 参数 | 说明 |
 |------|------|
-| `-lang en\|zh` | 设置语言 |
-| `-dry-run` | 预演模式：仅显示将要执行的操作，不修改任何文件 |
-| `-h` 或 `--help` | 显示帮助信息 |
-| `1-7` | 直接运行对应功能 |
-| 目录路径 | 指定仓库根目录 |
+| `-lang en\|zh` | 设置界面语言并写入 `config.ini`（非 `en` 值回落 `zh`） |
+| `-dry-run` | 预演模式：仅显示将要执行的操作，不修改任何文件与环境变量 |
+| `-h` / `-help` / `--help` | 显示帮助信息（固定英文，含版本与 build 信息） |
+| `1`-`7` | 直接运行对应功能，进入非交互命令行模式；无功能号 `0` |
+| 目录路径 | 指定仓库根目录，**仅在给出功能号时生效** |
+
+> 无 `-root` 标志、无 `-version` 标志、无控制台交互菜单；功能号超出 `1`–`7` 的数字会被当作路径处理。
 
 **示例**
 
 ```bash
 repo-cleaner                       # GUI 模式
-repo-cleaner E:\Github             # 指定仓库根目录
-repo-cleaner 1                     # 命令行直接启用全局 node_modules
-repo-cleaner -lang en              # 使用英文
-repo-cleaner 5 E:\Projects         # 为指定路径安装全局依赖
+repo-cleaner 1                     # CLI：直接启用全局 node_modules
+repo-cleaner 5 E:\Projects         # CLI：为指定根目录安装全局依赖
+repo-cleaner 6 "D:\My Projects"    # CLI：指定含空格的仓库根目录
+repo-cleaner -lang en              # 写入 LANG=en 后启动（默认 GUI）
 repo-cleaner -dry-run 6            # 预演清理所有项目缓存（不删除任何文件）
+repo-cleaner -h                    # 查看帮助与构建信息
 ```
 
 ---
@@ -225,7 +234,7 @@ repo-cleaner -dry-run 6            # 预演清理所有项目缓存（不删除�
 ### 仓库描述（Description）
 
 ```
-🧰 一键清理前端项目冗余：统一管理全局 node_modules、禁用 .next/.vite 缓存、清理 dist/build 垃圾。支持 Next.js / React / Vue / Vite / Angular / Svelte，中文/英文双语菜单，单仓库可节省数 GB 磁盘空间。
+🧰 一键清理前端项目冗余：统一管理全局 node_modules、禁用 .next/.vite 缓存、清理 dist/build 垃圾。Go 编译的跨平台单文件工具（Windows / macOS / Linux，Fyne GUI + 命令行），支持 Next.js / React / Vue / Vite / Angular / Svelte，中文/英文双语界面。
 ```
 
 ### 主页（Website）
@@ -271,10 +280,16 @@ A：是的，禁用缓存会略微影响 Next.js 热更新速度。开发完成�
 A：清理是不可逆的。删除 `node_modules` 后需重新 `npm install`；建议仅在确认不再开发或已备份时执行。
 
 **Q：默认扫描哪个目录？**
-A：默认扫描 Windows 下的 `E:\Github\`（macOS / Linux 为 `~/Github`），可通过 GUI、命令行参数或 `config.ini` 的 `REPO_ROOT` 修改。
+A：默认扫描 Windows 下的 `E:\Github\`（macOS / Linux 为 `~/Github`），可通过 GUI 输入框、`config.ini` 的 `REPO_ROOT`，或与功能号同用的 CLI 位置路径修改。
 
 **Q：支持含空格的仓库路径吗？**
-A：支持。所有目录扫描均已做引号包裹处理，可正确识别含空格的路径。
+A：支持。Go 版目录枚举用 `os.ReadDir`、路径一律用 `path/filepath` 拼接，不经过 shell 字符串拼接；命令行传参时仍需按终端规则给路径加引号。
+
+**Q：为什么 `repo-cleaner E:\Github` 没有切换目录？**
+A：不带功能号时程序启动 GUI 并忽略位置路径。请写成 `repo-cleaner <功能号> <路径>`（如 `repo-cleaner 6 E:\Github`），或在 GUI 里选择目录后保存。
+
+**Q：有交互式文本菜单吗？**
+A：没有。v1.x 批处理脚本提供过文本菜单；v2.0.0 起只有 Fyne GUI 与「功能号 CLI」两种模式。
 
 ---
 
@@ -283,8 +298,9 @@ A：支持。所有目录扫描均已做引号包裹处理，可正确识别含�
 1. **首次使用建议先运行 `[5]` 安装全局依赖**
 2. **功能 3 会影响 Next.js 热更新速度**，开发完成后可恢复
 3. **功能 6 删除后需要重新 `npm install`**，建议在确认不再开发时使用
-4. **默认扫描 `E:\Github\` 目录**，可通过交互菜单或配置文件修改
+4. **默认扫描 `E:\Github\` 目录**（Unix 为 `~/Github`），可通过 GUI、`config.ini` 或 CLI 位置路径修改
 5. **删除操作不可逆**，执行前请确认已备份重要文件
+6. **只扫描仓库根目录的直接子目录**，不递归处理 monorepo 深层项目（见 [OPENSPEC.md](./docs/OPENSPEC.md) §7.3 L3）
 
 ---
 
@@ -299,6 +315,8 @@ A：支持。所有目录扫描均已做引号包裹处理，可正确识别含�
 | [docs/CONTRIBUTING.md](./docs/CONTRIBUTING.md) | 开发规范：编码风格、命名约定、目录组织、提交信息格式、分支管理、代码审查流程、版本规则、发布流程、术语表 |
 | [docs/DESIGN-SYSTEM.md](./docs/DESIGN-SYSTEM.md) | UI 设计规范：设计令牌、组件库、交互、响应式、a11y、规范与实现差距清单 |
 | [docs/tokens.json](./docs/tokens.json) | 机器可读设计令牌 |
+| [docs/config.example.ini](./docs/config.example.ini) | 运行配置示例模板（`config.ini` 不入库） |
+| [docs/tasks.md](./docs/tasks.md) / [tasks-done.md](./docs/tasks-done.md) | 进行中 / 待办任务清单与已完成任务归档 |
 | [.github/CODE_OF_CONDUCT.md](./.github/CODE_OF_CONDUCT.md) | 行为准则 |
 | [.github/SECURITY.md](./.github/SECURITY.md) | 安全策略与漏洞私密报告 |
 | [.github/SUPPORT.md](./.github/SUPPORT.md) | 支持与提问指南 |
@@ -340,7 +358,7 @@ npm run build        # 生产构建
 ```
 RepoCleaner/
 ├── .github/                           # Community Health Files
-│   ├── workflows/                     # ci.yml（门禁）+ release.yml（全绿后自动发布 Release）
+│   ├── workflows/                     # ci.yml（门禁）+ release.yml（push vX.Y.Z tag 触发，门禁全绿后发布）
 │   ├── CODE_OF_CONDUCT.md / SECURITY.md / SUPPORT.md
 │   ├── FUNDING.yml / CODEOWNERS / PULL_REQUEST_TEMPLATE.md
 │   └── ISSUE_TEMPLATE/                # config.yml + bug_report.yml + feature_request.yml
@@ -349,27 +367,28 @@ RepoCleaner/
 │   ├── OPENSPEC.md                    # 产品功能规格
 │   ├── CONTRIBUTING.md                # 开发规范
 │   ├── DESIGN-SYSTEM.md               # UI 设计规范
-│   └── tokens.json                    # 设计令牌
-├── go.mod / go.sum                    # Go 模块与依赖（Fyne）
-├── cmd/repo-cleaner/main.go           # 产品入口
-├── internal/                          # Go 源码：platform / engine / config / i18n / ui
-├── scripts/build.ps1 / build.sh       # 跨平台交叉编译脚本
+│   ├── tokens.json                    # 设计令牌
+│   ├── config.example.ini             # 运行配置示例模板
+│   └── tasks.md / tasks-done.md       # 任务清单与完成归档
+├── go.mod / go.sum                    # Go 模块与依赖（Fyne v2）
+├── cmd/repo-cleaner/                  # 产品入口：main.go + gui.go（默认）/ headless.go（nogui 占位）
+├── internal/                          # Go 源码：buildinfo / config / engine / i18n / platform / ui（6 个包）
+├── scripts/                           # build.ps1 / build.sh（交叉编译）+ check-doc-links.mjs（文档链接校验）
 ├── RepoCleaner.bat                    # v1.x 旧版 Windows 脚本（已弃用）
-├── config.ini                         # 运行配置（REPO_ROOT / LANG，本机生成不入库；示例见 docs/config.example.ini）
-├── lang.ini                           # v1.x 批处理语言文案（历史保留）
+├── config.ini                         # 运行配置（REPO_ROOT / LANG，可执行文件同目录、本机生成不入库；示例见 docs/config.example.ini）
+├── lang.ini                           # v1.x 批处理语言文案（历史保留，Go 程序不读取）
 ├── README.MD / CHANGELOG.MD / LICENSE # 入口 / 变更历史 / 许可证
 ├── RepoCleaner.code-workspace          # VS Code 工作区配置
 ├── package.json                       # 参考界面依赖与版本同步位（产品唯一权威源在 internal/buildinfo/version.go）
-├── next.config.ts                     # Next.js 配置（注入版本 + build 编号）
+├── next.config.ts                     # 参考界面 Next.js 配置（注入版本 + 10 位 build 编号）
 ├── tsconfig.json                      # TypeScript 配置（@/* → ./src/*）
 ├── postcss.config.mjs                 # Tailwind v4 PostCSS 配置
 ├── eslint.config.mjs                  # ESLint 配置
-├── public/                            # 静态资源
-├── scripts/check-doc-links.mjs        # 文档链接校验（npm run check:docs）
+├── public/                            # 参考界面静态资源
 ├── src/                               # 已弃用参考界面应用（v1.x 遗留）
 │   ├── app/                           # layout.tsx / page.tsx / globals.css
 │   ├── components/                    # icons.tsx + ui/ 基础组件
-│   └── lib/                           # i18n.ts + data/（单一数据源）
+│   └── lib/                           # i18n.ts + utils.ts + data/（单一数据源）
 ├── prototype/README.md                # 原型目录说明（无代码、无规范正文）
 └── .gitignore
 ```
@@ -390,6 +409,6 @@ RepoCleaner/
 
 <div align="center">
 
-RepoCleaner v2.2.0 · MIT License · [文档中心](./docs/README.md)
+RepoCleaner v2.3.0 · MIT License · [文档中心](./docs/README.md)
 
 </div>

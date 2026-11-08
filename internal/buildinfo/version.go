@@ -1,4 +1,4 @@
-// internal/buildinfo/version.go v2.2.0
+// internal/buildinfo/version.go v2.3.0
 
 // Package buildinfo 是产品版本的唯一权威来源（见 docs/CONTRIBUTING.md §8.2）。
 package buildinfo
@@ -10,7 +10,7 @@ import (
 )
 
 // Version 产品版本常量；bump 时须同步全部全局展示位（CONTRIBUTING.md §8.2 清单）。
-const Version = "2.2.0"
+const Version = "2.3.0"
 
 // BuildID 构建编号，格式 yymmddhhmm（10 位），由 scripts/build.ps1 / build.sh
 // 在构建期以 -ldflags "-X repo-cleaner/internal/buildinfo.BuildID=<10位>" 注入。

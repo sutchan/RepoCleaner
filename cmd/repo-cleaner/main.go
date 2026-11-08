@@ -1,4 +1,4 @@
-// cmd/repo-cleaner/main.go v2.1.0
+// cmd/repo-cleaner/main.go v2.3.0
 
 // 命令 repo-cleaner 是产品入口：解析参数后分流到命令行模式或 Fyne GUI。
 package main
@@ -15,16 +15,17 @@ import (
 	"repo-cleaner/internal/config"
 	"repo-cleaner/internal/engine"
 	"repo-cleaner/internal/i18n"
+	"repo-cleaner/internal/logs"
 	"repo-cleaner/internal/platform"
 )
 
 func main() {
 	langFlag := flag.String("lang", "", "界面语言 en|zh（写入 config.ini）")
 	dryRunFlag := flag.Bool("dry-run", false, "预演模式：仅显示将要执行的操作，不修改任何文件")
+	recursiveFlag := flag.Bool("recursive", false, "递归扫描 monorepo 深层项目（深度 2 层）")
 	showHelp := flag.Bool("h", false, "显示帮助")
 	flag.BoolVar(showHelp, "help", false, "显示帮助")
 	flag.Parse()
-	opts := engine.Options{DryRun: *dryRunFlag}
 
 	cfgPath := config.Path()
 	cfg, err := config.Load(cfgPath)
@@ -37,6 +38,12 @@ func main() {
 		if saveErr := config.Save(cfgPath, cfg); saveErr != nil {
 			fmt.Fprintf(os.Stderr, i18n.Logs(i18n.Normalize(cfg.Lang)).SaveCfgErr, saveErr)
 		}
+	}
+	// 选项优先级：命令行参数 > config.ini > 默认关闭（对齐 OPENSPEC §4.5 / §5.2）。
+	opts := engine.Options{
+		DryRun:         *dryRunFlag,
+		Recursive:      *recursiveFlag || cfg.Recursive,
+		ExtraCleanDirs: cfg.ExtraCleanDirs,
 	}
 
 	lang := i18n.Normalize(cfg.Lang)
@@ -97,7 +104,10 @@ func runCLI(p platform.Platform, cfgPath string, cfg *config.Config, fn int, roo
 			return
 		}
 	}
-	if err := engine.Run(p, fn, root, lang, opts, engine.StdLogger{}); err != nil {
+	// V4：执行日志同时追加写入可执行文件同目录的 repo-cleaner.log。
+	fileLog := logs.NewFileLogger(logs.DefaultPath(), engine.StdLogger{})
+	defer fileLog.Close()
+	if err := engine.Run(p, fn, root, lang, opts, fileLog); err != nil {
 		fmt.Fprintf(os.Stderr, d.ErrorPrefix+"\n", err)
 		os.Exit(1)
 	}
@@ -120,6 +130,7 @@ func printHelp() {
 	fmt.Println("  -lang en  Set language to English")
 	fmt.Println("  -lang zh  Set language to Chinese")
 	fmt.Println("  -dry-run  Preview actions without modifying anything")
+	fmt.Println("  -recursive  Recursive scan (monorepo, depth 2)")
 	fmt.Println("  -h        Show this help")
 	fmt.Println()
 	fmt.Println("Examples:")

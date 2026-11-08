@@ -1,4 +1,4 @@
-// internal/platform/platform.go v2.0.0
+// internal/platform/platform.go v2.3.0
 
 // Package platform 收口全部操作系统差异（目录扫描、删除、隐藏属性、环境变量持久化）。
 // engine 只依赖本接口，禁止直接调用 OS 专属命令；新增平台仅需增加对应 build tag 实现。
@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 )
 
@@ -35,6 +36,44 @@ type Platform interface {
 	RemoveUserEnv(key string) error
 	// GlobalNodeModulesPath 返回 `npm root -g` 的全局模块路径。
 	GlobalNodeModulesPath() (string, error)
+}
+
+// deepSkipDirs 递归枚举时跳过的依赖 / 构建产物目录名（避免深入依赖树与输出目录）。
+var deepSkipDirs = map[string]bool{
+	"node_modules": true, ".next": true, ".nuxt": true, "dist": true, "build": true,
+	".vite": true, ".turbo": true, ".angular": true, ".svelte-kit": true,
+	"coverage": true, ".nyc_output": true, ".git": true,
+}
+
+// ListProjectDirsDeep 递归枚举 repoRoot 下 depthLimit 层内的目录（1 = 仅直接子目录，
+// 2 = 含孙目录，V1 monorepo 支持）。跳过 deepSkipDirs 中的目录；单个子树读取失败
+// 不影响其余结果。返回排序后的路径列表（v2.3.0，对齐 OPENSPEC §3.0）。
+func ListProjectDirsDeep(repoRoot string, depthLimit int) ([]string, error) {
+	var dirs []string
+	seen := map[string]bool{}
+	var walk func(dir string, depth int)
+	walk = func(dir string, depth int) {
+		entries, err := os.ReadDir(dir)
+		if err != nil {
+			return // 子树不可读时跳过，不影响其余枚举
+		}
+		for _, e := range entries {
+			if !e.IsDir() || deepSkipDirs[e.Name()] {
+				continue
+			}
+			full := filepath.Join(dir, e.Name())
+			if !seen[full] {
+				seen[full] = true
+				dirs = append(dirs, full)
+			}
+			if depth < depthLimit {
+				walk(full, depth+1)
+			}
+		}
+	}
+	walk(repoRoot, 1)
+	sort.Strings(dirs)
+	return dirs, nil
 }
 
 // HasFile 判断 dir 下是否存在指定文件（探测 package.json / next.config.*）。

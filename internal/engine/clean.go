@@ -1,4 +1,4 @@
-// internal/engine/clean.go v2.1.0
+// internal/engine/clean.go v2.3.0
 
 package engine
 
@@ -15,7 +15,7 @@ import (
 func CleanNextCache(p platform.Platform, repoRoot string, lang i18n.Lang, opts Options, log Logger) error {
 	d := i18n.Logs(lang)
 	log.Logf("%s", d.F3Start)
-	dirs, err := p.ListProjectDirs(repoRoot)
+	dirs, err := listDirs(p, repoRoot, opts)
 	if err != nil {
 		return err
 	}
@@ -60,7 +60,7 @@ func CleanNextCache(p platform.Platform, repoRoot string, lang i18n.Lang, opts O
 func RestoreNextCache(p platform.Platform, repoRoot string, lang i18n.Lang, opts Options, log Logger) error {
 	d := i18n.Logs(lang)
 	log.Logf("%s", d.F4Start)
-	dirs, err := p.ListProjectDirs(repoRoot)
+	dirs, err := listDirs(p, repoRoot, opts)
 	if err != nil {
 		return err
 	}
@@ -102,9 +102,13 @@ func CleanViteCache(p platform.Platform, repoRoot string, lang i18n.Lang, opts O
 // DryRun 下仅输出预演日志，不删除任何文件。
 func cleanByWhitelist(p platform.Platform, repoRoot string, dirNames, fileNames []string, lang i18n.Lang, opts Options, log Logger) error {
 	d := i18n.Logs(lang)
-	projects, err := p.ListProjectDirs(repoRoot)
+	projects, err := listDirs(p, repoRoot, opts)
 	if err != nil {
 		return err
+	}
+	if len(opts.ExtraCleanDirs) > 0 {
+		// V3：自定义清理目录仅限项目目录内部匹配，并入白名单（对齐 OPENSPEC §3.6 / §3.7）。
+		dirNames = append(append([]string{}, dirNames...), opts.ExtraCleanDirs...)
 	}
 	for _, project := range projects {
 		if opts.DryRun {

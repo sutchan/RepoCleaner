@@ -1,4 +1,4 @@
-// internal/config/config.go v2.0.0
+// internal/config/config.go v2.3.0
 
 // Package config 负责 config.ini 的读写：读旧 → 过滤目标键 → 补写 → 回写，
 // 保留注释与未知行（对齐 OPENSPEC §5.3 与 CONTRIBUTING.md §4.5 约定）。
@@ -13,8 +13,10 @@ import (
 
 // Config 产品运行配置。
 type Config struct {
-	RepoRoot string // 仓库根目录
-	Lang     string // 界面语言：zh / en
+	RepoRoot       string   // 仓库根目录
+	Lang           string   // 界面语言：zh / en
+	Recursive      bool     // 递归扫描 monorepo 深层项目（V1，默认关闭）
+	ExtraCleanDirs []string // 自定义清理目录名（V3，逗号分隔，仅限项目目录内部）
 }
 
 // Default 返回默认配置（REPO_ROOT 留空，由调用方按平台取默认目录）。
@@ -53,6 +55,11 @@ func Load(path string) (Config, error) {
 			cfg.RepoRoot = strings.TrimSpace(value)
 		case "LANG":
 			cfg.Lang = strings.TrimSpace(value)
+		case "RECURSIVE":
+			v := strings.TrimSpace(value)
+			cfg.Recursive = v == "true" || v == "1" || strings.EqualFold(v, "yes")
+		case "EXTRA_CLEAN_DIRS":
+			cfg.ExtraCleanDirs = parseDirList(value)
 		}
 	}
 	if cfg.Lang != "en" {
@@ -61,13 +68,29 @@ func Load(path string) (Config, error) {
 	return cfg, nil
 }
 
+// parseDirList 解析逗号分隔的目录名列表（去空白、去空项）。
+func parseDirList(value string) []string {
+	var names []string
+	for _, part := range strings.Split(value, ",") {
+		if name := strings.TrimSpace(part); name != "" {
+			names = append(names, name)
+		}
+	}
+	return names
+}
+
 // Save 以「读旧 → 过滤目标键 → 补写 → 临时文件 → 回写」方式保存，去重同名键。
 func Save(path string, cfg Config) error {
 	var lines []string
 	if data, err := os.ReadFile(path); err == nil {
 		lines = strings.Split(strings.ReplaceAll(string(data), "\r\n", "\n"), "\n")
 	}
-	repoWritten, langWritten := false, false
+	repoWritten, langWritten, recWritten, extraWritten := false, false, false, false
+	extraLine := "EXTRA_CLEAN_DIRS=" + strings.Join(cfg.ExtraCleanDirs, ",")
+	recLine := "RECURSIVE=false"
+	if cfg.Recursive {
+		recLine = "RECURSIVE=true"
+	}
 	for i, line := range lines {
 		key, _, ok := strings.Cut(line, "=")
 		if !ok {
@@ -88,6 +111,20 @@ func Save(path string, cfg Config) error {
 			} else {
 				lines[i] = ""
 			}
+		case "RECURSIVE":
+			if !recWritten {
+				lines[i] = recLine
+				recWritten = true
+			} else {
+				lines[i] = ""
+			}
+		case "EXTRA_CLEAN_DIRS":
+			if !extraWritten {
+				lines[i] = extraLine
+				extraWritten = true
+			} else {
+				lines[i] = ""
+			}
 		}
 	}
 	if !repoWritten {
@@ -95,6 +132,12 @@ func Save(path string, cfg Config) error {
 	}
 	if !langWritten {
 		lines = append(lines, "LANG="+cfg.Lang)
+	}
+	if !recWritten {
+		lines = append(lines, recLine)
+	}
+	if !extraWritten {
+		lines = append(lines, extraLine)
 	}
 	content := strings.Join(lines, "\n")
 	tmp := path + ".tmp"

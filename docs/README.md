@@ -1,4 +1,4 @@
-# RepoCleaner 文档中心 v2.2.0
+# RepoCleaner 文档中心 v2.3.0
 
 > 本目录是 RepoCleaner **所有规范与规格文档的唯一归档位置**。
 > 仓库根只保留面向使用者的入口 [README.MD](../README.MD)、变更历史 [CHANGELOG.MD](../CHANGELOG.MD) 与 [LICENSE](../LICENSE)。

@@ -1,4 +1,4 @@
-// internal/i18n/i18n.go v2.2.0
+// internal/i18n/i18n.go v2.3.0
 
 // Package i18n 是唯一的 UI 文案来源（zh / en），禁止在 ui / engine 层硬编码文案。
 package i18n
@@ -32,6 +32,7 @@ type Dict struct {
 	FuncNames      [7]string
 	RunHint        string
 	DryRunLabel    string
+	RecursiveLabel string
 	WarningF1      string
 	WarningAll     string
 	WarningVite    string
@@ -54,6 +55,7 @@ var dicts = map[Lang]Dict{
 		FuncNames:      [7]string{"启用全局 node_modules", "重置 Node 配置", "清理 .next 缓存", "恢复 Next.js 缓存", "安装全局依赖", "清理所有项目缓存", "清理 Vite/构建缓存"},
 		RunHint:        "点击功能按钮执行；危险操作会先确认",
 		DryRunLabel:    "预演模式 (dry-run)",
+		RecursiveLabel: "递归扫描 (monorepo)",
 		WarningF1:      "警告: 这将删除所有项目的本地 node_modules!",
 		WarningAll:     "警告: 这将永久删除所有缓存文件!",
 		WarningVite:    "警告: 这将删除 .vite/.turbo/.angular 等构建缓存目录!",
@@ -74,6 +76,7 @@ var dicts = map[Lang]Dict{
 		FuncNames:      [7]string{"Enable Global node_modules", "Reset Node Config", "Clean .next Cache", "Restore Next.js Cache", "Install Global Dependencies", "Clean All Project Cache", "Clean Vite/Build Cache"},
 		RunHint:        "Click a function button; dangerous ones ask for confirmation",
 		DryRunLabel:    "Dry-run mode",
+		RecursiveLabel: "Recursive scan (monorepo)",
 		WarningF1:      "WARNING: This will delete all local node_modules!",
 		WarningAll:     "WARNING: This will permanently delete all cache files!",
 		WarningVite:    "WARNING: This will delete .vite/.turbo/.angular and other build cache directories!",

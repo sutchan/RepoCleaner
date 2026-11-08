@@ -1,4 +1,4 @@
-# RepoCleaner 开放规格说明书 (OpenSpec) v2.2.0
+# RepoCleaner 开放规格说明书 (OpenSpec) v2.3.0
 
 > **本文定位**：产品功能规格，定义「做什么」——7 项功能的行为契约、交互方式、环境与兼容性。
 > 开发规范（编码 / 提交 / 分支 / 审查）见 [CONTRIBUTING.md](./CONTRIBUTING.md)；UI 设计规范见 [DESIGN-SYSTEM.md](./DESIGN-SYSTEM.md)；变更历史见 [CHANGELOG.MD](../CHANGELOG.MD)；文档导航见 [docs/README.md](./README.md)。
@@ -31,12 +31,13 @@
 
 | 层 / 包 | 职责 |
 |---------|------|
-| `cmd/repo-cleaner/main.go` | 程序入口：解析参数、目录解析、启动 Fyne GUI |
-| `internal/platform` | **操作系统差异抽象**（关键）：目录扫描、删除、隐藏/系统/只读属性、环境变量持久化、默认 `REPO_ROOT`，按 `build tag` 分 `platform_windows.go` / `platform_unix.go` 实现 |
-| `internal/engine` | 功能 1 ～ 功能 7 的**平台无关**业务逻辑（扫描、写 `.npmrc`、清缓存），只调用 `platform` 接口 |
+| `cmd/repo-cleaner/` | 程序入口：`main.go`（flag 解析、位置参数、目录解析、GUI/CLI 分流）；`gui.go`（默认标签，启动 Fyne GUI）；`headless.go`（`nogui` 标签下 `runGUI` 的占位提示，**不是 CLI 实现**） |
+| `internal/platform` | **操作系统差异抽象**（关键）：目录扫描、删除、隐藏/系统/只读属性、环境变量持久化、默认 `REPO_ROOT`，按 `build tag` 分 `platform_windows.go` / `platform_unix.go` 实现；`Platform` 接口共 11 个方法 |
+| `internal/engine` | 功能 1 ～ 功能 7 的**平台无关**业务逻辑（扫描、写 `.npmrc`、清缓存），只调用 `platform` 接口；`Run` 按功能号分派、`IsDangerous` 判定 1 / 6 / 7 |
 | `internal/config` | `config.ini` 读写（去重键、保留未知行）、默认 `REPO_ROOT` / `LANG` |
-| `internal/i18n` | 中文 / 英文文案字典（唯一来源） |
-| `internal/ui` | Fyne 桌面 GUI：主菜单、语言切换、二次确认、进度与结果展示 |
+| `internal/i18n` | 中文 / 英文文案字典（唯一来源）：界面 `T()` + 执行日志 `Logs()` |
+| `internal/ui` | Fyne 桌面 GUI：目录 / 语言 / 预演 / 关于、功能按钮 1–7、二次确认、结果日志区、页脚 |
+| `internal/buildinfo` | `Version`（**产品版本唯一权威源**）、`BuildID`、`Footer()` / `BuildInfo()` |
 
 > 新增平台只需在 `internal/platform` 增加对应 `build tag` 实现，`engine` 与 `ui` 零改动。
 

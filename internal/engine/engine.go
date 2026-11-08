@@ -1,4 +1,4 @@
-// internal/engine/engine.go v2.2.0
+// internal/engine/engine.go v2.3.0
 
 // Package engine 实现功能 1 ～ 7 的平台无关业务逻辑；OS 差异一律经 platform.Platform。
 package engine
@@ -60,7 +60,7 @@ func EnableGlobalNodeModules(p platform.Platform, repoRoot string, lang i18n.Lan
 	}
 
 	log.Logf("%s", d.F1Step3)
-	dirs, err := p.ListProjectDirs(repoRoot)
+	dirs, err := listDirs(p, repoRoot, opts)
 	if err != nil {
 		return err
 	}
@@ -114,7 +114,7 @@ func ResetNodeConfig(p platform.Platform, repoRoot string, lang i18n.Lang, opts 
 		log.Logf(d.EnvDelWarn, err)
 	}
 	log.Logf("%s", d.F2Step2)
-	dirs, err := p.ListProjectDirs(repoRoot)
+	dirs, err := listDirs(p, repoRoot, opts)
 	if err != nil {
 		return err
 	}

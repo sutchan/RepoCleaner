@@ -1,4 +1,4 @@
-// internal/engine/options.go v2.1.0
+// internal/engine/options.go v2.3.0
 
 package engine
 
@@ -14,12 +14,30 @@ type Options struct {
 	// DryRun 预演模式：仅输出将要执行的操作，不修改任何文件与环境变量
 	// （对齐 OPENSPEC §4.7）；危险操作在预演下跳过二次确认。
 	DryRun bool
+	// Recursive 递归扫描 monorepo 深层项目（V1，2 层深度，默认关闭；
+	// 对齐 OPENSPEC §3.0）。
+	Recursive bool
+	// ExtraCleanDirs 自定义清理目录名（V3，仅限项目目录内部匹配，
+	// 并入功能 6 / 7 白名单；对齐 OPENSPEC §3.6 / §3.7）。
+	ExtraCleanDirs []string
+}
+
+// listDirs 按选项选择枚举方式：Recursive 启用 2 层深度递归，否则仅直接子目录。
+func listDirs(p platform.Platform, repoRoot string, opts Options) ([]string, error) {
+	if opts.Recursive {
+		return platform.ListProjectDirsDeep(repoRoot, 2)
+	}
+	return p.ListProjectDirs(repoRoot)
 }
 
 // Run 按功能编号（1-7）执行对应功能，lang 决定执行日志语言。
 func Run(p platform.Platform, fn int, repoRoot string, lang i18n.Lang, opts Options, log Logger) error {
+	d := i18n.Logs(lang)
 	if opts.DryRun {
-		log.Logf("%s", i18n.Logs(lang).DryRunOn)
+		log.Logf("%s", d.DryRunOn)
+	}
+	if opts.Recursive {
+		log.Logf("%s", d.RecursiveOn)
 	}
 	switch fn {
 	case 1:

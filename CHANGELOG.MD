@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [2.3.0] - 2026-11-08
+
+### Added
+- **递归扫描 monorepo（V1）** - 新增 `-recursive` 命令行参数与 GUI「递归扫描」复选框；`platform.ListProjectDirsDeep` 以 2 层深度枚举深层项目，跳过 `node_modules` / `.next` / `.git` 等依赖与产物目录，结果排序返回；`config.ini` 支持 `RECURSIVE=true|1|yes` 持久化
+- **自定义清理目录（V3）** - `config.ini` 新增 `EXTRA_CLEAN_DIRS`（逗号分隔），并入功能 6 / 7 清理白名单，仅限项目目录内部匹配
+- **执行日志落盘（V4）** - 新增 `internal/logs` 文件日志器：CLI 与 GUI 的执行日志同步追加写入可执行文件同目录的 `repo-cleaner.log`
+- **文案与帮助** - i18n 新增递归扫描中英文案（`RecursiveLabel` / `RecursiveOn`）；`-h` 帮助补充 `-recursive` 说明
+
+### Changed
+- **选项优先级统一** - `DryRun` / `Recursive` / `ExtraCleanDirs` 按「命令行参数 > `config.ini` > 默认关闭」生效（对齐 `OPENSPEC.md` §4.5 / §5.2）
+- **文档同步至 v2.3.0** - README 徽章与页脚、`package.json` / `package-lock.json`、`docs/tokens.json`、各 `docs/*.md` 与 `prototype/README.md` 标题同步至 `2.3.0`；被改 Go 文件头注释同步 bump
+
+---
+
 ## [2.2.0] - 2026-11-07
 
 ### Added
