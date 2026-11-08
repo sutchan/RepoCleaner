@@ -1,10 +1,11 @@
-// internal/platform/platform_test.go v2.0.0
+// internal/platform/platform_test.go v2.3.0
 
 package platform
 
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -81,5 +82,38 @@ func TestProjectDetect(t *testing.T) {
 	}
 	if !IsNextProject(dir) {
 		t.Fatal("应识别为 Next.js 项目")
+	}
+}
+
+func TestListProjectDirsDeep(t *testing.T) {
+	root := t.TempDir()
+	// 结构：root/proj-a（直接子目录）、root/proj-a/inner（孙目录）、
+	// root/proj-a/inner/node_modules 与 .git（应跳过）、root/proj-b（直接子目录）。
+	for _, rel := range []string{
+		"proj-a",
+		"proj-a/inner",
+		"proj-a/inner/node_modules/dep",
+		"proj-a/inner/.git/objects",
+		"proj-b",
+	} {
+		if err := os.MkdirAll(filepath.Join(root, rel), 0o755); err != nil {
+			t.Fatal(err)
+		}
+	}
+	dirs, err := ListProjectDirsDeep(root, 2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	joined := strings.Join(dirs, ";")
+	for _, want := range []string{"proj-a", "proj-b", filepath.Join("proj-a", "inner")} {
+		if !strings.Contains(joined, want) {
+			t.Fatalf("递归枚举应包含 %s，得到 %v", want, dirs)
+		}
+	}
+	if strings.Contains(joined, "node_modules") || strings.Contains(joined, ".git") {
+		t.Fatalf("依赖 / VCS 目录应被跳过，得到 %v", dirs)
+	}
+	if len(dirs) != 3 {
+		t.Fatalf("期望 3 个目录（proj-a、inner、proj-b），得到 %d: %v", len(dirs), dirs)
 	}
 }

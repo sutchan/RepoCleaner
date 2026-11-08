@@ -7,7 +7,7 @@ All notable changes to this project will be documented in this file.
 ## [2.3.0] - 2026-11-08
 
 ### Added
-- **递归扫描 monorepo（V1）** - 新增 `-recursive` 命令行参数与 GUI「递归扫描」复选框；`platform.ListProjectDirsDeep` 以 2 层深度枚举深层项目，跳过 `node_modules` / `.next` / `.git` 等依赖与产物目录，结果排序返回；`config.ini` 支持 `RECURSIVE=true|1|yes` 持久化
+- **递归扫描 monorepo（V1）** - 新增 `-recursive` 命令行参数与 GUI「递归扫描」复选框；`platform.ListProjectDirsDeep` 以 3 层深度枚举深层项目（覆盖 `REPO_ROOT/monorepo/packages/app` 典型结构），跳过 `node_modules` / `.next` / `.git` 等依赖与产物目录，结果排序返回；`config.ini` 支持 `RECURSIVE=true|1|yes` 持久化
 - **自定义清理目录（V3）** - `config.ini` 新增 `EXTRA_CLEAN_DIRS`（逗号分隔），并入功能 6 / 7 清理白名单，仅限项目目录内部匹配
 - **执行日志落盘（V4）** - 新增 `internal/logs` 文件日志器：CLI 与 GUI 的执行日志同步追加写入可执行文件同目录的 `repo-cleaner.log`
 - **文案与帮助** - i18n 新增递归扫描中英文案（`RecursiveLabel` / `RecursiveOn`）；`-h` 帮助补充 `-recursive` 说明

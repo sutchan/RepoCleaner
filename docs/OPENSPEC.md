@@ -34,8 +34,9 @@
 | `cmd/repo-cleaner/` | 程序入口：`main.go`（flag 解析、位置参数、目录解析、GUI/CLI 分流）；`gui.go`（默认标签，启动 Fyne GUI）；`headless.go`（`nogui` 标签下 `runGUI` 的占位提示，**不是 CLI 实现**） |
 | `internal/platform` | **操作系统差异抽象**（关键）：目录扫描、删除、隐藏/系统/只读属性、环境变量持久化、默认 `REPO_ROOT`，按 `build tag` 分 `platform_windows.go` / `platform_unix.go` 实现；`Platform` 接口共 11 个方法 |
 | `internal/engine` | 功能 1 ～ 功能 7 的**平台无关**业务逻辑（扫描、写 `.npmrc`、清缓存），只调用 `platform` 接口；`Run` 按功能号分派、`IsDangerous` 判定 1 / 6 / 7 |
-| `internal/config` | `config.ini` 读写（去重键、保留未知行）、默认 `REPO_ROOT` / `LANG` |
+| `internal/config` | `config.ini` 读写（去重键、保留未知行）、默认 `REPO_ROOT` / `LANG` / `RECURSIVE` / `EXTRA_CLEAN_DIRS` |
 | `internal/i18n` | 中文 / 英文文案字典（唯一来源）：界面 `T()` + 执行日志 `Logs()` |
+| `internal/logs` | 执行日志落盘（v2.3.0）：`FileLogger` 将 CLI / GUI 日志同步追加写入 `repo-cleaner.log` |
 | `internal/ui` | Fyne 桌面 GUI：目录 / 语言 / 预演 / 关于、功能按钮 1–7、二次确认、结果日志区、页脚 |
 | `internal/buildinfo` | `Version`（**产品版本唯一权威源**）、`BuildID`、`Footer()` / `BuildInfo()` |
 
@@ -76,7 +77,7 @@
 > 菜单上显示的短文案以 `internal/i18n` 文案字典为准；文档只使用上表名称。
 > v2.0.0 起各功能由 `internal/engine` 的 `EnableGlobalNodeModules` / `ResetNodeConfig` / `CleanNextCache` / `RestoreNextCache` / `InstallGlobalDeps` / `CleanAllCaches` / `CleanViteCache` 实现；上表「批处理标签」列仅为 v1.x 历史对照。
 
-所有功能的作用域统一为：**遍历 `REPO_ROOT` 的直接子目录**（`internal/platform.ListProjectDirs` 用 `os.ReadDir` 枚举），不递归进入更深层级。
+所有功能的作用域默认为：**遍历 `REPO_ROOT` 的直接子目录**（`internal/platform.ListProjectDirs` 用 `os.ReadDir` 枚举），不递归进入更深层级。v2.3.0 起支持可选递归（V1）：`config.ini` 的 `RECURSIVE=true` 或 CLI `-recursive` / GUI 复选框启用 `ListProjectDirsDeep`（深度 3 层，覆盖 `REPO_ROOT/monorepo/packages/app` 典型结构；跳过 `node_modules` / `.next` / `.git` 等依赖与产物目录）。
 
 ### 3.1 功能 1：启用全局 node_modules
 
@@ -140,14 +141,14 @@
 
 - **前置**：显示警告并要求二次确认（GUI 确认弹窗 / CLI 输入 `Y`）。
 - **清理项**（每个 `REPO_ROOT` 直接子目录）：
-  - 目录：`node_modules`、`.next`、`.nuxt`、`dist`、`build`
+  - 目录：`node_modules`、`.next`、`.nuxt`、`dist`、`build`（v2.3.0 起可经 `EXTRA_CLEAN_DIRS` 追加自定义目录名，见 §5.3）
   - 文件：`package-lock.json`、`yarn.lock`、`pnpm-lock.yaml`
 - **预期结果**：释放磁盘空间。删除不可逆，恢复需重新 `npm install`。
 
 ### 3.7 功能 7：清理 Vite/构建缓存
 
 - **前置**：显示警告并要求二次确认（GUI 确认弹窗 / CLI 输入 `Y`）。
-- **清理项**：`.vite`、`.turbo`、`.nuxt`、`.angular`、`.svelte-kit`、`dist`、`build`、`coverage`、`.nyc_output`
+- **清理项**：`.vite`、`.turbo`、`.nuxt`、`.angular`、`.svelte-kit`、`dist`、`build`、`coverage`、`.nyc_output`；v2.3.0 起可经 `EXTRA_CLEAN_DIRS` 追加自定义目录名（见 §5.3）。
 - **预期结果**：清理构建缓存，适合 Vite / Turborepo / Angular / Svelte 项目（v2.2.0 起含 Angular `.angular` 与 Svelte `.svelte-kit`）。
 
 > 功能 6 与功能 7 有重叠项（`dist`、`build`、`.nuxt`），属预期设计：功能 6 面向「全量清理」，功能 7 面向「仅构建缓存」。
@@ -179,6 +180,7 @@ GUI 提供 3 种目录来源：使用当前目录、手动输入完整路径（�
 |------|------|------|
 | `-lang en\|zh` | 设置语言并写入 `config.ini` | `repo-cleaner -lang en` |
 | `-dry-run` | 预演模式：仅显示将要执行的操作，不修改任何文件（见 §4.7） | `repo-cleaner -dry-run 6` |
+| `-recursive` | 递归扫描 monorepo 深层项目（深度 3 层，见 §3.0；优先级高于 `config.ini`） | `repo-cleaner -recursive 6` |
 | `-h` / `--help` | 显示帮助信息 | `repo-cleaner -h` |
 | `1`-`7` | 直接运行对应功能（命令行模式，跳过 GUI） | `repo-cleaner 1` |
 | 路径 | 指定仓库根目录（支持含空格路径，需引号包裹） | `repo-cleaner "D:\My Projects"` |
@@ -290,7 +292,13 @@ RepoCleaner/
 ```ini
 REPO_ROOT=E:\Github
 LANG=zh
+RECURSIVE=false
+EXTRA_CLEAN_DIRS=
 ```
+
+**新增键（v2.3.0）**：
+- `RECURSIVE`：`true|1|yes` 启用递归扫描 monorepo 深层项目（深度 3 层，见 §3.0 / §7.3 L3），默认 `false`；CLI `-recursive` 优先级更高。
+- `EXTRA_CLEAN_DIRS`：逗号分隔的自定义清理目录名，并入功能 6 / 7 白名单，**仅限项目目录内部匹配**；留空表示无自定义项。
 
 **`lang.ini`**：首部 `LANG=` 记录当前语言选择；`[en]` / `[zh]` 两节保存中英文文案参考。Go 程序**不从该节读取文案**（文案在 `internal/i18n` 中定义），此文件为 v1.x 历史保留。`-lang` 参数不得覆盖本文件。
 
@@ -351,7 +359,7 @@ LANG=zh
 |------|------|------|
 | L1 | ~~`.npmrc` 的 `tmp=` 值未加引号~~ | **v2.0.0 已修复**：`tmp=` 值加引号，兼容含空格的 `TEMP` 路径 |
 | L2 | 功能 1 设置 `NODE_PATH` 后需重开终端才对新进程完全生效 | 当前会话已同步设置，新终端需重开 |
-| L3 | 目录扫描仅覆盖 `REPO_ROOT` 的直接子目录，不递归 | monorepo 深层项目不会被处理 |
+| L3 | ~~目录扫描仅覆盖 `REPO_ROOT` 的直接子目录，不递归~~ | **v2.3.0 已修复**：`RECURSIVE=true` / `-recursive` 启用 `ListProjectDirsDeep`（深度 3 层，跳过依赖与产物目录）；默认仍为直接子目录，保持安全边界 |
 | L4 | ~~功能 5 不检查 `npm install -g` 的退出码~~ | **v2.1.0 已修复**：逐组检查退出码，结束后汇总失败组并返回错误（CLI 退出码非 0） |
 | L5 | ~~功能 6 / 7 使用 `pause` 而非 `Y/N` 二次确认~~ | **v2.0.0 已修复**：GUI 确认弹窗 + CLI `Y/N` |
 
@@ -410,12 +418,12 @@ npm run check:docs                          # 校验所有 Markdown 相对链接
 ## 10. 扩展计划
 
 - [x] ~~支持更多框架缓存清理（Angular、Svelte）~~（v2.2.0 已完成，见 §3.7）
-- [ ] 支持自定义清理规则
-- [ ] 添加日志记录功能
+- [x] ~~支持自定义清理规则~~（v2.3.0 已完成：`EXTRA_CLEAN_DIRS`，见 §3.6）
+- [x] ~~添加日志记录功能~~（v2.3.0 已完成：`internal/logs` 落盘 `repo-cleaner.log`）
 - [x] ~~添加 dry-run 模式预览待删除文件~~（v2.1.0 已完成，见 §4.7）
 - [x] ~~功能 5 检查 `npm install -g` 退出码并汇总失败项（对应 L4）~~（v2.1.0 已完成）
 - [x] ~~功能 6 / 7 改为 `Y/N` 二次确认~~（v2.0.0 已完成，见 L5）
-- [ ] 支持递归扫描 monorepo 深层项目（对应 L3）
+- [x] ~~支持递归扫描 monorepo 深层项目（对应 L3）~~（v2.3.0 已完成，见 §3.0 / §7.3）
 - [ ] 添加详细进度显示
 
 ---

@@ -67,7 +67,7 @@
 
 | ID | 任务 | 优先级 | 状态 | 结果 |
 |----|------|--------|------|------|
-| V1 | 支持递归扫描 monorepo 深层项目 | 中 | 已完成 | `-recursive` 参数 + GUI 复选框；`platform.ListProjectDirsDeep` 深度 2 层、跳过依赖/产物目录、排序返回；`config.ini` 支持 `RECURSIVE`；文档与帮助同步 |
+| V1 | 支持递归扫描 monorepo 深层项目 | 中 | 已完成 | `-recursive` 参数 + GUI 复选框；`platform.ListProjectDirsDeep` 深度 3 层（覆盖 REPO_ROOT/monorepo/packages/app）、跳过依赖/产物目录、排序返回；`config.ini` 支持 `RECURSIVE`；文档与帮助同步 |
 | V3 | 支持自定义清理规则 | 低 | 已完成 | `config.ini` 新增 `EXTRA_CLEAN_DIRS`（逗号分隔），并入功能 6 / 7 白名单，仅限项目目录内部匹配 |
 | V4 | 添加日志记录功能 | 低 | 已完成 | 新增 `internal/logs` 文件日志器，CLI / GUI 执行日志同步追加写入 `repo-cleaner.log` |
 | R0 | v2.3.0 收尾 | 高 | 已完成 | 版本单一来源 bump 至 2.3.0 并同步全部展示位；CHANGELOG 补 `[2.3.0]`；`gofmt` / `go vet` / `go test` / `go build`（`-tags nogui`）门禁复跑通过；提交并推送 |

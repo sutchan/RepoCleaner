@@ -22,7 +22,7 @@ import (
 func main() {
 	langFlag := flag.String("lang", "", "界面语言 en|zh（写入 config.ini）")
 	dryRunFlag := flag.Bool("dry-run", false, "预演模式：仅显示将要执行的操作，不修改任何文件")
-	recursiveFlag := flag.Bool("recursive", false, "递归扫描 monorepo 深层项目（深度 2 层）")
+	recursiveFlag := flag.Bool("recursive", false, "递归扫描 monorepo 深层项目（深度 3 层）")
 	showHelp := flag.Bool("h", false, "显示帮助")
 	flag.BoolVar(showHelp, "help", false, "显示帮助")
 	flag.Parse()

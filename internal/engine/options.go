@@ -22,10 +22,11 @@ type Options struct {
 	ExtraCleanDirs []string
 }
 
-// listDirs 按选项选择枚举方式：Recursive 启用 2 层深度递归，否则仅直接子目录。
+// listDirs 按选项选择枚举方式：Recursive 启用 3 层深度递归（覆盖
+// REPO_ROOT/monorepo/packages/app 这类典型 monorepo 结构），否则仅直接子目录。
 func listDirs(p platform.Platform, repoRoot string, opts Options) ([]string, error) {
 	if opts.Recursive {
-		return platform.ListProjectDirsDeep(repoRoot, 2)
+		return platform.ListProjectDirsDeep(repoRoot, 3)
 	}
 	return p.ListProjectDirs(repoRoot)
 }
