@@ -1,7 +1,7 @@
 # .github/workflows/ci.yml v2.3.3
-# 仓库级自动门禁（行为契约见 docs/CONTRIBUTING.md §8.4 / §9.1）：
-# check:root-clean + gofmt + go vet + go test + go build（nogui / ci）+ npm run check:docs，
-# 另含 Fyne GUI（默认构建标签，需 OpenGL / C 工具链）编译验证。
+# 仓库级门禁（行为契约见 docs/CONTRIBUTING.md §8.4 / §9.1）：
+# check 跑全套静态 / 测试门禁；windows-smoke 在 Windows runner 验证平台层代码；
+# gui-build 在 Linux 验证默认标签的完整 Fyne GUI 编译。
 # -tags ci 使用 Fyne software driver，无需 C 工具链即可验证 internal/ui 代码可编译。
 name: ci
 
@@ -10,9 +10,14 @@ on:
     branches: [main]
     tags: ['v*']
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   check:
@@ -24,6 +29,7 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: '1.25'
+          cache: true
 
       - uses: actions/setup-node@v4
         with:
@@ -54,6 +60,24 @@ jobs:
       - name: check:docs
         run: npm run check:docs
 
+  # Windows 平台层此前只在发版时首次编译，PR 阶段无法发现问题
+  windows-smoke:
+    name: windows smoke (nogui + ci)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.25'
+          cache: true
+
+      - name: go test (nogui)
+        run: go test -tags nogui -count=1 ./...
+
+      - name: go build (ci tags, GUI code)
+        run: go build -tags ci ./...
+
   gui-build:
     name: gui build (linux, default tags)
     runs-on: ubuntu-latest
@@ -63,6 +87,7 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: '1.25'
+          cache: true
 
       - name: Install OpenGL / X11 / Wayland dev libraries
         run: |

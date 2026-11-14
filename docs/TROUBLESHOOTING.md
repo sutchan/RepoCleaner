@@ -20,7 +20,7 @@
 |------|------|------|
 | 本机 `go build` 报 OpenGL / C 工具链相关错误 | Fyne GUI 需要 CGO、系统 OpenGL、X11 与 Wayland 开发库 | 完整 GUI 构建需 C 工具链；无工具链时用 `go build -tags nogui ./...` 只编译非 GUI 部分（**不会产出可用 GUI**）。CI 的 `gui-build` job 在 Ubuntu 安装开发库后验证完整编译 |
 | Linux 编译报 `wayland-client-core.h: No such file or directory` | `go-gl/glfw v3.4` 在 Linux 默认标签同时编译 X11 与 Wayland 后端，只装了 X11 开发库 | 安装 `libwayland-dev` 与 `libxkbcommon-dev`（CI 的 `gui-build` 已内置）；或改用 `-tags x11` 只编 X11 后端（产物不支持 Wayland，**不用于发布**） |
-| 找不到 Release 资产 | v2.3.3 起资产为 `RepoManager-v<版本>-<os>-<arch>.zip / .tar.gz` 归档（Windows/macOS zip、Linux tar.gz），另附 `SHA256SUMS.txt` | 按 OS / 架构选择归档并用校验和核对；`windows/arm64` 暂不产出（托管 runner 缺交叉工具链），`linux/arm64` 交叉目标仍需 arm64 架构开发库 |
+| 找不到 Release 资产 | v2.3.3 起资产为 `RepoManager-v<版本>-<os>-<arch>.zip / .tar.gz` 归档（Windows/macOS zip、Linux tar.gz），另附 `SHA256SUMS.txt` | 按 OS / 架构选择归档并用校验和核对；`windows/arm64` 与 `linux/arm64` 因托管 runner 缺交叉/多架构工具链暂不产出，可在 Actions 手动触发（仅打包）或本地 `scripts/build.ps1` / `build.sh` 补齐 |
 | 启动后是 GUI 而不是预期的命令行操作 | 只有给出功能号 `1`–`7` 才进入非交互 CLI | 写成 `repo-manager <功能号> <路径>`；单独给路径会启动 GUI 并忽略该路径 |
 
 > 前置要求：Windows / macOS / Linux；功能 1 / 5 需要 Node.js ≥ 18 与 npm；源码构建需 Go ≥ 1.25。

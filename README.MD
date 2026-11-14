@@ -352,7 +352,7 @@ RepoManager/
 ├── go.mod / go.sum                    # Go 模块与依赖（Fyne v2）
 ├── cmd/repo-manager/                  # 产品入口：main.go + gui.go（默认）/ headless.go（nogui 占位）
 ├── internal/                          # Go 源码：buildinfo / config / engine / i18n / logs / platform / ui（7 个包）
-├── scripts/                           # build.ps1 / build.sh（交叉编译）+ check-doc-links.mjs / check-root-clean.mjs（门禁）
+├── scripts/                           # build.ps1 / build.sh（交叉编译）+ package-release.sh（归档）+ gen-landing-version.mjs（版本注入）+ check-*.mjs（门禁）
 ├── .tmp/                              # 会话级临时文件唯一落点（脚本 / 探针 / 日志 / 中间产物，用完即清）
 ├── reports/                           # 工具正式产物目录（审计报告 / 覆盖率 / 测试结果）
 ├── RepoCleaner.bat                    # v1.x 旧版 Windows 脚本（已弃用）
@@ -370,8 +370,8 @@ RepoManager/
 ├── src/                               # 已弃用参考界面应用（v1.x 遗留）
 │   ├── app/                           # layout.tsx / page.tsx / globals.css
 │   ├── components/                    # icons.tsx + ui/ 基础组件
-│   └── lib/                           # i18n.ts + utils.ts + data/（单一数据源）
-├── landing/                           # Web 展示项目落地页（README.md 为目录说明，页面文件规划中）
+│   └── lib/                           # i18n.ts（三语）+ utils.ts + data/（单一数据源）
+├── landing/                           # Web 展示落地页：index.html + assets/（样式 / 三语脚本 / 版本）+ README.md
 ├── prototype/README.md                # 原型目录说明（无代码、无规范正文）
 └── .gitignore
 ```

@@ -73,7 +73,7 @@ frontend
 | 版本权威源 | `internal/buildinfo/version.go` 的 `Version` 常量；同步清单见 [CONTRIBUTING.md §8.2](./CONTRIBUTING.md) |
 | 发布流程 | 见 [CONTRIBUTING.md §8.4](./CONTRIBUTING.md)；工作流实现为 [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) 与 [`.github/workflows/release.yml`](../.github/workflows/release.yml) |
 | 触发与校验 | push `vX.Y.Z` tag；发布前校验 `tag == "v" + Version == package.json.version`，且 [CHANGELOG.MD](../CHANGELOG.MD) 存在 `## [X.Y.Z]` 小节，任一不满足即失败 |
-| Release 资产 | `RepoManager-v<版本>-<os>-<arch>.zip / .tar.gz` 归档（Windows/macOS zip、Linux tar.gz）与 `SHA256SUMS.txt`；`windows/arm64` 因托管 runner 缺交叉工具链暂不产出，`linux/arm64` 交叉目标仍需 arm64 架构开发库 |
+| Release 资产 | `RepoManager-v<版本>-<os>-<arch>.zip / .tar.gz` 归档（Windows/macOS zip、Linux tar.gz）与 `SHA256SUMS.txt`；`windows/arm64` 因托管 runner 缺交叉工具链、`linux/arm64` 因缺 arm64 架构 GUI 开发库，均暂不产出（发布矩阵仅 4 目标，本地 `scripts/build.ps1` 可补齐） |
 | Release 说明 | 从 `CHANGELOG.MD` 对应版本小节提取，标题为 tag 名 |
 | 本机交叉编译 | `scripts/build.ps1` / `scripts/build.sh`，6 目标输出到 `bin/`；缺交叉编译器时跳过并警告 |
 
@@ -117,7 +117,7 @@ grep 'const Version' internal/buildinfo/version.go
 
 ## 5. 门禁与目录卫生
 
-- 自动门禁命令以 [ci.yml](../.github/workflows/ci.yml) 为准（含 `check:root-clean`、`gofmt`、`go vet` / `go test` / `go build` 的 `nogui` 标签、`npm ci`、`check:docs`），完整说明见 [CONTRIBUTING.md §6.3](./CONTRIBUTING.md) 与 [OPENSPEC.md §9.1](./OPENSPEC.md)。
+- 自动门禁命令以 [ci.yml](../.github/workflows/ci.yml) 为准（含 `check:root-clean`、`gofmt`、`go vet` / `go test` / `go build` 的 `nogui` 标签、`npm ci`、`check:docs`），完整说明见 [CONTRIBUTING.md §6.3](./CONTRIBUTING.md) 与 [OPENSPEC.md §9.1](./OPENSPEC.md)。发布侧另有 `scripts/package-release.sh`（归档）与 `npm run landing:version`（落地页版本注入，每次 bump 版本须重跑并同步 `landing/assets/version.js`）。
 - 一次性脚本、探针、日志、中间产物写 `.tmp/`；工具正式产物写 `reports/` / `coverage/` / `test-results/`；`*.code-workspace` 按后缀放行。
 - 新增根目录工程文件 / 子目录必须同时登记 `scripts/check-root-clean.mjs` 的 `ALLOWED_DIRS` 白名单，并核对 `.gitignore` 的忽略规则，二者不可脱节；`landing/` 已按此登记。落地页构建产物写 `landing/dist/` 或 `landing/out/`（由 `.gitignore` 忽略）。
 - 产品运行时生成的 `config.ini` / `repo-manager.log` 位于可执行文件同目录，不属仓库根目录卫生约束。

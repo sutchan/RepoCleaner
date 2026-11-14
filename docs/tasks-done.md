@@ -101,3 +101,18 @@
 | W1 | CI GUI 构建补齐 Wayland 开发依赖 | 高 | 已完成 | v2.3.2：`ci.yml` / `release.yml` 安装 `libwayland-dev` / `libxkbcommon-dev`，解决 `wayland-client-core.h` 缺失；排障与规格文档同步 |
 
 > 本节按 2026-11-14 17:58 的代码与 workflow 实况核查归档；「规划写成既成事实」仍为禁止项，未完成事项只在 [tasks.md](./tasks.md) 维护。
+
+## 九、v2.3.3 剩余任务收口（2026-11-14 18:21）
+
+| ID | 任务 | 优先级 | 状态 | 结果 |
+|----|------|--------|------|------|
+| V5 | 添加详细进度显示（GUI 进度条 + CLI 分步进度） | 中 | 已完成 | `internal/ui/output.go` 的 `progressView` 按执行日志 `[n/m]` 推进进度条与步骤文案；`progress_parse.go` 抽为纯函数并新增 `progress_parse_test.go`；CLI 原有 `[1/4]` / `[1/5]` 分步日志保留 |
+| D1 | Release 资产按全局规范打包归档 | 中 | 已完成 | `release.yml` 新增独立 `version` job 读取 `internal/buildinfo/version.go`；`scripts/package-release.sh` 产出 `RepoManager-v<版本>-<os>-<arch>.zip / .tar.gz`（Windows/macOS zip、Linux tar.gz）与 `SHA256SUMS.txt`，Release 只上传归档 |
+| D2 | 让同 SHA 的其它工作流失败阻断 release job | 高 | 已完成 | `release` job 以 `gh api` 校验同 SHA 全部非 release 工作流为绿，运行中轮询、失败或超时退出；`permissions` 补 `actions: read`；`gate` 的 `check:root-clean` 见第八节 D2a |
+| D3 | 统一残留递归深度文本、明确帮助固定英文 | 低 | 已完成 | `options.go` / `recursive_extra_test.go` 注释改为 3 层；`OPENSPEC.md` L6、`TROUBLESHOOTING.md`、`DESIGN-SYSTEM.md` G9、根 README 同步；CLI 帮助固定英文，不随 `-lang` 切换 |
+| D4 | 补齐繁体中文 | 中 | 已完成 | `internal/i18n/hant.go` 繁中界面 + 执行日志字典；`Normalize` 支持 `zh-Hant` / `tw` / `zh-TW`；GUI 下拉框、CLI `-lang`、`config.ini` 枚举、参考界面三语数据与落地页切换 UI 全覆盖；localStorage 持久化 + 枚举校验 + `<html lang>` 同步；`i18n_test.go` 新增断言 |
+| D6 | 产品名同步到应用内文案与技术标识 | 高 | 已完成 | `go.mod` / import / `cmd/repo-manager/` / 二进制与日志名 / Fyne app ID / `package.json` / GitHub 链接 / Release 资产 / i18n 与 GUI/CLI 文案统一；CHANGELOG 与归档历史条目按 §8.3 保留原貌 |
+| D7 | 实现 Web 展示落地页 | 低 | 已完成 | `landing/index.html` + `assets/styles.css` / `app.js` / `version.js`（`npm run landing:version` 构建期注入 `V{semver}· build yymmddhhmm`）；语义化 kebab-case id、三语切换、响应式与深色偏好、设计令牌对齐；部署 / 上线方式仍为规划项 |
+| R7 | 版本与文档同步 | 中 | 已完成 | bump 至 2.3.3 并同步 `package.json` / `package-lock.json` / README 徽章与页脚 / `tokens.json` / 被改文件头注释；`CHANGELOG.MD` 新增 `[2.3.3]`；OPENSPEC / CONTRIBUTING / DESIGN-SYSTEM / MAINTAINERS / TROUBLESHOOTING / docs/README / landing/README 四处登记同步 |
+
+> 本节按 2026-11-14 18:21 的代码与 workflow 实况归档；`docs/tasks.md` 已更新为无待办状态。已知限制（`windows/arm64` 无交叉工具链、`linux/arm64` 缺 arm64 架构开发库）登记于 [MAINTAINERS.md §6](./MAINTAINERS.md) 与 [CONTRIBUTING.md §8.4](./CONTRIBUTING.md)，不属待办。

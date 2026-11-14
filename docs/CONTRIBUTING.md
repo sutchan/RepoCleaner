@@ -110,6 +110,8 @@ RepoManager/
 ├── scripts/                     # 工程脚本
 │   ├── check-doc-links.mjs      # 文档相对链接校验（npm run check:docs）
 │   ├── check-root-clean.mjs    # 根目录清洁度门禁（npm run check:root-clean）
+│   ├── gen-landing-version.mjs # 落地页版本与 build 编号构建期注入（npm run landing:version）
+│   ├── package-release.sh      # Release 资产归档与 SHA256SUMS 生成
 │   ├── build.ps1                # Go 交叉编译（Windows / PowerShell）
 │   └── build.sh                 # Go 交叉编译（macOS / Linux）
 ├── .tmp/                        # 会话级临时文件唯一落点（内容不入库，用完即清）
@@ -132,7 +134,7 @@ RepoManager/
 ├── config.ini                   # 运行配置：4 键（本机生成，v2.2.0 起不入库，示例见 docs/config.example.ini）
 ├── lang.ini                     # 语言文案参考节 [en] / [zh]（v1.x 历史保留，Go 不读取）
 ├── README.MD / CHANGELOG.MD / LICENSE     # 入口、变更历史、许可证
-├── RepoManager.code-workspace   # VS Code 工作区配置，禁止删除（本地目录名非产品名，见 MAINTAINERS.md §1）
+├── RepoManager.code-workspace   # VS Code 工作区配置，禁止删除（命名现状见 MAINTAINERS.md §1）
 ├── .nvmdrc                      # 本机 Node 版本标记
 ├── package.json / package-lock.json / tsconfig.json / next.config.ts
 ├── postcss.config.mjs / eslint.config.mjs / next-env.d.ts
@@ -387,22 +389,22 @@ npm run check:root-clean       # 根目录清洁度门禁
 
 **规则（目标）**：GitHub Actions **所有工作流全部通过**才算完整发布闭环；禁止在门禁未全绿时手动上传或跳过 CI 发版。
 
-**当前实现边界（workflow 实况）**：`release.yml` 的 `release` job 以 `needs: [gate, build]` 阻断，只保证发布工作流自身全绿；`ci.yml` 由同一 tag push 独立触发，**不阻断** release。tag 推送后须人工确认两条工作流均绿再对外宣布发布。后续新增任何工作流时必须确保失败可阻断 release job（如经 `workflow_run` 汇总），才能把「所有工作流全绿」变为强制门槛；该差距已登记 [`docs/tasks.md`](./tasks.md)。
+**当前实现边界（workflow 实况，v2.3.3）**：`release.yml` 的 `release` job 以 `needs: [version, build, package]` 阻断，并在发布前通过 `gh api` 校验同 SHA 的其它工作流（含 `ci.yml` 与今后新增的工作流）全部 `completed|success`；运行中轮询等待，失败或超时即退出。`release` job 单独提权 `contents: write` / `actions: read`，顶层与其余 job 仅 `contents: read`。
 
 | 项 | 约定 |
 |----|------|
-| 触发 | push 符合 `vX.Y.Z` 的 tag（必须与 §8.2 权威源 `Version` 一致） |
-| 全绿门槛（当前） | `release.yml` 的 `gate` + `build` 全部成功；另需确认 `ci.yml` 同次运行为绿（非自动阻断） |
-| 发布动作 | 发布 job 以该 tag 创建 Release：标题 `vX.Y.Z`，说明取 `CHANGELOG.MD` 对应版本小节，附件为矩阵实际产出的二进制 + `SHA256SUMS.txt`（build 号按 §8.2 在构建期 `-ldflags` 注入） |
+| 触发 | push 符合 `vX.Y.Z` 的 tag（必须与 §8.2 权威源 `Version` 一致）；两条工作流另支持 `workflow_dispatch` 与 `concurrency` 防重复，手动触发只产出压缩包 artifact、不创建 Release |
+| 全绿门槛（v2.3.3） | `release.yml` 的 `version` + `build` + `package` 全部成功；门禁由 `ci.yml` 在同 SHA 运行，`release` job 自动等待并校验其结论，缺失或失败即阻断 |
+| 发布动作 | `version` job 从 `internal/buildinfo/version.go` 读取版本；`build` job 按 4 目标矩阵产出二进制；`package` job 用 `scripts/package-release.sh` 打包为 `RepoManager-v<版本>-<os>-<arch>.zip / .tar.gz` 归档并生成 `SHA256SUMS.txt`；`release` job 用该 tag 创建 Release，说明取 `CHANGELOG.MD` 对应小节，附件只含归档与校验文件（build 号按 §8.2 在构建期 `-ldflags` 注入） |
 | 一致性校验 | 发布前校验 tag == `internal/buildinfo/version.go` 的 `Version` == `package.json`；不一致即失败，不得发布 |
 | 失败处理 | 发布工作流自身任一步失败则不发布；修复后删除并重新打同一 tag 重跑，禁止在失败状态下手工发版 |
 
-**当前状态：已落地（v2.2.0）**——实现为两个工作流：
+**当前状态：已落地（v2.3.3）**——实现为两个工作流：
 
-- [`.github/workflows/ci.yml`](../.github/workflows/ci.yml)：`push`（`main` 与 `v*` tag）与 `pull_request` 触发；`check` job 执行 §9.1 全部仓库级门禁（nogui），`gui-build` job 在 ubuntu 安装 OpenGL / X11 / Wayland 开发库后以**默认构建标签**完整编译 Fyne GUI（补齐本机无 C 工具链的验证缺口）。`go-gl/glfw v3.4` 在 Linux 默认双后端，缺 `libwayland-dev` / `libxkbcommon-dev` 会在 `wl_platform.h` 处编译失败，排障见 [TROUBLESHOOTING.md §2](./TROUBLESHOOTING.md)。
-- [`.github/workflows/release.yml`](../.github/workflows/release.yml)：`push` `vX.Y.Z` tag 触发；`gate` job 重跑同一套门禁，`build` job 按三平台矩阵产出二进制（ubuntu：linux/amd64、linux/arm64、windows/amd64；macos：darwin/amd64、darwin/arm64；windows：windows/amd64），`release` job 校验 tag == 版本权威源 == `package.json`、生成 `SHA256SUMS.txt`、从 `CHANGELOG.MD` 提取对应小节作 Release 说明，全部成功后 `gh release create` 自动发布。
-- **全绿语义**：发布 job 以 `needs: [gate, build]` 保证发布工作流自身全绿；tag push 同时触发 `ci.yml`，同一提交上两工作流均绿才完成发布闭环。**后续新增任何工作流时，必须确保失败可阻断 release job**（如经 `workflow_run` 汇总），维持「所有工作流全绿」门槛。
-- **已知缺口**：GitHub 托管 runner 无 `aarch64-w64-mingw32-gcc`，CI 不产出 `windows/arm64`（本地 `scripts/build.ps1` 具备该交叉工具链时可补齐）；产物缺失不阻断发布，`SHA256SUMS.txt` 仅覆盖实际产出文件。
+- [`.github/workflows/ci.yml`](../.github/workflows/ci.yml)：`push`（`main` 与 `v*` tag）、`pull_request` 与 `workflow_dispatch` 触发；`check` job 执行 §9.1 全部仓库级门禁（nogui），`windows-smoke` job 在 Windows runner 补跑 `go test -tags nogui` 与 `go build -tags ci`，`gui-build` job 在 ubuntu 安装 OpenGL / X11 / Wayland 开发库后以**默认构建标签**完整编译 Fyne GUI。`go-gl/glfw v3.4` 在 Linux 默认双后端，缺 `libwayland-dev` / `libxkbcommon-dev` 会在 `wl_platform.h` 处编译失败，排障见 [TROUBLESHOOTING.md §2](./TROUBLESHOOTING.md)。
+- [`.github/workflows/release.yml`](../.github/workflows/release.yml)：tag push 或 `workflow_dispatch` 触发；`version` job 读取版本权威源，`build` job 按 4 目标矩阵产出二进制，`package` job 调用 `scripts/package-release.sh` 打包归档并把 `release-archives` 作为 artifact 保留，`release` job（仅 tag push）校验同 SHA 其它工作流全绿、tag == 版本权威源 == `package.json`，从 `CHANGELOG.MD` 提取对应小节作 Release 说明；`gh release create` 只上传 `*.zip` / `*.tar.gz` 归档与校验文件，预发布以 `--prerelease` 标记区分。门禁不在本工作流重复执行。
+- **全绿语义**：`release` job 以 `needs: [version, build, package]` 保证发布工作流自身全绿，并通过 `gh api` 校验同 SHA 其它工作流全部 `completed|success`；新增工作流会被该轮询自动纳入阻断范围。
+- **已知缺口**：GitHub 托管 runner 无 `aarch64-w64-mingw32-gcc`，不产出 `windows/arm64`；`linux/arm64` 缺 arm64 架构的 X11 / Wayland / OpenGL 开发库，为避免该目标失败拖垮整个 `build` job，v2.3.3 起从发布矩阵移除（本地 `scripts/build.ps1` 仍可补齐）；`SHA256SUMS.txt` 仅覆盖实际产出的归档。
 
 ---
 

@@ -92,18 +92,18 @@ RepoManager/
 │   ├── config.example.ini # 运行配置示例模板
 │   ├── tokens.json        # 设计令牌
 │   └── tasks.md / tasks-done.md  # 任务清单与完成归档
-├── landing/                                    # Web 展示项目落地页（README.md 说明用途；页面文件规划中）
+├── landing/                                    # Web 展示落地页：index.html + assets/（页面 / 样式 / 三语脚本 / 版本）+ README.md
 ├── prototype/README.md                         # 原型目录说明（无规范正文、无代码）
 ├── src/                                        # 参考界面应用（Next.js App Router，v2.0.0 起已弃用）
 │   ├── app/               # layout.tsx / page.tsx / globals.css
 │   ├── components/        # icons.tsx + ui/
 │   └── lib/               # i18n.ts / utils.ts / data/
 ├── public/                                     # 静态资源
-├── scripts/                                    # check-doc-links.mjs / check-root-clean.mjs（门禁）+ build.ps1 / build.sh（交叉编译）
+├── scripts/                                    # check-*.mjs（门禁）+ build.ps1 / build.sh（交叉编译）+ package-release.sh / gen-landing-version.mjs
 ├── .tmp/                                       # 会话级临时文件唯一落点（内容不入库，用完即清）
 ├── reports/                                    # 工具正式产物目录（内容不入库）
 ├── .github/                                    # Community Health Files
-│   ├── workflows/                             # ci.yml（门禁）+ release.yml（tag 触发，release job 依赖 gate + build）
+│   ├── workflows/                             # ci.yml（门禁）+ release.yml（version + gate + build + release，跨工作流阻断）
 │   ├── CODE_OF_CONDUCT.md                     # 行为准则
 │   ├── SECURITY.md                            # 安全策略
 │   ├── SUPPORT.md                             # 支持指南
@@ -132,6 +132,7 @@ npm run type-check     # TypeScript 类型检查
 npm run lint           # ESLint
 npm run check:docs     # 校验所有 Markdown 相对链接（含文件名大小写）
 npm run check:root-clean # 根目录清洁度门禁（临时文件是否散落）
+npm run landing:version   # 构建期注入落地页版本与 10 位 build 编号
 npm run build          # 生产构建（参考界面）
 npm run start          # 启动构建产物
 ```

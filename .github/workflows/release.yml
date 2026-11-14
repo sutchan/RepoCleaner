@@ -1,20 +1,26 @@
 # .github/workflows/release.yml v2.3.3
 # 发布工作流（行为契约见 docs/CONTRIBUTING.md §8.4）：
-# push vX.Y.Z tag 触发 → 独立 version job 读取版本权威源 → gate 重跑门禁
-# → 三平台矩阵构建 → release job 校验同 SHA 的其它工作流为绿、tag 与版本一致
-# → 打包为 <产品名>-v<版本>-<os>-<arch>.<扩展名> 归档后发布。
+# tag push 或手动触发 → version 读取唯一权威源 → build 多平台矩阵
+# → package 统一打包为 <产品名>-v<版本>-<os>-<arch>.<扩展名> 并保留 artifact
+# → 仅 tag push 时 release 校验同 SHA 其它工作流全绿、版本一致后创建 Release。
 #
-# 目标矩阵与 scripts/build.ps1 / build.sh 对齐；windows/arm64 因 GitHub 托管
-# runner 无 aarch64-w64-mingw32 交叉工具链暂不产出（build.ps1 本地构建可补齐）。
+# 门禁不在本工作流重复：ci.yml 在同 SHA 运行全部门禁，release job 会等待并校验其结论。
+# 手动触发只产出 release-archives 压缩包，不创建 Release。
+# linux/arm64 因托管 runner 缺 arm64 架构 GUI 开发库暂不产出；
+# windows/arm64 因无 aarch64-w64-mingw32-gcc 暂不产出（本地 scripts/build.ps1 可补齐）。
 name: release
 
 on:
   push:
     tags: ['v*']
+  workflow_dispatch:
 
 permissions:
-  contents: write
-  actions: read
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   version:
@@ -32,56 +38,16 @@ jobs:
           test -n "$V" || { echo "版本权威源读取失败"; exit 1; }
           echo "version=$V" >> "$GITHUB_OUTPUT"
 
-  gate:
-    name: gate (nogui + ci + docs)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-go@v5
-        with:
-          go-version: '1.25'
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-
-      - name: check:root-clean
-        run: npm run check:root-clean
-
-      - name: gofmt
-        run: test -z "$(gofmt -l ./cmd ./internal)"
-
-      - name: go vet (nogui)
-        run: go vet -tags nogui ./...
-
-      - name: go test (nogui)
-        run: go test -tags nogui -count=1 ./...
-
-      - name: go build (nogui)
-        run: go build -tags nogui ./...
-
-      - name: go build (ci tags, GUI code)
-        run: go build -tags ci ./...
-
-      - name: npm ci
-        run: npm ci
-
-      - name: check:docs
-        run: npm run check:docs
-
   build:
-    needs: gate
+    needs: version
     strategy:
       fail-fast: false
       matrix:
         include:
-          - { os: ubuntu-latest,  goos: linux,   goarch: amd64, cc: '',                       apt: '' }
-          - { os: ubuntu-latest,  goos: linux,   goarch: arm64, cc: aarch64-linux-gnu-gcc,    apt: gcc-aarch64-linux-gnu }
-          - { os: macos-latest,   goos: darwin,  goarch: amd64, cc: '',                       apt: '' }
-          - { os: macos-latest,   goos: darwin,  goarch: arm64, cc: '',                       apt: '' }
-          - { os: windows-latest, goos: windows, goarch: amd64, cc: '',                       apt: '' }
+          - { os: ubuntu-latest,  goos: linux,   goarch: amd64 }
+          - { os: macos-latest,   goos: darwin,  goarch: amd64 }
+          - { os: macos-latest,   goos: darwin,  goarch: arm64 }
+          - { os: windows-latest, goos: windows, goarch: amd64 }
 
     name: build ${{ matrix.goos }}/${{ matrix.goarch }}
     runs-on: ${{ matrix.os }}
@@ -91,28 +57,22 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: '1.25'
+          cache: true
 
-      # linux/amd64 默认标签需 X11 + Wayland 开发库；arm64 交叉目标还需 arm64 架构的同套库，当前未配置多架构 apt 源
-      - name: Install Linux GUI dev libraries (amd64)
-        if: runner.os == 'Linux' && matrix.goarch == 'amd64'
+      # Linux 默认标签需 X11 + Wayland 开发库；交叉目标缺 arm64 架构库，故暂不构建 linux/arm64
+      - name: Install Linux GUI dev libraries
+        if: runner.os == 'Linux'
         run: |
           sudo apt-get update
           sudo apt-get install -y \
             libgl1-mesa-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libxxf86vm-dev \
             libwayland-dev libxkbcommon-dev
 
-      - name: Install cross toolchain
-        if: matrix.apt != ''
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y ${{ matrix.apt }}
-
       - name: Build
         shell: bash
         run: |
           BUILD_ID=$(date -u +%y%m%d%H%M)
           export GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} CGO_ENABLED=1
-          if [ -n "${{ matrix.cc }}" ]; then export CC="${{ matrix.cc }}"; fi
           NAME="repo-manager-${GOOS}-${GOARCH}"
           if [ "$GOOS" = "windows" ]; then NAME="$NAME.exe"; fi
           echo "build $NAME (build $BUILD_ID)"
@@ -122,11 +82,44 @@ jobs:
         with:
           name: dist-${{ matrix.goos }}-${{ matrix.goarch }}
           path: dist/
+          if-no-files-found: error
+          retention-days: 7
+
+  # 打包独立成 job：手动触发也能直接下载压缩包，无需发布 Release
+  package:
+    needs: [version, build]
+    name: package (archives)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: dist-*
+          path: dist
+          merge-multiple: true
+
+      - name: Package release archives
+        run: bash scripts/package-release.sh "${{ needs.version.outputs.version }}" dist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-archives
+          path: |
+            dist/*.zip
+            dist/*.tar.gz
+            dist/SHA256SUMS.txt
+          if-no-files-found: error
+          retention-days: 30
 
   release:
-    needs: [gate, build, version]
-    name: release (verify + package + publish)
+    needs: [version, build, package]
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    name: release (verify + publish)
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: read
     steps:
       - uses: actions/checkout@v4
 
@@ -136,9 +129,8 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
-          pattern: dist-*
+          name: release-archives
           path: dist
-          merge-multiple: true
 
       # 同 SHA 的其它工作流（含 ci 与今后新增的工作流）必须全部为绿，否则阻断发布
       - name: Verify all other workflows are green for this commit
@@ -170,20 +162,6 @@ jobs:
           echo "tag=$TAG version.go=$V package.json=$PJSON"
           [ "v$V" = "$TAG" ] || { echo "tag 与 internal/buildinfo/version.go 不一致，终止发布"; exit 1; }
           [ "$PJSON" = "$V" ] || { echo "package.json 与版本权威源不一致，终止发布"; exit 1; }
-
-      - name: Package release archives
-        run: bash scripts/package-release.sh "${{ needs.version.outputs.version }}" dist
-
-      # 归档同时作为 Actions artifact 保留，无需发布 Release 也能直接下载压缩包
-      - name: Upload release archives
-        uses: actions/upload-artifact@v4
-        with:
-          name: release-archives
-          path: |
-            dist/*.zip
-            dist/*.tar.gz
-            dist/SHA256SUMS.txt
-          if-no-files-found: error
 
       - name: Release notes
         run: |

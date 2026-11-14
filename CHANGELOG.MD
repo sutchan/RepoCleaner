@@ -17,6 +17,7 @@ All notable changes to this project will be documented in this file.
 - **项目更名收口** - Go 模块 / import / `cmd/repo-manager/` / 二进制 `repo-manager` / 日志 `repo-manager.log` / Fyne app ID / `package.json` 与 GitHub 链接统一为新标识；GUI 标题、CLI 帮助、i18n 文案与参考界面统一显示 `Repo Manager`；CHANGELOG 历史条目按规范保留原貌
 - **Release 资产归档** - `release.yml` 新增独立 `version` 作业读取 `internal/buildinfo/version.go`；`scripts/package-release.sh` 打包为 `RepoManager-v<版本>-<os>-<arch>.zip|tar.gz`（Windows/macOS zip、Linux tar.gz），Release 只上传归档与 `SHA256SUMS.txt`
 - **发布跨工作流阻断** - `release` job 校验同 SHA 的其它工作流（含今后新增）全部为绿，否则阻断发布；`permissions` 补 `actions: read`
+- **工作流整理与加固** - `ci.yml` 新增 `windows-smoke` 日常 Windows 门禁、`workflow_dispatch` 与 `concurrency`；`release.yml` 删除与 `ci.yml` 重复的 `gate` job、抽出独立 `package` job（手动触发即可下载压缩包而不发版）、顶层权限收紧为 `contents: read` 仅 `release` job 提权、artifact 设保留天数；移除缺 arm64 GUI 开发库而必然失败的 `linux/arm64` 目标，发布矩阵收敛为 4 目标；`scripts/package-release.sh` 增加 semver 校验、异常清理、README / 配置示例随包与平铺归档条目
 - **递归深度文本统一** - `options.go` / 测试注释与规格 L6、排障手册同步为 3 层，明确 CLI 帮助固定英文、不随 `-lang` 切换
 - **参考界面数据真实性** - 移除无依据的平均缓存占用数字与旧版 bat 步骤描述，改用当前 Go 产品的真实用法
 
