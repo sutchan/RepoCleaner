@@ -2,8 +2,27 @@
 .npm-cache/
 %USERPROFILE%/
 
-# Windows 批处理运行残留
+# ── 临时文件与产物目录（唯一约定，见 CONTRIBUTING.md §3.2）──
+# .tmp/：一次性脚本 / 探针 / 调试日志 / 中间产物；内容全忽略，会话结束即清
+.tmp/*
+!.tmp/.gitkeep
+# reports/ 等：正式工具产物（审计报告 / 覆盖率 / 测试结果）
+/reports/*
+!/reports/.gitkeep
+/coverage/
+/playwright-report/
+/test-results/
+
+# 根目录临时产物兜底：禁止散落 .tmp-*.mjs / *.log / audit-*.json 等
 *.log
+*.tmp
+*.out
+/*.txt
+audit-*.json
+*-result.json
+.tmp-*
+*_tmp*
+tmp-*
 
 # 依赖与构建产物
 node_modules/
@@ -30,3 +49,5 @@ desktop.ini
 # IDE 数据
 .codebuddy/
 .next_backup_*
+.tmp/
+reports/

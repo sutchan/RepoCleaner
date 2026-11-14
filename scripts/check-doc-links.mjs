@@ -1,4 +1,4 @@
-// scripts/check-doc-links.mjs v1.2.5
+// scripts/check-doc-links.mjs v2.3.1
 // 校验仓库内所有 Markdown 相对链接的目标是否存在，且文件名大小写严格匹配。
 // 用法：npm run check:docs（或在仓库根执行 node scripts/check-doc-links.mjs）
 // 退出码：0 = 全部通过；1 = 存在失效链接。
@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 
 // 兼容 Node 18：不使用 import.meta.dirname
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const SKIP = new Set(["node_modules", ".next", ".git", "out", "dist", "build"]);
+const SKIP = new Set(["node_modules", ".next", ".git", "out", "dist", "build", "bin", ".tmp", "reports", "coverage", "test-results"]);
 
 function collectMarkdown(dir, out = []) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {

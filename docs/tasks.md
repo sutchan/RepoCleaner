@@ -1,8 +1,8 @@
 # RepoCleaner 任务清单 (docs/tasks.md)
 
-> 最后更新：**2026-11-08**
+> 最后更新：**2026-11-14**
 > 维护约定：已完成任务归档至 [tasks-done.md](./tasks-done.md)；本文件仅保留进行中 / 待办任务。
-> 全局版本唯一来源：`internal/buildinfo/version.go` 的 `Version`（当前 **2.3.0**）。
+> 全局版本唯一来源：`internal/buildinfo/version.go` 的 `Version`（当前 **2.3.1**）。
 
 ## 进行中 / 待办
 

@@ -4,7 +4,7 @@
 
 [![Platform](https://img.shields.io/badge/Platform-Win%20%7C%20macOS%20%7C%20Linux-blue?style=flat)](https://github.com/sutchan/RepoCleaner)
 [![Go](https://img.shields.io/badge/Go-1.25%2B-00ADD8?style=flat&logo=go&logoColor=white)](https://go.dev)
-[![Version](https://img.shields.io/badge/Version-2.3.0-green?style=flat)](https://github.com/sutchan/RepoCleaner)
+[![Version](https://img.shields.io/badge/Version-2.3.1-green?style=flat)](https://github.com/sutchan/RepoCleaner)
 [![License](https://img.shields.io/badge/License-MIT-orange?style=flat)](https://github.com/sutchan/RepoCleaner)
 [![Node](https://img.shields.io/badge/Node.js-339933?style=flat&logo=node.js&logoColor=white)](https://nodejs.org)
 [![Disk](https://img.shields.io/badge/Saves-10GB%2B-red?style=flat)](https://github.com/sutchan/RepoCleaner)
@@ -71,7 +71,7 @@
 
 ### 使用步骤
 
-1. **下载或构建 `repo-cleaner` 可执行文件**（源码构建：`./scripts/build.ps1` / `./scripts/build.sh` 交叉编译到 `bin/`；本机快速构建 `go build -o repo-cleaner ./cmd/repo-cleaner`，Fyne GUI 需 C 工具链）
+1. **下载或构建 `repo-cleaner` 可执行文件**（源码构建：`./scripts/build.ps1` / `./scripts/build.sh` 交叉编译到 `bin/`；本机快速构建 `go build -o .tmp/repo-cleaner ./cmd/repo-cleaner`（临时产物统一进 `.tmp/`），Fyne GUI 需 C 工具链）
 2. **运行**：不带参数启动 GUI（Windows 双击，macOS/Linux 命令行执行）；带功能号 `1`–`7` 则直接进入命令行模式
 3. **选择仓库根目录**（GUI 输入框 / 目录选择按钮，可保存到 `config.ini`；CLI 用位置路径）
 4. **按功能按钮（GUI）或功能号（CLI）选择功能**
@@ -376,7 +376,9 @@ RepoCleaner/
 ├── go.mod / go.sum                    # Go 模块与依赖（Fyne v2）
 ├── cmd/repo-cleaner/                  # 产品入口：main.go + gui.go（默认）/ headless.go（nogui 占位）
 ├── internal/                          # Go 源码：buildinfo / config / engine / i18n / platform / ui（6 个包）
-├── scripts/                           # build.ps1 / build.sh（交叉编译）+ check-doc-links.mjs（文档链接校验）
+├── scripts/                           # build.ps1 / build.sh（交叉编译）+ check-doc-links.mjs / check-root-clean.mjs（门禁）
+├── .tmp/                              # 会话级临时文件唯一落点（脚本 / 探针 / 日志 / 中间产物，用完即清）
+├── reports/                           # 工具正式产物目录（审计报告 / 覆盖率 / 测试结果）
 ├── RepoCleaner.bat                    # v1.x 旧版 Windows 脚本（已弃用）
 ├── config.ini                         # 运行配置（REPO_ROOT / LANG，可执行文件同目录、本机生成不入库；示例见 docs/config.example.ini）
 ├── lang.ini                           # v1.x 批处理语言文案（历史保留，Go 程序不读取）
@@ -396,6 +398,8 @@ RepoCleaner/
 └── .gitignore
 ```
 
+> **临时文件约定**：一次性脚本、探针、调试日志、中间产物一律写 `.tmp/`；工具正式产物（报告 / 覆盖率 / 测试结果）写 `reports/`。两个目录内容均被 `.gitignore` 忽略，ESLint / `tsconfig.json` / 文档链接扫描也已排除；`npm run check:root-clean` 会拦截根目录散落的未登记条目。详见 [开发规范 §3.2](./docs/CONTRIBUTING.md)。
+
 ---
 
 ## 📄 许可证
@@ -412,6 +416,6 @@ RepoCleaner/
 
 <div align="center">
 
-RepoCleaner v2.3.0 · MIT License · [文档中心](./docs/README.md)
+RepoCleaner v2.3.1 · MIT License · [文档中心](./docs/README.md)
 
 </div>

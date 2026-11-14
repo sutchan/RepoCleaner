@@ -1,6 +1,6 @@
-# .github/workflows/ci.yml v2.2.0
+# .github/workflows/ci.yml v2.3.1
 # 仓库级自动门禁（行为契约见 docs/CONTRIBUTING.md §8.4 / §9.1）：
-# gofmt + go vet + go test + go build + npm run check:docs，
+# check:root-clean + gofmt + go vet + go test + go build + npm run check:docs，
 # 另含 Fyne GUI（默认构建标签，需 OpenGL / C 工具链）编译验证。
 name: ci
 
@@ -28,6 +28,9 @@ jobs:
         with:
           node-version: 20
           cache: npm
+
+      - name: check:root-clean
+        run: npm run check:root-clean
 
       - name: gofmt
         run: test -z "$(gofmt -l ./cmd ./internal)"
@@ -63,4 +66,4 @@ jobs:
           sudo apt-get install -y libgl1-mesa-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libxxf86vm-dev
 
       - name: go build (default tags, Fyne GUI)
-        run: go build -trimpath ./cmd/repo-cleaner
+        run: mkdir -p .tmp && go build -trimpath -o .tmp/repo-cleaner ./cmd/repo-cleaner

@@ -1,4 +1,4 @@
-# RepoCleaner 开发规范与贡献指南 v2.3.0
+# RepoCleaner 开发规范与贡献指南 v2.3.1
 
 > 本文是 RepoCleaner 仓库的**唯一开发规范来源**，规定「如何改代码、如何写文档、如何提交与评审」。
 > 本文存放于 `docs/`；所有贡献者（含 AI 协作会话）在动手前必须阅读本文。
@@ -103,8 +103,11 @@ RepoCleaner/
 ├── public/                      # 参考界面应用静态资源（SVG）
 ├── scripts/                     # 工程脚本
 │   ├── check-doc-links.mjs      # 文档相对链接校验（npm run check:docs）
+│   ├── check-root-clean.mjs    # 根目录清洁度门禁（npm run check:root-clean）
 │   ├── build.ps1                # Go 交叉编译（Windows / PowerShell）
 │   └── build.sh                 # Go 交叉编译（macOS / Linux）
+├── .tmp/                        # 会话级临时文件唯一落点（内容不入库，用完即清）
+├── reports/                     # 工具正式产物目录（报告 / 覆盖率 / 测试结果，内容不入库）
 ├── go.mod / go.sum              # Go 模块定义与依赖锁定（Fyne）
 ├── cmd/repo-cleaner/main.go     # 产品本体入口（参数解析 / OS 分发 / 启动 GUI）
 ├── internal/                    # Go 源码：platform / engine / config / i18n / ui
@@ -138,6 +141,7 @@ RepoCleaner/
 5. **文件行数**：所有源代码文件（`.ts/.tsx/.js/.jsx/.vue/.py/.dart/.go/.java` 等）单文件 **≤ 200 行**。超出时按职责拆分为更小模块（组件拆子组件、逻辑抽纯函数/常量/类型），且**不得改变对外导出契约**。
    - **文档文件（`.md/.markdown/.mdx/.rst`）不拆分**，即使超过 200 行也保持单文件完整连贯。
    - `.bat` 为批处理脚本，不纳入源码 200 行规则，但仍须按标签分节、保持可读。
+6. **临时文件统一落固定子目录**：一次性脚本、探针、调试日志、中间产物一律写入 `.tmp/`；工具正式产物（审计报告、覆盖率、`*-result.json` 等）写入 `reports/` / `coverage/` / `test-results/`。写入前先 `mkdir -p`，本轮产生的 `.tmp/` 内容在任务结束前清理；需长期留存的证据改写进 `docs/` 或测试断言。两类目录均已在 `.gitignore` 忽略，并在 ESLint / `tsconfig.json` / `check-doc-links.mjs` 中排除，避免临时脚本让门禁假红。**禁止**在仓库根或顶层散落 `.tmp-*.mjs`、`tmp-*.js`、`*.log`、`audit-*.json` 等；根目录白名单由 `scripts/check-root-clean.mjs` 强制校验（CI 首步）。产品运行时的 `config.ini` / `repo-cleaner.log` 属 exe 同目录便携配置，不在此约束内。
 
 ---
 
@@ -285,12 +289,13 @@ v1.2.5
 ### 6.3 提交前检查
 
 ```bash
-git status                                   # 确认无 node_modules / .next / *.log / *.tsbuildinfo / bin/ 被跟踪
+git status                                   # 确认无 node_modules / .next / *.log / *.tsbuildinfo / bin/ / .tmp/ 被跟踪
 gofmt -l .                                   # 输出应为空
 go vet ./cmd/... ./internal/...
 go test ./cmd/... ./internal/...
 go build ./cmd/...
 npm run check:docs
+npm run check:root-clean       # 根目录清洁度门禁
 
 # 无 OpenGL C 工具链时，Go 命令统一改用 -tags nogui（含 go build -tags nogui ./...）
 ```
@@ -413,7 +418,7 @@ npm run check:docs
 - [ ] `CHANGELOG.MD` 已新增对应小节；`README.MD` / `docs/OPENSPEC.md` 使用说明随功能变化更新
 - [ ] 文档链接按实际大小写与相对层级书写，新增文档归入 `docs/`
 - [ ] GitHub Actions 所有工作流全绿；发布类变更已按 §8.4 校验 tag 与版本权威源一致性
-- [ ] 无密钥 / Token / 真实用户数据入库；`node_modules`、`.next`、`*.log`、`*.tsbuildinfo` 未被跟踪
+- [ ] 无密钥 / Token / 真实用户数据入库；`node_modules`、`.next`、`*.log`、`*.tsbuildinfo` 未被跟踪；`npm run check:root-clean` 通过，临时文件统一在 `.tmp/` / `reports/`
 
 ### 9.3 功能验证（GUI 手动冒烟，跨平台）
 

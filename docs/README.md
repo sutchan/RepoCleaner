@@ -1,4 +1,4 @@
-# RepoCleaner 文档中心 v2.3.0
+# RepoCleaner 文档中心 v2.3.1
 
 > 本目录是 RepoCleaner **所有规范与规格文档的唯一归档位置**。
 > 仓库根只保留面向使用者的入口 [README.MD](../README.MD)、变更历史 [CHANGELOG.MD](../CHANGELOG.MD) 与 [LICENSE](../LICENSE)。
@@ -83,7 +83,9 @@ RepoCleaner/
 │   ├── components/        # icons.tsx + ui/
 │   └── lib/               # i18n.ts / utils.ts / data/
 ├── public/                                     # 静态资源
-├── scripts/                                    # check-doc-links.mjs（文档门禁）+ build.ps1 / build.sh（交叉编译）
+├── scripts/                                    # check-doc-links.mjs / check-root-clean.mjs（门禁）+ build.ps1 / build.sh（交叉编译）
+├── .tmp/                                       # 会话级临时文件唯一落点（内容不入库，用完即清）
+├── reports/                                    # 工具正式产物目录（内容不入库）
 ├── .github/                                    # Community Health Files
 │   ├── workflows/                             # ci.yml（门禁）+ release.yml（全绿后自动发布 Release）
 │   ├── CODE_OF_CONDUCT.md                     # 行为准则
@@ -113,6 +115,7 @@ npm run dev            # 开发预览（参考界面）
 npm run type-check     # TypeScript 类型检查
 npm run lint           # ESLint
 npm run check:docs     # 校验所有 Markdown 相对链接（含文件名大小写）
+npm run check:root-clean # 根目录清洁度门禁（临时文件是否散落）
 npm run build          # 生产构建（参考界面）
 npm run start          # 启动构建产物
 ```

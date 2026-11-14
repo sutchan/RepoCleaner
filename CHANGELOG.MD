@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [2.3.1] - 2026-11-14
+
+### Added
+- **固定临时目录** - 建立 `.tmp/`（一次性脚本 / 探针 / 日志 / 中间产物）与 `reports/`（工具正式产物），由 `.gitkeep` 固定目录、内容全部忽略
+- **根目录清洁度门禁** - 新增 `scripts/check-root-clean.mjs` 与 `npm run check:root-clean`：白名单校验根目录 git 可见条目，拦截散落的临时脚本 / 日志 / 产物；纳入 `.github/workflows/ci.yml` 首步
+
+### Changed
+- **忽略与门禁排除** - `.gitignore` 补齐 `.tmp/` / `reports/` / `coverage/` / `test-results/` 与 `*.tmp` / `*.out` / `/*.txt` / `audit-*.json` / `*-result.json` / `.tmp-*` 等兜底；ESLint、`tsconfig.json` 与 `scripts/check-doc-links.mjs` 同步排除临时目录
+- **构建产物不落根目录** - README 本机快速构建与 CI 的 GUI 编译验证统一输出至 `.tmp/repo-cleaner`
+- **版本号同步** - 权威源 `internal/buildinfo/version.go` 及 §8.2 全部展示位同步至 `2.3.1`
+
+### Docs
+- **开发规范补充** - `CONTRIBUTING.md` §3.2 新增临时文件统一目录约定，§6.3 / §9.2 补门禁检查；`README.MD` / `docs/README.md` 目录树与常用命令同步
+
+---
+
 ## [2.3.0] - 2026-11-08
 
 ### Added
