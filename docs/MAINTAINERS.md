@@ -1,4 +1,4 @@
-# Repo Manager 维护者手册 (Maintainers) v2.3.1
+# Repo Manager 维护者手册 (Maintainers) v2.3.2
 
 > **定位**：仓库维护者的操作与决策记录——命名现状、GitHub 仓库设置、发版校验、文档治理、门禁与目录卫生。
 > 使用者请从 [README.MD](../README.MD) 开始；功能行为以 [OPENSPEC.md](./OPENSPEC.md) 为准；编码 / 提交 / 审查规范以 [CONTRIBUTING.md](./CONTRIBUTING.md) 为准；未完成的任务以 [tasks.md](./tasks.md) 为唯一来源。
@@ -100,6 +100,7 @@ grep 'const Version' internal/buildinfo/version.go
 | 改 UI / 令牌 | [DESIGN-SYSTEM.md](./DESIGN-SYSTEM.md) + [tokens.json](./tokens.json) |
 | 改流程 / 命令 / CI | [CONTRIBUTING.md](./CONTRIBUTING.md) + [docs/README.md](./README.md) §4 |
 | 新增 / 删除文档 | [docs/README.md](./README.md) §1 文档地图与 §3 目录树、根 `README.MD` 文档索引、本文 §4 |
+| 改落地页 / 新增根目录子目录 | [`landing/README.md`](../landing/README.md) + 四处文档登记 + `scripts/check-root-clean.mjs` 白名单（见 §5） |
 | 新增 / 完成任务 | [tasks.md](./tasks.md)（唯一未完成来源）/ [tasks-done.md](./tasks-done.md)（归档） |
 | 维护者信息 / 仓库设置 | 本文 |
 | 版本 bump | [CONTRIBUTING.md §8.2](./CONTRIBUTING.md) 全部展示位 + `CHANGELOG.MD` 新小节 |
@@ -118,14 +119,14 @@ grep 'const Version' internal/buildinfo/version.go
 
 - 自动门禁命令以 [ci.yml](../.github/workflows/ci.yml) 为准（含 `check:root-clean`、`gofmt`、`go vet` / `go test` / `go build` 的 `nogui` 标签、`npm ci`、`check:docs`），完整说明见 [CONTRIBUTING.md §6.3](./CONTRIBUTING.md) 与 [OPENSPEC.md §9.1](./OPENSPEC.md)。
 - 一次性脚本、探针、日志、中间产物写 `.tmp/`；工具正式产物写 `reports/` / `coverage/` / `test-results/`；`*.code-workspace` 按后缀放行。
-- 新增根目录工程文件必须同时登记 `scripts/check-root-clean.mjs` 的白名单，并核对 `.gitignore` 的忽略规则，二者不可脱节。
+- 新增根目录工程文件 / 子目录必须同时登记 `scripts/check-root-clean.mjs` 的 `ALLOWED_DIRS` 白名单，并核对 `.gitignore` 的忽略规则，二者不可脱节；`landing/` 已按此登记。落地页构建产物写 `landing/dist/` 或 `landing/out/`（由 `.gitignore` 忽略）。
 - 产品运行时生成的 `config.ini` / `repo-cleaner.log` 位于可执行文件同目录，不属仓库根目录卫生约束。
 
 ---
 
 ## 6. 已知差距与决策记录
 
-以下均为 v2.3.1 的**现状**（不是已完成事项），待办编号见 [tasks.md](./tasks.md)：
+以下均为**当前现状**（不是已完成事项），待办编号见 [tasks.md](./tasks.md)：
 
 | 编号 | 现状 | 目标 / 决策 |
 |------|------|-------------|

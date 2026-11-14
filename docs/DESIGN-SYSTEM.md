@@ -1,4 +1,4 @@
-# Repo Manager 设计系统 (Design System) v2.3.1
+# Repo Manager 设计系统 (Design System) v2.3.2
 
 > **本文定位**：Repo Manager 的**唯一 UI 设计规范来源**，规定设计令牌、界面结构与交互标准。
 > **v2.0.0 起**：实际 UI 为 **Go + Fyne 桌面 GUI**（`internal/ui`），配色沿用本文 §2.1 设计令牌；仓库根 `src/` 的 Next.js 参考界面为 **v1.x 遗留、已弃用**，§3.1 / §3.2 等 Next.js 章节仅作历史参考。

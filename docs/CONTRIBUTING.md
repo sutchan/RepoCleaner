@@ -1,4 +1,4 @@
-# Repo Manager 开发规范与贡献指南 v2.3.1
+# Repo Manager 开发规范与贡献指南 v2.3.2
 
 > 本文是 Repo Manager 仓库的**唯一开发规范来源**，规定「如何改代码、如何写文档、如何提交与评审」。
 > 本文存放于 `docs/`；所有贡献者（含 AI 协作会话）在动手前必须阅读本文。
@@ -105,6 +105,8 @@ RepoManager/
 │   ├── config.example.ini       # 运行配置示例模板（4 键）
 │   └── tasks.md / tasks-done.md # 任务单一来源与完成归档
 ├── public/                      # 参考界面应用静态资源（SVG）
+├── landing/                     # Web 展示项目落地页（页面源码与资源；README.md 为目录说明）
+│   └── README.md
 ├── scripts/                     # 工程脚本
 │   ├── check-doc-links.mjs      # 文档相对链接校验（npm run check:docs）
 │   ├── check-root-clean.mjs    # 根目录清洁度门禁（npm run check:root-clean）
@@ -139,15 +141,15 @@ RepoManager/
 
 ### 3.2 组织规则
 
-1. **所有规范 / 规格文档放 `docs/`**；根只保留入口 `README.MD`、`CHANGELOG.MD`、`LICENSE`。**产品代码一律放根 `cmd/` 与 `internal/`（Go）**；`src/` 为已弃用参考界面，禁止新增功能代码；`prototype/` 只放原型说明，禁止再放回可运行代码或规范正文。
-2. **单一数据源**：产品 UI 与执行日志文案只放 `internal/i18n`（界面用 `T()`、日志用 `Logs()`）；`engine` 的业务常量（清理目录清单、依赖包列表、`.npmrc` 模板）集中在其包内定义，禁止散落在 `ui` 层。已弃用的 `src/lib/` 不再新增数据。
+1. **所有规范 / 规格文档放 `docs/`**；根只保留入口 `README.MD`、`CHANGELOG.MD`、`LICENSE`。**产品代码一律放根 `cmd/` 与 `internal/`（Go）**；`src/` 为已弃用参考界面，禁止新增功能代码；`prototype/` 只放原型说明，禁止再放回可运行代码或规范正文；**Web 展示项目的落地页面放 `landing/`**，其内容约定见 [`landing/README.md`](../landing/README.md)。
+2. **单一数据源**：产品 UI 与执行日志文案只放 `internal/i18n`（界面用 `T()`、日志用 `Logs()`）；`engine` 的业务常量（清理目录清单、依赖包列表、`.npmrc` 模板）集中在其包内定义，禁止散落在 `ui` 层。已弃用的 `src/lib/` 不再新增数据；落地页文案须与 `OPENSPEC.md` 事实一致，禁止虚构数据。
 3. **Go 依赖**：只经 `go.mod` 管理（`go get` / `go mod tidy`），提交 `go.sum`；禁止 vendor 目录与多套依赖清单并存。UI 依赖仅限 `fyne.io/fyne/v2`，不得再引入第二套 GUI 框架。
-4. **新增模块按职责落位**：入口 → `cmd/repo-cleaner/`；OS 差异 → `internal/platform/`；业务功能 → `internal/engine/`；配置读写 → `internal/config/`；文案 → `internal/i18n/`；界面 → `internal/ui/`；规范 → `docs/`；工程脚本 → `scripts/`。
+4. **新增模块按职责落位**：入口 → `cmd/repo-cleaner/`；OS 差异 → `internal/platform/`；业务功能 → `internal/engine/`；配置读写 → `internal/config/`；文案 → `internal/i18n/`；界面 → `internal/ui/`；落地页 → `landing/`；规范 → `docs/`；工程脚本 → `scripts/`。
 5. **文件行数**：所有源代码文件（`.ts/.tsx/.js/.jsx/.vue/.py/.dart/.go/.java` 等）单文件 **≤ 200 行**。超出时按职责拆分为更小模块（组件拆子组件、逻辑抽纯函数/常量/类型），且**不得改变对外导出契约**。
    - **文档文件（`.md/.markdown/.mdx/.rst`）不拆分**，即使超过 200 行也保持单文件完整连贯。
    - `.bat` 为批处理脚本，不纳入源码 200 行规则，但仍须按标签分节、保持可读。
 6. **临时文件统一落固定子目录**：一次性脚本、探针、调试日志、中间产物一律写入 `.tmp/`；工具正式产物（审计报告、覆盖率、`*-result.json` 等）写入 `reports/` / `coverage/` / `test-results/`。写入前先 `mkdir -p`，本轮产生的 `.tmp/` 内容在任务结束前清理；需长期留存的证据改写进 `docs/` 或测试断言。目录忽略规则以 `.gitignore` 实况为准，并在 ESLint / `tsconfig.json` / `check-doc-links.mjs` 中排除，避免临时脚本让门禁假红。**禁止**在仓库根或顶层散落 `.tmp-*.mjs`、`tmp-*.js`、`*.log`、`audit-*.json` 等；根目录白名单由 `scripts/check-root-clean.mjs` 强制校验（CI 首步），新增根目录工程文件须同时核对 `.gitignore` 与白名单。产品运行时的 `config.ini` / `repo-cleaner.log` 属 exe 同目录便携配置，不在此约束内。
-7. **新增 / 删除 / 重命名文档**须同步四处：[`docs/README.md`](./README.md) §1 文档地图与 §3 目录树、根 [`README.MD`](../README.MD) 文档索引与目录树、本文 §3.1、[`MAINTAINERS.md`](./MAINTAINERS.md) §4 变更对照表；新增文档标题带当前版本号，并在 `CHANGELOG.MD` 对应版本的 `Docs` 分组记录。同一事实只在一处维护，其余用链接引用。
+7. **新增 / 删除 / 重命名文档**须同步四处：[`docs/README.md`](./README.md) §1 文档地图与 §3 目录树、根 [`README.MD`](../README.MD) 文档索引与目录树、本文 §3.1、[`MAINTAINERS.md`](./MAINTAINERS.md) §4 变更对照表；新增文档标题带当前版本号，并在 `CHANGELOG.MD` 对应版本的 `Docs` 分组记录。**新增根目录子目录**（如 `landing/`）还须登记 `scripts/check-root-clean.mjs` 的 `ALLOWED_DIRS` 白名单并核对 `.gitignore`。同一事实只在一处维护，其余用链接引用。
 8. **命名层次**：产品名 `Repo Manager`、Go 模块与二进制 `repo-cleaner`、Git 远程 `sutchan/RepoCleaner`；本机目录名 `RepoManager` 与工作区文件 `RepoManager.code-workspace` 与产品名对应，但代码标识符、远程与应用内文案仍沿用旧名。对照、技术标识同步清单与决策见 [`MAINTAINERS.md` §1](./MAINTAINERS.md)，未完成项见 [`tasks.md`](./tasks.md)。
 
 ---

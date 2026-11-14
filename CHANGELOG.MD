@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [2.3.2] - 2026-11-14
+
+### Added
+- **落地页目录** - 新建 `landing/` 与 `landing/README.md`，用于保存 Web 展示项目的落地页面；明确与 `docs/` / `prototype/` / `src/` / `public/` 的边界、内容约定与门禁登记。页面文件尚未创建（规划项，登记为 `docs/tasks.md` D7）
+
+### Changed
+- **根目录白名单** - `scripts/check-root-clean.mjs` 的 `ALLOWED_DIRS` 登记 `landing/`，保证 `npm run check:root-clean` 与 CI 首步通过
+
+### Docs
+- **四处登记同步** - `docs/README.md` §1 / §3、根 `README.MD` 索引与目录树、`CONTRIBUTING.md` §3.1 / §3.2、`MAINTAINERS.md` §4 / §5 同步；`prototype/README.md` 补落地页边界
+- **版本号同步** - 权威源 `internal/buildinfo/version.go` 及 §8.2 全部展示位同步至 `2.3.2`
+
+---
+
 ## [2.3.1] - 2026-11-14
 
 ### Added

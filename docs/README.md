@@ -1,4 +1,4 @@
-# Repo Manager 文档中心 v2.3.1
+# Repo Manager 文档中心 v2.3.2
 
 > 本目录是 Repo Manager **所有规范与规格文档的唯一归档位置**。
 > 仓库根只保留面向使用者的入口 [README.MD](../README.MD)、变更历史 [CHANGELOG.MD](../CHANGELOG.MD) 与 [LICENSE](../LICENSE)。
@@ -20,6 +20,7 @@
 | [docs/MAINTAINERS.md](./MAINTAINERS.md) | 维护者手册 | 命名现状、GitHub About 设置、发布校验、文档治理、门禁与已知差距 | 功能介绍、规范正文 |
 | [docs/tasks.md](./tasks.md) / [tasks-done.md](./tasks-done.md) | 任务单一来源 / 归档 | 未完成与进行中任务 / 已完成任务归档 | 功能规格、流程规范 |
 | [CHANGELOG.MD](../CHANGELOG.MD) | 唯一版本历史 | 按版本倒序的变更明细 | 功能规格、规范正文 |
+| [landing/README.md](../landing/README.md) | 落地页目录说明 | Web 展示项目落地页的用途、边界、内容约定与门禁登记 | 规范正文、产品业务代码 |
 | [prototype/README.md](../prototype/README.md) | 原型目录说明 | 原型现状与本目录用途 | 不复述设计规范正文 |
 | [.github/PULL_REQUEST_TEMPLATE.md](../.github/PULL_REQUEST_TEMPLATE.md) | PR 审查清单 | 提交 PR 时逐项勾选 | — |
 
@@ -91,6 +92,7 @@ RepoManager/
 │   ├── config.example.ini # 运行配置示例模板
 │   ├── tokens.json        # 设计令牌
 │   └── tasks.md / tasks-done.md  # 任务清单与完成归档
+├── landing/                                    # Web 展示项目落地页（README.md 说明用途；页面文件规划中）
 ├── prototype/README.md                         # 原型目录说明（无规范正文、无代码）
 ├── src/                                        # 参考界面应用（Next.js App Router，v2.0.0 起已弃用）
 │   ├── app/               # layout.tsx / page.tsx / globals.css

@@ -1,4 +1,4 @@
-// scripts/check-root-clean.mjs v2.3.1
+// scripts/check-root-clean.mjs v2.3.2
 // 校验仓库根目录只保留白名单条目：临时脚本 / 日志 / 产物必须落 .tmp/ 或 reports/。
 // 用法：npm run check:root-clean（或在仓库根执行 node scripts/check-root-clean.mjs）
 // 退出码：0 = 根目录清洁；1 = 存在散落条目或 git 不可用。
@@ -36,6 +36,7 @@ const ALLOWED_DIRS = new Set([
   "coverage",
   "docs",
   "internal",
+  "landing",
   "prototype",
   "public",
   "reports",

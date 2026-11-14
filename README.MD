@@ -4,7 +4,7 @@
 
 [![Platform](https://img.shields.io/badge/Platform-Win%20%7C%20macOS%20%7C%20Linux-blue?style=flat)](https://github.com/sutchan/RepoCleaner)
 [![Go](https://img.shields.io/badge/Go-1.25%2B-00ADD8?style=flat&logo=go&logoColor=white)](https://go.dev)
-[![Version](https://img.shields.io/badge/Version-2.3.1-green?style=flat)](https://github.com/sutchan/RepoCleaner)
+[![Version](https://img.shields.io/badge/Version-2.3.2-green?style=flat)](https://github.com/sutchan/RepoCleaner)
 [![License](https://img.shields.io/badge/License-MIT-orange?style=flat)](https://github.com/sutchan/RepoCleaner)
 [![Node](https://img.shields.io/badge/Node.js-18%2B-339933?style=flat&logo=node.js&logoColor=white)](https://nodejs.org)
 [![i18n](https://img.shields.io/badge/i18n-中文%2FEnglish-9C27B0?style=flat)](https://github.com/sutchan/RepoCleaner)
@@ -302,6 +302,7 @@ A：可执行文件同目录的 `repo-cleaner.log`，CLI 与 GUI 均追加写入
 | [docs/TROUBLESHOOTING.md](./docs/TROUBLESHOOTING.md) | 使用与构建排障：症状、原因、处理与门禁失败定位 |
 | [docs/MAINTAINERS.md](./docs/MAINTAINERS.md) | 维护者手册：命名现状、仓库设置、发布校验、文档治理、已知差距 |
 | [docs/tasks.md](./docs/tasks.md) / [tasks-done.md](./docs/tasks-done.md) | 进行中 / 待办任务清单与已完成任务归档 |
+| [landing/README.md](./landing/README.md) | Web 展示项目落地页目录：用途、边界与内容约定（页面文件规划中） |
 | [.github/CODE_OF_CONDUCT.md](./.github/CODE_OF_CONDUCT.md) | 行为准则 |
 | [.github/SECURITY.md](./.github/SECURITY.md) | 安全策略与漏洞私密报告 |
 | [.github/SUPPORT.md](./.github/SUPPORT.md) | 支持与提问指南 |
@@ -370,6 +371,7 @@ RepoManager/
 │   ├── app/                           # layout.tsx / page.tsx / globals.css
 │   ├── components/                    # icons.tsx + ui/ 基础组件
 │   └── lib/                           # i18n.ts + utils.ts + data/（单一数据源）
+├── landing/                           # Web 展示项目落地页（README.md 为目录说明，页面文件规划中）
 ├── prototype/README.md                # 原型目录说明（无代码、无规范正文）
 └── .gitignore
 ```
@@ -392,6 +394,6 @@ RepoManager/
 
 <div align="center">
 
-Repo Manager v2.3.1 · MIT License · [文档中心](./docs/README.md)
+Repo Manager v2.3.2 · MIT License · [文档中心](./docs/README.md)
 
 </div>
