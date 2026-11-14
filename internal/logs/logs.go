@@ -1,4 +1,4 @@
-// internal/logs/logs.go v2.3.0
+// internal/logs/logs.go v2.3.3
 
 // Package logs 提供执行日志的文件落盘能力（V4）：在下游 Logger 输出之上
 // 追加写入本地日志文件；文件打开 / 写入失败时仅保留下游输出，不中断功能。

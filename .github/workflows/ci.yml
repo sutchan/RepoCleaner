@@ -1,4 +1,4 @@
-# .github/workflows/ci.yml v2.3.2
+# .github/workflows/ci.yml v2.3.3
 # 仓库级自动门禁（行为契约见 docs/CONTRIBUTING.md §8.4 / §9.1）：
 # check:root-clean + gofmt + go vet + go test + go build（nogui / ci）+ npm run check:docs，
 # 另含 Fyne GUI（默认构建标签，需 OpenGL / C 工具链）编译验证。

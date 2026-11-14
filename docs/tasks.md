@@ -2,7 +2,7 @@
 
 > 最后更新：**2026-11-14 17:58**
 > 维护约定：已完成任务归档至 [tasks-done.md](./tasks-done.md)；本文件仅保留进行中 / 待办任务。
-> 全局版本唯一来源：`internal/buildinfo/version.go` 的 `Version`（当前 **2.3.2**）。
+> 全局版本唯一来源：`internal/buildinfo/version.go` 的 `Version`（当前 **2.3.3**）。
 > 本次核查（2026-11-14 17:58）：按代码 / workflow 实况复核 8 项任务，D5 与 D2/D3 已完成部分归档至 [tasks-done.md](./tasks-done.md) 第八节，其余重新标定优先级与状态。
 
 ## 进行中 / 待办

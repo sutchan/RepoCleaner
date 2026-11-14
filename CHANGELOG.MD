@@ -4,6 +4,27 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [2.3.3] - 2026-11-14
+
+### Added
+
+- **繁体中文（zh-Hant）** - `internal/i18n` 新增繁中界面与执行日志字典（`hant.go`），支持 `tw` / `zh-TW` 等别名；GUI 语言下拉框、CLI `-lang`、参考界面与落地页切换 UI 均覆盖简中 → 繁中 → 英文，偏好持久化到 localStorage 并做枚举校验，`<html lang>` 同步 `zh` / `zh-Hant` / `en`
+- **GUI 详细进度显示** - `internal/ui/output.go` 的进度条与当前步骤文案按执行日志 `[n/m]` 标记推进；解析逻辑抽为 `progress_parse.go` 并新增自动化测试
+- **Web 展示落地页** - `landing/index.html` 与 `assets/` 静态三语页面、语义化 id、响应式与深色偏好；`npm run landing:version` 从版本权威源与本地时间注入 `V{semver}· build yymmddhhmm`
+
+### Changed
+
+- **项目更名收口** - Go 模块 / import / `cmd/repo-manager/` / 二进制 `repo-manager` / 日志 `repo-manager.log` / Fyne app ID / `package.json` 与 GitHub 链接统一为新标识；GUI 标题、CLI 帮助、i18n 文案与参考界面统一显示 `Repo Manager`；CHANGELOG 历史条目按规范保留原貌
+- **Release 资产归档** - `release.yml` 新增独立 `version` 作业读取 `internal/buildinfo/version.go`；`scripts/package-release.sh` 打包为 `RepoManager-v<版本>-<os>-<arch>.zip|tar.gz`（Windows/macOS zip、Linux tar.gz），Release 只上传归档与 `SHA256SUMS.txt`
+- **发布跨工作流阻断** - `release` job 校验同 SHA 的其它工作流（含今后新增）全部为绿，否则阻断发布；`permissions` 补 `actions: read`
+- **递归深度文本统一** - `options.go` / 测试注释与规格 L6、排障手册同步为 3 层，明确 CLI 帮助固定英文、不随 `-lang` 切换
+- **参考界面数据真实性** - 移除无依据的平均缓存占用数字与旧版 bat 步骤描述，改用当前 Go 产品的真实用法
+
+### Docs
+
+- **任务治理** - `docs/tasks.md` 于 2026-11-14 17:58 核查归档 D5 / D2a / D3a / W1，剩余 V5、D1–D4、D6、D7 全部完成并归档至 `docs/tasks-done.md` 第九节；`docs/tasks.md` 更新为无待办状态
+- **规范四处同步** - OPENSPEC / CONTRIBUTING / DESIGN-SYSTEM / MAINTAINERS / TROUBLESHOOTING / docs/README / landing/README 与根索引同步命名、三语、Release 归档、落地页与版本展示位；`linux/arm64` 交叉构建仍需 arm64 架构开发库，按实况登记为已知限制
+
 ## [2.3.2] - 2026-11-14
 
 ### Added

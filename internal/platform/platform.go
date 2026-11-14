@@ -1,4 +1,4 @@
-// internal/platform/platform.go v2.3.0
+// internal/platform/platform.go v2.3.3
 
 // Package platform 收口全部操作系统差异（目录扫描、删除、隐藏属性、环境变量持久化）。
 // engine 只依赖本接口，禁止直接调用 OS 专属命令；新增平台仅需增加对应 build tag 实现。

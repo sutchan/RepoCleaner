@@ -1,4 +1,4 @@
-// internal/platform/dirs.go v2.3.2
+// internal/platform/dirs.go v2.3.3
 
 package platform
 

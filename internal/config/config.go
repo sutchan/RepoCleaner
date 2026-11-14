@@ -1,4 +1,4 @@
-// internal/config/config.go v2.3.2
+// internal/config/config.go v2.3.3
 
 // Package config 负责 config.ini 的读写：读旧 → 过滤目标键 → 补写 → 回写，
 // 保留注释与未知行（对齐 OPENSPEC §5.3 与 CONTRIBUTING.md §4.5 约定）。

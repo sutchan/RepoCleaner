@@ -1,4 +1,4 @@
-// scripts/check-doc-links.mjs v2.3.1
+// scripts/check-doc-links.mjs v2.3.3
 // 校验仓库内所有 Markdown 相对链接的目标是否存在，且文件名大小写严格匹配。
 // 用法：npm run check:docs（或在仓库根执行 node scripts/check-doc-links.mjs）
 // 退出码：0 = 全部通过；1 = 存在失效链接。

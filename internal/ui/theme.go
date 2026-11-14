@@ -1,6 +1,6 @@
 //go:build !nogui
 
-// internal/ui/theme.go v2.3.2
+// internal/ui/theme.go v2.3.3
 
 package ui
 

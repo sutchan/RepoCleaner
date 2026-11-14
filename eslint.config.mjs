@@ -1,4 +1,4 @@
-// eslint.config.mjs v2.3.1
+// eslint.config.mjs v2.3.3
 import { defineConfig, globalIgnores } from "eslint/config";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";

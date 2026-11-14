@@ -1,4 +1,4 @@
-# Repo Manager 维护者手册 (Maintainers) v2.3.2
+# Repo Manager 维护者手册 (Maintainers) v2.3.3
 
 > **定位**：仓库维护者的操作与决策记录——命名现状、GitHub 仓库设置、发版校验、文档治理、门禁与目录卫生。
 > 使用者请从 [README.MD](../README.MD) 开始；功能行为以 [OPENSPEC.md](./OPENSPEC.md) 为准；编码 / 提交 / 审查规范以 [CONTRIBUTING.md](./CONTRIBUTING.md) 为准；未完成的任务以 [tasks.md](./tasks.md) 为唯一来源。

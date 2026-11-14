@@ -394,6 +394,6 @@ RepoManager/
 
 <div align="center">
 
-Repo Manager v2.3.2 · MIT License · [文档中心](./docs/README.md)
+Repo Manager v2.3.3 · MIT License · [文档中心](./docs/README.md)
 
 </div>

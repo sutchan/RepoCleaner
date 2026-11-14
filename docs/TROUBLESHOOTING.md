@@ -1,4 +1,4 @@
-# Repo Manager 使用与构建排障 (Troubleshooting) v2.3.2
+# Repo Manager 使用与构建排障 (Troubleshooting) v2.3.3
 
 > **定位**：面向使用者与贡献者的「症状 → 原因 → 处理」清单，内容以当前代码实况为准。
 > 功能行为契约见 [OPENSPEC.md](./OPENSPEC.md)，使用入口见 [README.MD](../README.MD)，安全边界见 [SECURITY.md](../.github/SECURITY.md)。

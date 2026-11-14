@@ -1,4 +1,4 @@
-# Repo Manager 文档中心 v2.3.2
+# Repo Manager 文档中心 v2.3.3
 
 > 本目录是 Repo Manager **所有规范与规格文档的唯一归档位置**。
 > 仓库根只保留面向使用者的入口 [README.MD](../README.MD)、变更历史 [CHANGELOG.MD](../CHANGELOG.MD) 与 [LICENSE](../LICENSE)。

@@ -1,4 +1,4 @@
-# Repo Manager 开放规格说明书 (OpenSpec) v2.3.2
+# Repo Manager 开放规格说明书 (OpenSpec) v2.3.3
 
 > **本文定位**：产品功能规格，定义「做什么」——7 项功能的行为契约、交互方式、环境与兼容性。
 > 开发规范（编码 / 提交 / 分支 / 审查）见 [CONTRIBUTING.md](./CONTRIBUTING.md)；UI 设计规范见 [DESIGN-SYSTEM.md](./DESIGN-SYSTEM.md)；变更历史见 [CHANGELOG.MD](../CHANGELOG.MD)；文档导航见 [docs/README.md](./README.md)。
