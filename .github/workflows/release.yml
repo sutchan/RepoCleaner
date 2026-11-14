@@ -1,7 +1,8 @@
-# .github/workflows/release.yml v2.3.2
+# .github/workflows/release.yml v2.3.3
 # 发布工作流（行为契约见 docs/CONTRIBUTING.md §8.4）：
-# push vX.Y.Z tag 触发 → gate 重跑全部门禁 → 三平台矩阵构建产物
-# → 全部成功且 tag 与版本权威源一致后，自动创建 GitHub Release 并上传二进制 + SHA256SUMS。
+# push vX.Y.Z tag 触发 → 独立 version job 读取版本权威源 → gate 重跑门禁
+# → 三平台矩阵构建 → release job 校验同 SHA 的其它工作流为绿、tag 与版本一致
+# → 打包为 <产品名>-v<版本>-<os>-<arch>.<扩展名> 归档后发布。
 #
 # 目标矩阵与 scripts/build.ps1 / build.sh 对齐；windows/arm64 因 GitHub 托管
 # runner 无 aarch64-w64-mingw32 交叉工具链暂不产出（build.ps1 本地构建可补齐）。
@@ -13,8 +14,24 @@ on:
 
 permissions:
   contents: write
+  actions: read
 
 jobs:
+  version:
+    name: version (authoritative source)
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.read.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: read
+        name: Read version from internal/buildinfo/version.go
+        run: |
+          V=$(grep -oP 'const Version = "\K[^"]+' internal/buildinfo/version.go)
+          test -n "$V" || { echo "版本权威源读取失败"; exit 1; }
+          echo "version=$V" >> "$GITHUB_OUTPUT"
+
   gate:
     name: gate (nogui + ci + docs)
     runs-on: ubuntu-latest
@@ -96,10 +113,10 @@ jobs:
           BUILD_ID=$(date -u +%y%m%d%H%M)
           export GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} CGO_ENABLED=1
           if [ -n "${{ matrix.cc }}" ]; then export CC="${{ matrix.cc }}"; fi
-          NAME="repo-cleaner-${GOOS}-${GOARCH}"
+          NAME="repo-manager-${GOOS}-${GOARCH}"
           if [ "$GOOS" = "windows" ]; then NAME="$NAME.exe"; fi
           echo "build $NAME (build $BUILD_ID)"
-          go build -trimpath -ldflags "-s -w -X repo-cleaner/internal/buildinfo.BuildID=$BUILD_ID" -o "dist/$NAME" ./cmd/repo-cleaner
+          go build -trimpath -ldflags "-s -w -X repo-manager/internal/buildinfo.BuildID=$BUILD_ID" -o "dist/$NAME" ./cmd/repo-manager
 
       - uses: actions/upload-artifact@v4
         with:
@@ -107,8 +124,8 @@ jobs:
           path: dist/
 
   release:
-    needs: [gate, build]
-    name: release (version check + publish)
+    needs: [gate, build, version]
+    name: release (verify + package + publish)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -123,19 +140,54 @@ jobs:
           path: dist
           merge-multiple: true
 
+      # 同 SHA 的其它工作流（含 ci 与今后新增的工作流）必须全部为绿，否则阻断发布
+      - name: Verify all other workflows are green for this commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          SHA="${{ github.sha }}"
+          for i in $(seq 1 30); do
+            STATE=$(gh api "repos/${{ github.repository }}/actions/runs?head_sha=$SHA&per_page=100" \
+              --jq '.workflow_runs[] | select(.name != "release") | "\(.status)|\(.conclusion)"')
+            if [ -z "$STATE" ]; then
+              echo "未找到该提交上的其它工作流运行，阻断发布"; exit 1
+            fi
+            if echo "$STATE" | grep -q -v '^completed|success$'; then
+              if echo "$STATE" | grep -q '^completed|'; then
+                echo "存在失败的工作流，阻断发布："; echo "$STATE"; exit 1
+              fi
+              echo "工作流仍在运行，等待 20s ($i/30)"; sleep 20; continue
+            fi
+            echo "该提交的其它工作流均为绿：$SHA"; exit 0
+          done
+          echo "其它工作流未在 10 分钟内结束，阻断发布"; exit 1
+
       - name: Verify version consistency (tag == buildinfo == package.json)
         run: |
           TAG="${GITHUB_REF_NAME}"
-          VFILE=$(grep -oP 'const Version = "\K[^"]+' internal/buildinfo/version.go)
+          V="${{ needs.version.outputs.version }}"
           PJSON=$(node -p "require('./package.json').version")
-          echo "tag=$TAG version.go=$VFILE package.json=$PJSON"
-          [ "v$VFILE" = "$TAG" ] || { echo "tag 与 internal/buildinfo/version.go 不一致，终止发布"; exit 1; }
-          [ "$PJSON" = "$VFILE" ] || { echo "package.json 与版本权威源不一致，终止发布"; exit 1; }
+          echo "tag=$TAG version.go=$V package.json=$PJSON"
+          [ "v$V" = "$TAG" ] || { echo "tag 与 internal/buildinfo/version.go 不一致，终止发布"; exit 1; }
+          [ "$PJSON" = "$V" ] || { echo "package.json 与版本权威源不一致，终止发布"; exit 1; }
 
-      - name: Checksums and release notes
+      - name: Package release archives
+        run: bash scripts/package-release.sh "${{ needs.version.outputs.version }}" dist
+
+      # 归档同时作为 Actions artifact 保留，无需发布 Release 也能直接下载压缩包
+      - name: Upload release archives
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-archives
+          path: |
+            dist/*.zip
+            dist/*.tar.gz
+            dist/SHA256SUMS.txt
+          if-no-files-found: error
+
+      - name: Release notes
         run: |
-          (cd dist && sha256sum -- * > SHA256SUMS.txt)
-          V=$(grep -oP 'const Version = "\K[^"]+' internal/buildinfo/version.go)
+          V="${{ needs.version.outputs.version }}"
           awk -v pat="^## \\[$V\\]" 'f && /^## /{exit} $0 ~ pat {f=1} f' CHANGELOG.MD > release-notes.md
           test -s release-notes.md || { echo "CHANGELOG.MD 中未找到 [$V] 小节"; exit 1; }
           head -3 release-notes.md
@@ -143,4 +195,14 @@ jobs:
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "$GITHUB_REF_NAME" dist/* --title "$GITHUB_REF_NAME" --notes-file release-notes.md --verify-tag
+        shell: bash
+        run: |
+          shopt -s nullglob
+          assets=(dist/*.zip dist/*.tar.gz)
+          ((${#assets[@]} > 0)) || { echo "没有可上传的归档资产"; exit 1; }
+          # 预发布版本用 Release 的 prerelease 标记区分，不在归档文件名加后缀
+          V="${{ needs.version.outputs.version }}"
+          PRERELEASE=""
+          case "$V" in *-*) PRERELEASE="--prerelease" ;; esac
+          gh release create "$GITHUB_REF_NAME" "${assets[@]}" dist/SHA256SUMS.txt \
+            --title "$GITHUB_REF_NAME" --notes-file release-notes.md --verify-tag $PRERELEASE

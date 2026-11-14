@@ -13,8 +13,8 @@
 | 层次 | 当前值 | 依据 |
 |------|--------|------|
 | 产品展示名 | `Repo Manager` | 根 `README.MD`、全部 `docs/` 文档标题与术语表 |
-| Go 模块 / 可执行文件 / 日志 | `repo-cleaner` / `repo-cleaner.log` | `go.mod`、`cmd/repo-cleaner/`、`scripts/build.*`、`internal/logs` |
-| Git 远程 | `https://github.com/sutchan/RepoCleaner.git` | `git remote -v` |
+| Go 模块 / 可执行文件 / 日志 | `repo-manager` / `repo-manager.log` | `go.mod`、`cmd/repo-manager/`、`scripts/build.*`、`internal/logs` |
+| Git 远程 | `https://github.com/sutchan/RepoManager.git` | `git remote -v` |
 | 本地目录 / 工作区文件 | 目录名 `RepoManager`、文件 `RepoManager.code-workspace` | 本机磁盘实况，不进入代码与远程 |
 
 **决策（2026-11-14）**：项目显示名统一为 `Repo Manager`，全部文档标题、正文与展示位同步；Git 远程、Go 模块与二进制标识暂沿用旧名，文档中的命令、路径与链接一律按实况书写。应用内文案（GUI 标题、CLI 帮助、i18n 字典、Web 参考界面）仍输出旧名，属代码侧待同步项，见 §6。
@@ -37,7 +37,7 @@
 
 ### 主页（Website）
 
-可留空，或填写仓库地址：`https://github.com/sutchan/RepoCleaner`
+可留空，或填写仓库地址：`https://github.com/sutchan/RepoManager`
 
 ### 话题标签（Topics）
 
@@ -73,7 +73,7 @@ frontend
 | 版本权威源 | `internal/buildinfo/version.go` 的 `Version` 常量；同步清单见 [CONTRIBUTING.md §8.2](./CONTRIBUTING.md) |
 | 发布流程 | 见 [CONTRIBUTING.md §8.4](./CONTRIBUTING.md)；工作流实现为 [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) 与 [`.github/workflows/release.yml`](../.github/workflows/release.yml) |
 | 触发与校验 | push `vX.Y.Z` tag；发布前校验 `tag == "v" + Version == package.json.version`，且 [CHANGELOG.MD](../CHANGELOG.MD) 存在 `## [X.Y.Z]` 小节，任一不满足即失败 |
-| Release 资产 | 二进制 `repo-cleaner-<goos>-<goarch>[.exe]`（Windows 带 `.exe`）与 `SHA256SUMS.txt`；`windows/arm64` 因托管 runner 缺交叉工具链暂不产出 |
+| Release 资产 | 二进制 `repo-manager-<goos>-<goarch>[.exe]`（Windows 带 `.exe`）与 `SHA256SUMS.txt`；`windows/arm64` 因托管 runner 缺交叉工具链暂不产出 |
 | Release 说明 | 从 `CHANGELOG.MD` 对应版本小节提取，标题为 tag 名 |
 | 本机交叉编译 | `scripts/build.ps1` / `scripts/build.sh`，6 目标输出到 `bin/`；缺交叉编译器时跳过并警告 |
 
@@ -120,7 +120,7 @@ grep 'const Version' internal/buildinfo/version.go
 - 自动门禁命令以 [ci.yml](../.github/workflows/ci.yml) 为准（含 `check:root-clean`、`gofmt`、`go vet` / `go test` / `go build` 的 `nogui` 标签、`npm ci`、`check:docs`），完整说明见 [CONTRIBUTING.md §6.3](./CONTRIBUTING.md) 与 [OPENSPEC.md §9.1](./OPENSPEC.md)。
 - 一次性脚本、探针、日志、中间产物写 `.tmp/`；工具正式产物写 `reports/` / `coverage/` / `test-results/`；`*.code-workspace` 按后缀放行。
 - 新增根目录工程文件 / 子目录必须同时登记 `scripts/check-root-clean.mjs` 的 `ALLOWED_DIRS` 白名单，并核对 `.gitignore` 的忽略规则，二者不可脱节；`landing/` 已按此登记。落地页构建产物写 `landing/dist/` 或 `landing/out/`（由 `.gitignore` 忽略）。
-- 产品运行时生成的 `config.ini` / `repo-cleaner.log` 位于可执行文件同目录，不属仓库根目录卫生约束。
+- 产品运行时生成的 `config.ini` / `repo-manager.log` 位于可执行文件同目录，不属仓库根目录卫生约束。
 
 ---
 

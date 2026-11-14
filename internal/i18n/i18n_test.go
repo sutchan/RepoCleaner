@@ -5,7 +5,7 @@ package i18n
 import "testing"
 
 func TestDictsComplete(t *testing.T) {
-	for _, lang := range []Lang{Zh, En} {
+	for _, lang := range []Lang{Zh, Hant, En} {
 		d := T(lang)
 		if d.AppTitle == "" || d.TargetDir == "" || d.Save == "" || d.OutputTitle == "" {
 			t.Fatalf("%s: 基础文案缺失", lang)
@@ -30,5 +30,22 @@ func TestNormalize(t *testing.T) {
 	}
 	if T("fr").AppTitle != T(Zh).AppTitle {
 		t.Fatal("非法语言应取中文文案")
+	}
+}
+
+func TestHantDictAndAliases(t *testing.T) {
+	for _, alias := range []string{"zh-Hant", "tw", "zh-TW", "zh-Hant-TW"} {
+		if Normalize(alias) != Hant {
+			t.Fatalf("%s 应归一化为 Hant", alias)
+		}
+	}
+	if T(Hant).AppTitle == "" || T(Hant).FuncNames[0] == "" {
+		t.Fatal("繁中界面字典缺失")
+	}
+	if Logs(Hant).F1Step1 == "" || Logs(Hant).GroupNames[0] == "" {
+		t.Fatal("繁中执行日志字典缺失")
+	}
+	if Normalize("fr") != Zh {
+		t.Fatal("非法语言应回落简中")
 	}
 }

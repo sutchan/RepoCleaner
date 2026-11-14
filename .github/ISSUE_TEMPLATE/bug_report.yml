@@ -1,16 +1,16 @@
 # 缺陷报告模板 v2.2.0
 name: 缺陷报告
-description: 报告 repo-cleaner（Go 产品本体）或参考界面应用的功能异常
+description: 报告 repo-manager（Go 产品本体）或参考界面应用的功能异常
 title: "[Bug]: "
 labels: ["bug"]
 body:
   - type: markdown
     attributes:
       value: |
-        感谢反馈。提交前请先查阅[文档中心](https://github.com/sutchan/RepoCleaner/blob/main/docs/README.md)、[已知限制](https://github.com/sutchan/RepoCleaner/blob/main/docs/OPENSPEC.md) 与[变更历史](https://github.com/sutchan/RepoCleaner/blob/main/CHANGELOG.MD)。
+        感谢反馈。提交前请先查阅[文档中心](https://github.com/sutchan/RepoManager/blob/main/docs/README.md)、[已知限制](https://github.com/sutchan/RepoManager/blob/main/docs/OPENSPEC.md) 与[变更历史](https://github.com/sutchan/RepoManager/blob/main/CHANGELOG.MD)。
 
         **注意**：
-        - 安全漏洞（路径穿越、绕过二次确认等）**请勿公开提交**，按[安全策略](https://github.com/sutchan/RepoCleaner/blob/main/.github/SECURITY.md)私密报告。
+        - 安全漏洞（路径穿越、绕过二次确认等）**请勿公开提交**，按[安全策略](https://github.com/sutchan/RepoManager/blob/main/.github/SECURITY.md)私密报告。
         - 删除类问题的复现请在**隔离的临时目录**进行，严禁在真实仓库根目录验证。
         - 所有内容请脱敏，不要包含真实用户名、绝对路径、密钥或私有仓库名。
 
@@ -18,7 +18,7 @@ body:
     id: version
     attributes:
       label: Repo Manager 版本
-      description: 见 GUI 页脚 / repo-cleaner -h 输出 / CHANGELOG.MD，如 v2.2.0
+      description: 见 GUI 页脚 / repo-manager -h 输出 / CHANGELOG.MD，如 v2.2.0
       placeholder: v2.2.0
     validations:
       required: true
@@ -67,7 +67,7 @@ body:
       description: 请给出完整命令或菜单操作序列；涉及目录时给出结构示意（用假项目名）
       placeholder: |
         1. 在隔离临时目录创建 repo-a（含 package.json）
-        2. 运行 repo-cleaner "C:\Temp\sandbox"（或 GUI 中选择该目录）
+        2. 运行 repo-manager "C:\Temp\sandbox"（或 GUI 中选择该目录）
         3. 运行 [6]
     validations:
       required: true

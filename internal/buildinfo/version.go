@@ -13,7 +13,7 @@ import (
 const Version = "2.3.2"
 
 // BuildID 构建编号，格式 yymmddhhmm（10 位），由 scripts/build.ps1 / build.sh
-// 在构建期以 -ldflags "-X repo-cleaner/internal/buildinfo.BuildID=<10位>" 注入。
+// 在构建期以 -ldflags "-X repo-manager/internal/buildinfo.BuildID=<10位>" 注入。
 // 未注入时 Footer 回退到 VCS 构建时间推导，仍缺失则只显示版本号。
 var BuildID = ""
 

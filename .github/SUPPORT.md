@@ -17,14 +17,14 @@ Repo Manager 由个人维护，**不提供实时支持，也不承诺响应时�
 
 ## 提交 Issue
 
-若文档未能解答，请在 [Issues](https://github.com/sutchan/RepoCleaner/issues) 使用对应模板提交：
+若文档未能解答，请在 [Issues](https://github.com/sutchan/RepoManager/issues) 使用对应模板提交：
 
 - 缺陷报告（功能异常、路径问题、误删等）
 - 功能建议（请先查看 [OPENSPEC.md](../docs/OPENSPEC.md) §10「扩展计划」，避免重复）
 
 一个有效的报告应包含：
 
-- Repo Manager 版本号（GUI 页脚 / `repo-cleaner -h` 输出 / [CHANGELOG.MD](../CHANGELOG.MD)）
+- Repo Manager 版本号（GUI 页脚 / `repo-manager -h` 输出 / [CHANGELOG.MD](../CHANGELOG.MD)）
 - 操作系统与版本（Windows / macOS / Linux）；涉及功能 1 / 5 时附 Node.js 与 npm 版本
 - 运行方式（双击交互 / 命令行参数，给出完整命令）
 - `REPO_ROOT` 的**目录结构示意**（可用假项目名，不要贴真实路径或私有仓库名）

@@ -20,7 +20,7 @@
 ## 2. 内容约定
 
 1. 页面入口建议 `landing/index.html`，静态资源归入 `landing/assets/`，使用相对路径引用，便于静态托管直接预览。
-2. 页面文案须与 [`OPENSPEC.md`](../docs/OPENSPEC.md) 的功能事实一致，禁止虚构容量、耗时、用户量等数据；产品名用 `Repo Manager`，技术标识（二进制 `repo-cleaner`、远程 `sutchan/RepoCleaner`）按实况书写，对照见 [`MAINTAINERS.md` §1](../docs/MAINTAINERS.md)。
+2. 页面文案须与 [`OPENSPEC.md`](../docs/OPENSPEC.md) 的功能事实一致，禁止虚构容量、耗时、用户量等数据；产品名用 `Repo Manager`，技术标识（二进制 `repo-manager`、远程 `sutchan/RepoManager`）按实况书写，对照见 [`MAINTAINERS.md` §1](../docs/MAINTAINERS.md)。
 3. 视觉对齐 [`DESIGN-SYSTEM.md`](../docs/DESIGN-SYSTEM.md) 与 [`tokens.json`](../docs/tokens.json)；主要容器与区块加语义化 kebab-case `id`（如 `landing-hero`、`landing-features`、`landing-footer`），便于可访问性关联与测试定位。
 4. 多语言按「简中 → 繁中 → 英文」优先级规划；当前产品仅 `zh` / `en`，页面若先行须显式标注差距（见 [`OPENSPEC.md` §7.3](../docs/OPENSPEC.md) L7），不得写成已支持。
 5. 页脚须展示版本与 build 编号，格式与构建期注入规则按 [`CONTRIBUTING.md` §8.2](../docs/CONTRIBUTING.md) 执行；禁止硬编码版本号或运行时现场生成。

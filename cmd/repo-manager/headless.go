@@ -1,14 +1,14 @@
 //go:build nogui
 
-// cmd/repo-cleaner/headless.go v2.0.2
+// cmd/repo-manager/headless.go v2.0.2
 
 package main
 
 import (
 	"fmt"
 
-	"repo-cleaner/internal/config"
-	"repo-cleaner/internal/i18n"
+	"repo-manager/internal/config"
+	"repo-manager/internal/i18n"
 )
 
 // runGUI 在 nogui 构建下提示使用命令行模式（用于无 C 工具链环境的校验构建）。

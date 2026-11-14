@@ -8,8 +8,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"repo-cleaner/internal/i18n"
-	"repo-cleaner/internal/platform"
+	"repo-manager/internal/i18n"
+	"repo-manager/internal/platform"
 )
 
 // Logger 由 UI / CLI 注入，用于输出执行日志。

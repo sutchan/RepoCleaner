@@ -1,4 +1,4 @@
-module repo-cleaner
+module repo-manager
 
 go 1.25
 

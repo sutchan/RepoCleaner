@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"repo-cleaner/internal/platform"
+	"repo-manager/internal/platform"
 )
 
 // captureLogger 收集日志便于断言。

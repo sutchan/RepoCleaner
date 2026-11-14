@@ -7,10 +7,10 @@ import (
 	"strings"
 	"testing"
 
-	"repo-cleaner/internal/i18n"
+	"repo-manager/internal/i18n"
 )
 
-// TestRecursiveClean V1：Recursive 开启时清理孙目录项目（深度 2 层），
+// TestRecursiveClean V1：Recursive 开启时清理孙目录项目（深度 3 层），
 // 关闭时仅处理直接子目录。
 func TestRecursiveClean(t *testing.T) {
 	s := newStub(t)

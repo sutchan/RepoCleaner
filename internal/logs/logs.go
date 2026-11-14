@@ -11,16 +11,16 @@ import (
 	"sync"
 	"time"
 
-	"repo-cleaner/internal/engine"
+	"repo-manager/internal/engine"
 )
 
-// DefaultPath 返回与可执行文件同目录的日志文件路径（repo-cleaner.log）。
+// DefaultPath 返回与可执行文件同目录的日志文件路径（repo-manager.log）。
 func DefaultPath() string {
 	exe, err := os.Executable()
 	if err != nil {
-		return "repo-cleaner.log"
+		return "repo-manager.log"
 	}
-	return filepath.Join(filepath.Dir(exe), "repo-cleaner.log")
+	return filepath.Join(filepath.Dir(exe), "repo-manager.log")
 }
 
 // FileLogger 将日志同时写入文件与下游 Logger（engine.Logger）。

@@ -1,12 +1,12 @@
 //go:build !nogui
 
-// cmd/repo-cleaner/gui.go v2.0.0
+// cmd/repo-manager/gui.go v2.0.0
 
 package main
 
 import (
-	"repo-cleaner/internal/config"
-	"repo-cleaner/internal/ui"
+	"repo-manager/internal/config"
+	"repo-manager/internal/ui"
 )
 
 // runGUI 启动 Fyne 桌面 GUI（默认构建包含 GUI）。

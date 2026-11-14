@@ -8,7 +8,7 @@ import (
 	"os/exec"
 	"strings"
 
-	"repo-cleaner/internal/i18n"
+	"repo-manager/internal/i18n"
 )
 
 // npmRunner 功能 5 的安装执行入口；测试可替换以避免真实联网安装。

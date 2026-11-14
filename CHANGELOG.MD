@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 - **落地页目录** - 新建 `landing/` 与 `landing/README.md`，用于保存 Web 展示项目的落地页面；明确与 `docs/` / `prototype/` / `src/` / `public/` 的边界、内容约定与门禁登记。页面文件尚未创建（规划项，登记为 `docs/tasks.md` D7）
+- **Release 归档打包** - 独立 `version` job 从 `internal/buildinfo/version.go` 读取版本并注入；`scripts/package-release.sh` 将矩阵二进制打包为 `RepoManager-v<版本>-<os>-<arch>.<扩展名>`（Windows / macOS 用 `zip`、Linux 用 `tar.gz`），生成 `SHA256SUMS.txt` 并移除裸二进制；Release 只上传归档，压缩包同时作为 `release-archives` artifact 可直接从 Actions 下载；预发布版本以 `--prerelease` 标记区分
 
 ### Changed
 - **根目录白名单** - `scripts/check-root-clean.mjs` 的 `ALLOWED_DIRS` 登记 `landing/`，保证 `npm run check:root-clean` 与 CI 首步通过

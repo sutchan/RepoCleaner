@@ -2,12 +2,12 @@
 
 <div align="center">
 
-[![Platform](https://img.shields.io/badge/Platform-Win%20%7C%20macOS%20%7C%20Linux-blue?style=flat)](https://github.com/sutchan/RepoCleaner)
+[![Platform](https://img.shields.io/badge/Platform-Win%20%7C%20macOS%20%7C%20Linux-blue?style=flat)](https://github.com/sutchan/RepoManager)
 [![Go](https://img.shields.io/badge/Go-1.25%2B-00ADD8?style=flat&logo=go&logoColor=white)](https://go.dev)
-[![Version](https://img.shields.io/badge/Version-2.3.2-green?style=flat)](https://github.com/sutchan/RepoCleaner)
-[![License](https://img.shields.io/badge/License-MIT-orange?style=flat)](https://github.com/sutchan/RepoCleaner)
+[![Version](https://img.shields.io/badge/Version-2.3.2-green?style=flat)](https://github.com/sutchan/RepoManager)
+[![License](https://img.shields.io/badge/License-MIT-orange?style=flat)](https://github.com/sutchan/RepoManager)
 [![Node](https://img.shields.io/badge/Node.js-18%2B-339933?style=flat&logo=node.js&logoColor=white)](https://nodejs.org)
-[![i18n](https://img.shields.io/badge/i18n-中文%2FEnglish-9C27B0?style=flat)](https://github.com/sutchan/RepoCleaner)
+[![i18n](https://img.shields.io/badge/i18n-中文%2FEnglish-9C27B0?style=flat)](https://github.com/sutchan/RepoManager)
 
 </div>
 
@@ -53,7 +53,7 @@
 - 🌲 递归扫描（monorepo）：`-recursive` / GUI 复选框 / `RECURSIVE=true` 覆盖深层项目（深度 3 层），默认关闭
 - 🌏 中文 / English 双语界面与执行日志（GUI 按钮 / `-lang` / `config.ini` 切换）
 - 🗂️ 自定义清理目录：`config.ini` 的 `EXTRA_CLEAN_DIRS` 追加目录名，仅限项目目录内部
-- 📝 执行日志落盘：CLI 与 GUI 同步追加写入可执行文件同目录的 `repo-cleaner.log`
+- 📝 执行日志落盘：CLI 与 GUI 同步追加写入可执行文件同目录的 `repo-manager.log`
 - ⚙️ 目录来源：GUI 输入框与目录选择、`config.ini`、CLI 位置路径（须与功能号同用）
 - 💾 仓库根目录可保存到 `config.ini`，一次设置长期生效
 - 🛡️ 危险操作（功能 1 / 6 / 7）前二次确认，避免误删
@@ -71,7 +71,7 @@
 
 ### 使用步骤
 
-1. **获取 `repo-cleaner` 可执行文件**：从 GitHub Release 下载 `repo-cleaner-<os>-<arch>[.exe]`（Windows 带 `.exe`），用随附的 `SHA256SUMS.txt` 校验；或源码构建（`./scripts/build.ps1` / `./scripts/build.sh` 交叉编译到 `bin/`；本机快速构建 `go build -o .tmp/repo-cleaner ./cmd/repo-cleaner`，临时产物统一进 `.tmp/`，Fyne GUI 需 C 工具链）
+1. **获取 `repo-manager` 可执行文件**：从 GitHub Release 下载 `repo-manager-<os>-<arch>[.exe]`（Windows 带 `.exe`），用随附的 `SHA256SUMS.txt` 校验；或源码构建（`./scripts/build.ps1` / `./scripts/build.sh` 交叉编译到 `bin/`；本机快速构建 `go build -o .tmp/repo-manager ./cmd/repo-manager`，临时产物统一进 `.tmp/`，Fyne GUI 需 C 工具链）
 2. **运行**：不带参数启动 GUI（Windows 双击，macOS/Linux 命令行执行）；带功能号 `1`–`7` 则直接进入命令行模式
 3. **选择仓库根目录**（GUI 输入框 / 目录选择按钮，可保存到 `config.ini`；CLI 用位置路径）
 4. **按功能按钮（GUI）或功能号（CLI）选择功能**
@@ -173,7 +173,7 @@ cross-env dotenv nodemon pm2 rimraf mkdirp
 
 | 方式 | 说明 |
 |------|------|
-| CLI 位置路径 | 须与功能号同用，如 `repo-cleaner 6 "D:\Projects"` |
+| CLI 位置路径 | 须与功能号同用，如 `repo-manager 6 "D:\Projects"` |
 | 配置文件 | **可执行文件同目录**的 `config.ini`（`REPO_ROOT=`；本机生成、不入库，示例见 [`docs/config.example.ini`](./docs/config.example.ini)） |
 | GUI | 窗口输入框 / 目录选择按钮，可用「保存」写回 `config.ini` |
 
@@ -186,7 +186,7 @@ cross-env dotenv nodemon pm2 rimraf mkdirp
 | 方式 | 说明 |
 |------|------|
 | GUI 下拉框 | 顶部「中文 / English」实时切换并写入 `config.ini` |
-| 命令行参数 | `repo-cleaner -lang en`（写入 `LANG=en`） |
+| 命令行参数 | `repo-manager -lang en`（写入 `LANG=en`） |
 | 配置文件 | `config.ini` 中 `LANG=zh` 或 `LANG=en` |
 
 > 语言仅 `zh` / `en` 两种：除 `en` 外的任何值（含非法值、空值）均回落中文 `zh`。
@@ -205,7 +205,7 @@ EXTRA_CLEAN_DIRS=
 ### 命令行参数
 
 ```bash
-repo-cleaner [选项] [功能号] [目录路径]
+repo-manager [选项] [功能号] [目录路径]
 ```
 
 | 参数 | 说明 |
@@ -219,18 +219,18 @@ repo-cleaner [选项] [功能号] [目录路径]
 | 目录路径 | 指定仓库根目录，**仅在给出功能号时生效** |
 
 > 无 `-root` 标志、无 `-version` 标志、无控制台交互菜单；功能号超出 `1`–`7` 的数字会被当作路径处理。
-> CLI 与 GUI 的执行日志都会追加写入可执行文件同目录的 `repo-cleaner.log`；`-h` 帮助固定英文，且其中的递归深度文本与实际 3 层不一致（以 3 层为准，见 [排障手册](./docs/TROUBLESHOOTING.md)）。
+> CLI 与 GUI 的执行日志都会追加写入可执行文件同目录的 `repo-manager.log`；`-h` 帮助固定英文（不随 `-lang` 切换），其中 `-recursive` 的递归深度与实际一致，均为 3 层。
 
 **示例**
 
 ```bash
-repo-cleaner                       # GUI 模式
-repo-cleaner 1                     # CLI：直接启用全局 node_modules
-repo-cleaner 5 E:\Projects         # CLI：为指定根目录安装全局依赖
-repo-cleaner 6 "D:\My Projects"    # CLI：指定含空格的仓库根目录
-repo-cleaner -lang en              # 写入 LANG=en 后启动（默认 GUI）
-repo-cleaner -dry-run 6            # 预演清理所有项目缓存（不删除任何文件）
-repo-cleaner -h                    # 查看帮助与构建信息
+repo-manager                       # GUI 模式
+repo-manager 1                     # CLI：直接启用全局 node_modules
+repo-manager 5 E:\Projects         # CLI：为指定根目录安装全局依赖
+repo-manager 6 "D:\My Projects"    # CLI：指定含空格的仓库根目录
+repo-manager -lang en              # 写入 LANG=en 后启动（默认 GUI）
+repo-manager -dry-run 6            # 预演清理所有项目缓存（不删除任何文件）
+repo-manager -h                    # 查看帮助与构建信息
 ```
 
 ---
@@ -238,10 +238,10 @@ repo-cleaner -h                    # 查看帮助与构建信息
 ## 🛠️ 排障与维护
 
 - 使用中遇到问题（启动失败、配置不生效、清理结果不符预期、门禁报错）→ [排障手册](./docs/TROUBLESHOOTING.md)
-- 提问前自查与有效 Issue 应含信息 → [支持指南](./.github/SUPPORT.md)；报缺陷用 [Issue 模板](https://github.com/sutchan/RepoCleaner/issues/new/choose)
+- 提问前自查与有效 Issue 应含信息 → [支持指南](./.github/SUPPORT.md)；报缺陷用 [Issue 模板](https://github.com/sutchan/RepoManager/issues/new/choose)
 - **安全漏洞不要公开提 Issue** → [安全策略](./.github/SECURITY.md)
 - 维护者操作（GitHub About 推荐设置、命名现状、发布校验、文档治理）→ [维护者手册](./docs/MAINTAINERS.md)
-- 应用内（GUI 标题、CLI 帮助）与 Git 远程仍显示旧名 `RepoCleaner`，Go 模块 / 可执行文件名为 `repo-cleaner`；命名对照与同步清单见[维护者手册 §1](./docs/MAINTAINERS.md)
+- 应用内（GUI 标题、CLI 帮助）与 Git 远程仍显示旧名 `Repo Manager`，Go 模块 / 可执行文件名为 `repo-manager`；命名对照与同步清单见[维护者手册 §1](./docs/MAINTAINERS.md)
 
 ---
 
@@ -262,8 +262,8 @@ A：默认扫描 Windows 下的 `E:\Github\`（macOS / Linux 为 `~/Github`）�
 **Q：支持含空格的仓库路径吗？**
 A：支持。Go 版目录枚举用 `os.ReadDir`、路径一律用 `path/filepath` 拼接，不经过 shell 字符串拼接；命令行传参时仍需按终端规则给路径加引号。
 
-**Q：为什么 `repo-cleaner E:\Github` 没有切换目录？**
-A：不带功能号时程序启动 GUI 并忽略位置路径。请写成 `repo-cleaner <功能号> <路径>`（如 `repo-cleaner 6 E:\Github`），或在 GUI 里选择目录后保存。
+**Q：为什么 `repo-manager E:\Github` 没有切换目录？**
+A：不带功能号时程序启动 GUI 并忽略位置路径。请写成 `repo-manager <功能号> <路径>`（如 `repo-manager 6 E:\Github`），或在 GUI 里选择目录后保存。
 
 **Q：有交互式文本菜单吗？**
 A：没有。v1.x 批处理脚本提供过文本菜单；v2.0.0 起只有 Fyne GUI 与「功能号 CLI」两种模式。
@@ -272,7 +272,7 @@ A：没有。v1.x 批处理脚本提供过文本菜单；v2.0.0 起只有 Fyne G
 A：加 `-dry-run` 或在 GUI 勾选「预演模式」，只输出将执行的操作，不修改任何文件与环境变量；预演下危险操作跳过二次确认。
 
 **Q：执行日志在哪里？**
-A：可执行文件同目录的 `repo-cleaner.log`，CLI 与 GUI 均追加写入并带时间戳；日志可能含本机路径，公开提交前请脱敏。更多症状见[排障手册](./docs/TROUBLESHOOTING.md)。
+A：可执行文件同目录的 `repo-manager.log`，CLI 与 GUI 均追加写入并带时间戳；日志可能含本机路径，公开提交前请脱敏。更多症状见[排障手册](./docs/TROUBLESHOOTING.md)。
 
 ---
 
@@ -311,7 +311,7 @@ A：可执行文件同目录的 `repo-cleaner.log`，CLI 与 GUI 均追加写入
 ### 社区与贡献
 
 - 参与贡献前请阅读[开发规范](./docs/CONTRIBUTING.md)与[行为准则](./.github/CODE_OF_CONDUCT.md)。
-- 报缺陷 / 提建议：使用 [Issue 模板](https://github.com/sutchan/RepoCleaner/issues/new/choose)，提问前先看[支持指南](./.github/SUPPORT.md)与[常见问题 FAQ](#-常见问题-faq)。
+- 报缺陷 / 提建议：使用 [Issue 模板](https://github.com/sutchan/RepoManager/issues/new/choose)，提问前先看[支持指南](./.github/SUPPORT.md)与[常见问题 FAQ](#-常见问题-faq)。
 - **安全漏洞不要公开提 Issue**，请按[安全策略](./.github/SECURITY.md)走私密渠道；本工具会删除文件，相关边界务必先读。
 - 社区行为问题按[行为准则](./.github/CODE_OF_CONDUCT.md)举报。
 
@@ -323,7 +323,7 @@ A：可执行文件同目录的 `repo-cleaner.log`，CLI 与 GUI 均追加写入
 
 - **单一数据源** `src/lib/data/`，文案统一经 `src/lib/i18n.ts` 中/英双语切换
 - **设计令牌** `src/app/globals.css` 的 CSS 变量，与 `docs/tokens.json` 对齐
-- **语义化 id** 主要容器/区块均带 `id`（如 `repo-cleaner-app`、`main-tabs`、`repo-card-<name>`）
+- **语义化 id** 主要容器/区块均带 `id`（如 `repo-manager-app`、`main-tabs`、`repo-card-<name>`）
 - **页脚** 展示 `vX.Y.Z · build yymmddhhmm`（10 位 build 编号，由 `next.config.ts` 从 `package.json` 注入）
 
 本地预览与全部可用命令（含 `dev` / `type-check` / `lint` / `check:docs` / `check:root-clean` / `build`）见[文档中心 §4 常用命令](./docs/README.md)；Go 产品本体的构建与门禁见[开发规范 §2](./docs/CONTRIBUTING.md)。
@@ -350,7 +350,7 @@ RepoManager/
 │   ├── config.example.ini             # 运行配置示例模板
 │   └── tasks.md / tasks-done.md       # 任务清单与完成归档
 ├── go.mod / go.sum                    # Go 模块与依赖（Fyne v2）
-├── cmd/repo-cleaner/                  # 产品入口：main.go + gui.go（默认）/ headless.go（nogui 占位）
+├── cmd/repo-manager/                  # 产品入口：main.go + gui.go（默认）/ headless.go（nogui 占位）
 ├── internal/                          # Go 源码：buildinfo / config / engine / i18n / logs / platform / ui（7 个包）
 ├── scripts/                           # build.ps1 / build.sh（交叉编译）+ check-doc-links.mjs / check-root-clean.mjs（门禁）
 ├── .tmp/                              # 会话级临时文件唯一落点（脚本 / 探针 / 日志 / 中间产物，用完即清）

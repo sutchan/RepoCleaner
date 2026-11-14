@@ -100,7 +100,7 @@ var logDicts = map[Lang]LogDict{
 		SaveCfgErr:         "保存配置失败: %v\n",
 		NoGUI: [2]string{
 			"本构建未包含 GUI（构建标签 nogui）。",
-			"请使用命令行模式：repo-cleaner <1-7> [目录路径]，或 repo-cleaner -h 查看帮助。",
+			"请使用命令行模式：repo-manager <1-7> [目录路径]，或 repo-manager -h 查看帮助。",
 		},
 	},
 	En: {
@@ -153,7 +153,7 @@ var logDicts = map[Lang]LogDict{
 		SaveCfgErr:         "Failed to save config: %v\n",
 		NoGUI: [2]string{
 			"This build has no GUI (build tag nogui).",
-			"Use CLI mode: repo-cleaner <1-7> [path], or repo-cleaner -h for help.",
+			"Use CLI mode: repo-manager <1-7> [path], or repo-manager -h for help.",
 		},
 	},
 }

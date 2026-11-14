@@ -1,15 +1,15 @@
 {
-  "name": "repo-cleaner",
+  "name": "repo-manager",
   "version": "2.3.2",
   "private": true,
   "description": "🧰 一键清理前端项目冗余：统一管理全局 node_modules、禁用 .next/.vite 缓存、清理 dist/build 垃圾。支持 Next.js / React / Vue / Vite，中文/英文双语菜单。",
-  "homepage": "https://github.com/sutchan/RepoCleaner#readme",
+  "homepage": "https://github.com/sutchan/RepoManager#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/sutchan/RepoCleaner.git"
+    "url": "git+https://github.com/sutchan/RepoManager.git"
   },
   "bugs": {
-    "url": "https://github.com/sutchan/RepoCleaner/issues"
+    "url": "https://github.com/sutchan/RepoManager/issues"
   },
   "keywords": [
     "windows",

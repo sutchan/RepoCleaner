@@ -1,6 +1,6 @@
-// cmd/repo-cleaner/main.go v2.3.2
+// cmd/repo-manager/main.go v2.3.2
 
-// 命令 repo-cleaner 是产品入口：解析参数后分流到命令行模式或 Fyne GUI。
+// 命令 repo-manager 是产品入口：解析参数后分流到命令行模式或 Fyne GUI。
 package main
 
 import (
@@ -11,16 +11,16 @@ import (
 	"strconv"
 	"strings"
 
-	"repo-cleaner/internal/buildinfo"
-	"repo-cleaner/internal/config"
-	"repo-cleaner/internal/engine"
-	"repo-cleaner/internal/i18n"
-	"repo-cleaner/internal/logs"
-	"repo-cleaner/internal/platform"
+	"repo-manager/internal/buildinfo"
+	"repo-manager/internal/config"
+	"repo-manager/internal/engine"
+	"repo-manager/internal/i18n"
+	"repo-manager/internal/logs"
+	"repo-manager/internal/platform"
 )
 
 func main() {
-	langFlag := flag.String("lang", "", "界面语言 en|zh（写入 config.ini）")
+	langFlag := flag.String("lang", "", "界面语言 zh|zh-Hant|en（写入 config.ini）")
 	dryRunFlag := flag.Bool("dry-run", false, "预演模式：仅显示将要执行的操作，不修改任何文件")
 	recursiveFlag := flag.Bool("recursive", false, "递归扫描 monorepo 深层项目（深度 3 层）")
 	showHelp := flag.Bool("h", false, "显示帮助")
@@ -109,7 +109,7 @@ func runCLI(p platform.Platform, cfgPath string, cfg *config.Config, fn int, roo
 			return
 		}
 	}
-	// V4：执行日志同时追加写入可执行文件同目录的 repo-cleaner.log。
+	// V4：执行日志同时追加写入可执行文件同目录的 repo-manager.log。
 	fileLog := logs.NewFileLogger(logs.DefaultPath(), engine.StdLogger{})
 	defer fileLog.Close()
 	if err := engine.Run(p, fn, root, lang, opts, fileLog); err != nil {
@@ -125,21 +125,22 @@ func runCLI(p platform.Platform, cfgPath string, cfg *config.Config, fn int, roo
 
 // printHelp 输出帮助信息；CLI 帮助固定英文，界面文案取自 internal/i18n。
 func printHelp() {
-	fmt.Println("RepoCleaner - Project Cleaner")
+	fmt.Println("Repo Manager")
 	fmt.Println()
 	fmt.Printf("Version: %s\n\n", buildinfo.BuildInfo())
-	fmt.Println("Usage: repo-cleaner [options] [function] [path]")
+	fmt.Println("Usage: repo-manager [options] [function] [path]")
 	fmt.Println()
 	fmt.Println("Options:")
 	fmt.Println("  1-7       Run corresponding function directly (CLI mode)")
+	fmt.Println("  -lang zh  Set language to Simplified Chinese")
+	fmt.Println("  -lang zh-Hant  Set language to Traditional Chinese")
 	fmt.Println("  -lang en  Set language to English")
-	fmt.Println("  -lang zh  Set language to Chinese")
 	fmt.Println("  -dry-run  Preview actions without modifying anything")
 	fmt.Println("  -recursive  Recursive scan (monorepo, depth 3)")
 	fmt.Println("  -h        Show this help")
 	fmt.Println()
 	fmt.Println("Examples:")
-	fmt.Println("  repo-cleaner                    # GUI mode")
-	fmt.Println("  repo-cleaner 1                  # CLI: enable global node_modules")
-	fmt.Println("  repo-cleaner 5 E:\\Projects      # CLI with path")
+	fmt.Println("  repo-manager                    # GUI mode")
+	fmt.Println("  repo-manager 1                  # CLI: enable global node_modules")
+	fmt.Println("  repo-manager 5 E:\\Projects      # CLI with path")
 }

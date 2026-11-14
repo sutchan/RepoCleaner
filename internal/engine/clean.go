@@ -6,8 +6,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"repo-cleaner/internal/i18n"
-	"repo-cleaner/internal/platform"
+	"repo-manager/internal/i18n"
+	"repo-manager/internal/platform"
 )
 
 // CleanNextCache 功能 3：清理并禁用 .next 缓存（对齐 OPENSPEC §3.3）。

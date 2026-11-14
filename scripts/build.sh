@@ -40,11 +40,11 @@ for t in "${targets[@]}"; do
   else
     unset CC || true
   fi
-  name="repo-cleaner-${os}-${arch}${ext}"
+  name="repo-manager-${os}-${arch}${ext}"
   echo "build $name (build $build_id)"
   CGO_ENABLED=1 GOOS="$os" GOARCH="$arch" go build -trimpath \
-    -ldflags "-s -w -X repo-cleaner/internal/buildinfo.BuildID=$build_id" \
-    -o "bin/$name" ./cmd/repo-cleaner
+    -ldflags "-s -w -X repo-manager/internal/buildinfo.BuildID=$build_id" \
+    -o "bin/$name" ./cmd/repo-manager
   built=$((built + 1))
 done
 

@@ -7,9 +7,9 @@ body:
   - type: markdown
     attributes:
       value: |
-        欢迎提出建议。提交前请先查看[扩展计划](https://github.com/sutchan/RepoCleaner/blob/main/docs/OPENSPEC.md)（§10）与[变更历史](https://github.com/sutchan/RepoCleaner/blob/main/CHANGELOG.MD)，避免与既有计划重复。
+        欢迎提出建议。提交前请先查看[扩展计划](https://github.com/sutchan/RepoManager/blob/main/docs/OPENSPEC.md)（§10）与[变更历史](https://github.com/sutchan/RepoManager/blob/main/CHANGELOG.MD)，避免与既有计划重复。
 
-        使用疑问请走[支持指南](https://github.com/sutchan/RepoCleaner/blob/main/.github/SUPPORT.md)；安全漏洞请勿公开提交。
+        使用疑问请走[支持指南](https://github.com/sutchan/RepoManager/blob/main/.github/SUPPORT.md)；安全漏洞请勿公开提交。
 
   - type: textarea
     id: problem

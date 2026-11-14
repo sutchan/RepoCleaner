@@ -1,0 +1,83 @@
+// internal/i18n/hant.go v2.3.3
+
+package i18n
+
+// 繁体中文（台湾用语）界面与执行日志字典；使用 init 注册，避免 i18n.go / log.go 超长。
+// 词条与简中、英文逐一对应，缺失时由 T() / Logs() 回退简中。
+func init() {
+	dicts[Hant] = Dict{
+		AppTitle:       "Repo Manager",
+		TargetDir:      "目標目錄:",
+		ChooseDir:      "選擇目錄",
+		Save:           "儲存設定",
+		Saved:          "設定已儲存至 config.ini",
+		LangLabel:      "語言",
+		FuncNames:      [7]string{"啟用全域 node_modules", "重設 Node 設定", "清理 .next 快取", "還原 Next.js 快取", "安裝全域依賴", "清理所有專案快取", "清理 Vite/建置快取"},
+		RunHint:        "點擊功能按鈕執行；危險操作會先確認",
+		DryRunLabel:    "預演模式 (dry-run)",
+		RecursiveLabel: "遞迴掃描 (monorepo)",
+		WarningF1:      "警告: 這將刪除所有專案的本機 node_modules!",
+		WarningAll:     "警告: 這將永久刪除所有快取檔案!",
+		WarningVite:    "警告: 這將刪除 .vite/.turbo/.angular 等建置快取目錄!",
+		Confirm:        "是否繼續?",
+		Ok:             "[完成]",
+		ErrInvalidRoot: "錯誤: 路徑不存在!",
+		About:          "關於",
+		AboutText:      "Repo Manager 透過 7 項功能管理全域依賴與前端專案快取；危險操作執行前會二次確認。版本與建置資訊顯示於視窗頁尾。",
+		OutputTitle:    "執行輸出",
+	}
+
+	logDicts[Hant] = LogDict{
+		F1Step1:            "[1/4] 取得全域 node_modules 路徑...",
+		F1Step2:            "[2/4] 設定 NODE_PATH 環境變數...",
+		F1Step3:            "[3/4] 停用所有專案的本機 node_modules...",
+		F1Step4:            "[4/4] 清理現有本機 node_modules 目錄...",
+		F1Path:             "Path: %s",
+		EnvSetWarn:         "[警告] 寫入環境變數失敗: %v",
+		EnvDelWarn:         "[警告] 刪除環境變數失敗: %v",
+		WriteNpmrcErr:      "[錯誤] 寫入 %s 失敗: %v",
+		Configured:         "Configured: %s",
+		Cleaning:           "Cleaning: %s",
+		DeleteErr:          "[錯誤] 刪除失敗: %v",
+		F2Step1:            "刪除 NODE_PATH 環境變數...",
+		F2Step2:            "清理專案 .npmrc 設定...",
+		Removed:            "Removed: %s",
+		F3Start:            "掃描並清理 Next.js 快取...",
+		Processing:         "Processing: %s",
+		RemoveDirErr:       "[錯誤] 刪除目錄失敗: %v",
+		ClearAttrWarn:      "[警告] 清除屬性失敗: %v",
+		SetAttrWarn:        "[警告] 設定隱藏屬性失敗: %v",
+		WriteNextErr:       "[錯誤] 寫入 .next 檔案失敗: %v",
+		F4Start:            "還原 Next.js 快取功能...",
+		Restoring:          "Restoring: %s",
+		RemoveErr:          "[錯誤] 刪除失敗: %v",
+		RemoveNameErr:      "[錯誤] 刪除 %s 失敗: %v",
+		UnsafeCleanDir:     "[警告] 已忽略不安全的自訂清理目錄名稱: %s",
+		ConfirmUnavailable: "無法讀取確認輸入（非互動環境），危險操作已終止；請在互動式終端執行或使用 -dry-run。",
+		GroupNames: [5]string{
+			"[1/5] 安裝 React 生態系...",
+			"[2/5] 安裝 Vue 生態系...",
+			"[3/5] 安裝 HTTP 函式庫...",
+			"[4/5] 安裝套件管理器...",
+			"[5/5] 安裝開發工具...",
+		},
+		GroupFail:      "[錯誤] 第 %d 組安裝失敗: %v",
+		GroupSummary:   "以下分組安裝失敗: %s",
+		DryRunOn:       "=== 預演模式 (dry-run)：僅顯示將執行的操作，不會修改任何檔案 ===",
+		RecursiveOn:    "[遞迴] 已啟用遞迴掃描（深度 3 層，覆蓋 monorepo 深層專案）",
+		DryRunWrite:    "[預演] 將寫入: %s",
+		DryRunDelete:   "[預演] 將刪除: %s",
+		DryRunEnv:      "[預演] 將設定環境變數: %s",
+		DryRunEnvDel:   "[預演] 將刪除環境變數: %s",
+		DryRunInstall:  "[預演] 將安裝: %s",
+		ErrorPrefix:    "[錯誤] %v",
+		ConfirmCLI:     "是否繼續? [Y/N]: ",
+		Cancelled:      "已取消",
+		LoadCfgErr:     "讀取設定失敗: %v\n",
+		SaveCfgErr:     "儲存設定失敗: %v\n",
+		NoGUI: [2]string{
+			"此建置未包含 GUI（建置標籤 nogui）。",
+			"請使用命令列模式：repo-manager <1-7> [目錄路徑]，或 repo-manager -h 檢視說明。",
+		},
+	}
+}

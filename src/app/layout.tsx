@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "RepoCleaner · 项目清洁助手",
+  title: "Repo Manager · 项目清洁助手",
   description: "一键让所有前端项目保持干净：无冗余 node_modules、无缓存垃圾。",
 };
 

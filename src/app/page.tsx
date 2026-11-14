@@ -25,7 +25,7 @@ export default function Home() {
   const safeCount = scanResults.filter((r) => r.risk === "safe").length;
 
   return (
-    <main id="repo-cleaner-app" className="min-h-screen bg-background py-8 text-foreground">
+    <main id="repo-manager-app" className="min-h-screen bg-background py-8 text-foreground">
       <div id="app-container" className="mx-auto max-w-5xl px-4">
         {/* 顶部栏：标题 + 语言切换 */}
         <header id="app-header" className="mb-6 flex items-center justify-between">

@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"repo-cleaner/internal/i18n"
+	"repo-manager/internal/i18n"
 )
 
 // TestDryRunCleanAllCaches 校验预演模式不删除任何文件且输出预演日志。

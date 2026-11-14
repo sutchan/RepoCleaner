@@ -1,6 +1,6 @@
 //go:build !nogui
 
-// internal/ui/ui.go v2.3.2
+// internal/ui/ui.go v2.3.3
 
 // Package ui 实现 Fyne 桌面 GUI（对齐 docs/DESIGN-SYSTEM.md §3.0）。
 // 本包需要 C 工具链编译（Fyne 依赖 OpenGL）；无 C 工具链环境用 `go build -tags nogui` 校验。
@@ -16,18 +16,28 @@ import (
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
 
-	"repo-cleaner/internal/config"
-	"repo-cleaner/internal/engine"
-	"repo-cleaner/internal/i18n"
-	"repo-cleaner/internal/logs"
-	"repo-cleaner/internal/platform"
+	"repo-manager/internal/config"
+	"repo-manager/internal/engine"
+	"repo-manager/internal/i18n"
+	"repo-manager/internal/logs"
+	"repo-manager/internal/platform"
 )
+
+// langOptions 语言切换顺序：简中 → 繁中 → 英文（覆盖全部支持语言）。
+var langOptions = []struct {
+	label string
+	lang  i18n.Lang
+}{
+	{"简体中文", i18n.Zh},
+	{"繁體中文", i18n.Hant},
+	{"English", i18n.En},
+}
 
 // Run 启动 Fyne GUI（阻塞直到窗口关闭）。
 func Run(cfg config.Config) {
-	a := app.NewWithID("repo-cleaner")
+	a := app.NewWithID("repo-manager")
 	a.Settings().SetTheme(newTheme())
-	w := a.NewWindow("RepoCleaner")
+	w := a.NewWindow("Repo Manager")
 	w.Resize(fyne.NewSize(760, 600))
 
 	p := platform.New()
@@ -39,7 +49,7 @@ func Run(cfg config.Config) {
 	// render 按当前语言重建窗口内容（语言切换即整体重绘）。
 	var render func()
 	render = func() {
-		lang := i18n.Lang(cfg.Lang)
+		lang := i18n.Normalize(cfg.Lang)
 		dict := i18n.T(lang)
 		d := i18n.Logs(lang)
 		w.SetTitle(dict.AppTitle)
@@ -47,26 +57,39 @@ func Run(cfg config.Config) {
 		output := widget.NewMultiLineEntry()
 		output.Wrapping = fyne.TextWrapWord
 		output.Disable()
-		logger := &guiLogger{out: output, mu: &sync.Mutex{}}
+		progress := newProgressView()
+		logger := &guiLogger{out: output, mu: &sync.Mutex{}, progress: progress}
 
 		dirEntry := widget.NewEntry()
 		dirEntry.SetText(cfg.RepoRoot)
 
-		langSelect := widget.NewSelect([]string{"中文", "English"}, func(s string) {
-			lang := i18n.Zh
-			if s == "English" {
-				lang = i18n.En
-			}
-			if lang == i18n.Lang(cfg.Lang) {
+		labels := make([]string, len(langOptions))
+		for i, option := range langOptions {
+			labels[i] = option.label
+		}
+		langSelect := widget.NewSelect(labels, func(s string) {
+			for _, option := range langOptions {
+				if option.label != s {
+					continue
+				}
+				if option.lang == i18n.Normalize(cfg.Lang) {
+					return
+				}
+				cfg.Lang = string(option.lang)
+				if err := config.Save(cfgPath, cfg); err != nil {
+					dialog.ShowError(err, w)
+					return
+				}
+				render()
 				return
 			}
-			cfg.Lang = string(lang)
-			if err := config.Save(cfgPath, cfg); err != nil {
-				dialog.ShowError(err, w)
-				return
-			}
-			render()
 		})
+		for _, option := range langOptions {
+			if option.lang == lang {
+				langSelect.SetSelected(option.label)
+				break
+			}
+		}
 		langSelect.PlaceHolder = dict.LangLabel
 
 		browse := widget.NewButton(dict.ChooseDir, func() {
@@ -121,8 +144,10 @@ func Run(cfg config.Config) {
 				if !confirmed {
 					return
 				}
+				progress.Reset()
 				go func() {
-					// V4：执行日志同时追加写入 repo-cleaner.log。
+					defer progress.Finish()
+					// V4：执行日志同时追加写入 repo-manager.log。
 					fileLog := logs.NewFileLogger(logs.DefaultPath(), logger)
 					defer fileLog.Close()
 					if err := engine.Run(p, fn, root, lang, opts, fileLog); err != nil {
@@ -153,6 +178,8 @@ func Run(cfg config.Config) {
 			container.NewHBox(widget.NewLabel(dict.TargetDir), dirEntry, browse, saveBtn),
 			container.NewHBox(widget.NewLabel(dict.LangLabel), langSelect, aboutBtn),
 			container.NewHBox(widget.NewLabel(dict.RunHint), dryRunCheck, recursiveCheck),
+			// V5：进度条与当前步骤文案，按执行日志的 [n/m] 标记推进
+			container.NewVBox(progress.label, progress.bar),
 		)
 		// 页脚区（Border bottom）：版本号 + build 编号的唯一展示位置，页眉不放版本号
 		w.SetContent(container.NewBorder(top,
@@ -163,20 +190,4 @@ func Run(cfg config.Config) {
 	}
 	render()
 	w.ShowAndRun()
-}
-
-// guiLogger 把 engine 日志安全地投递回 UI 线程。
-type guiLogger struct {
-	out *widget.Entry
-	mu  *sync.Mutex
-}
-
-// Logf 实现 engine.Logger。
-func (g *guiLogger) Logf(format string, args ...any) {
-	msg := fmt.Sprintf(format, args...)
-	g.mu.Lock()
-	defer g.mu.Unlock()
-	fyne.Do(func() {
-		g.out.SetText(g.out.Text + msg + "\n")
-	})
 }

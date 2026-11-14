@@ -1,23 +1,28 @@
-// internal/i18n/i18n.go v2.3.0
+// internal/i18n/i18n.go v2.3.3
 
-// Package i18n 是唯一的 UI 文案来源（zh / en），禁止在 ui / engine 层硬编码文案。
+// Package i18n 是唯一的 UI 文案来源（zh / zh-Hant / en），禁止在 ui / engine 层硬编码文案。
 package i18n
 
 // Lang 界面语言。
 type Lang string
 
-// 支持的语言（对齐 OPENSPEC §4.1）。
+// 支持的语言（对齐 OPENSPEC §4.1）：简中 → 繁中 → 英文；繁中缺失词条时回退简中。
 const (
-	Zh Lang = "zh"
-	En Lang = "en"
+	Zh   Lang = "zh"
+	Hant Lang = "zh-Hant"
+	En   Lang = "en"
 )
 
-// Normalize 校验并归一化语言值，非法值回落中文。
+// Normalize 校验并归一化语言值：繁中别名统一为 zh-Hant，非法值回落简中。
 func Normalize(l string) Lang {
-	if Lang(l) == En {
+	switch Lang(l) {
+	case Hant, "tw", "zh-TW", "zh-Hant-TW":
+		return Hant
+	case En:
 		return En
+	default:
+		return Zh
 	}
-	return Zh
 }
 
 // Dict 单语言界面文案；功能名称顺序与 OPENSPEC §3.0 一致（下标 0 对应功能 1）。
@@ -46,7 +51,7 @@ type Dict struct {
 
 var dicts = map[Lang]Dict{
 	Zh: {
-		AppTitle:       "RepoCleaner - 项目清洁助手",
+		AppTitle:       "Repo Manager",
 		TargetDir:      "目标目录:",
 		ChooseDir:      "选择目录",
 		Save:           "保存配置",
@@ -63,11 +68,11 @@ var dicts = map[Lang]Dict{
 		Ok:             "[完成]",
 		ErrInvalidRoot: "错误: 路径不存在!",
 		About:          "关于",
-		AboutText:      "RepoCleaner 通过 7 项功能管理全局依赖与前端项目缓存；危险操作执行前会二次确认。版本与构建信息见窗口页脚。",
+		AboutText:      "Repo Manager 通过 7 项功能管理全局依赖与前端项目缓存；危险操作执行前会二次确认。版本与构建信息见窗口页脚。",
 		OutputTitle:    "执行输出",
 	},
 	En: {
-		AppTitle:       "RepoCleaner - Project Cleaner",
+		AppTitle:       "Repo Manager - Project Cleaner",
 		TargetDir:      "Target:",
 		ChooseDir:      "Choose directory",
 		Save:           "Save config",
@@ -84,7 +89,7 @@ var dicts = map[Lang]Dict{
 		Ok:             "[OK]",
 		ErrInvalidRoot: "ERROR: Path does not exist!",
 		About:          "About",
-		AboutText:      "RepoCleaner manages global dependencies and front-end caches with 7 functions; destructive actions require confirmation. Version and build info are shown in the window footer.",
+		AboutText:      "Repo Manager manages global dependencies and front-end caches with 7 functions; destructive actions require confirmation. Version and build info are shown in the window footer.",
 		OutputTitle:    "Output",
 	},
 }

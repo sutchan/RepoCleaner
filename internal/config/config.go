@@ -10,13 +10,14 @@ import (
 	"path/filepath"
 	"strings"
 
-	"repo-cleaner/internal/platform"
+	"repo-manager/internal/i18n"
+	"repo-manager/internal/platform"
 )
 
 // Config 产品运行配置。
 type Config struct {
 	RepoRoot       string   // 仓库根目录
-	Lang           string   // 界面语言：zh / en
+	Lang           string   // 界面语言：zh / zh-Hant / en
 	Recursive      bool     // 递归扫描 monorepo 深层项目（V1，默认关闭）
 	ExtraCleanDirs []string // 自定义清理目录名（V3，逗号分隔，仅限项目目录内部）
 }
@@ -64,9 +65,8 @@ func Load(path string) (Config, error) {
 			cfg.ExtraCleanDirs = parseDirList(value)
 		}
 	}
-	if cfg.Lang != "en" {
-		cfg.Lang = "zh" // 白名单校验，非法值回落中文
-	}
+	// 语言枚举校验：非法值回落简中，繁中别名归一化为 zh-Hant。
+	cfg.Lang = string(i18n.Normalize(cfg.Lang))
 	return cfg, nil
 }
 

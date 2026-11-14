@@ -12,7 +12,7 @@ import (
 // TestFileLogger V4：日志应同时落盘（带时间戳）并转发下游。
 func TestFileLogger(t *testing.T) {
 	dir := t.TempDir()
-	path := filepath.Join(dir, "repo-cleaner.log")
+	path := filepath.Join(dir, "repo-manager.log")
 	var forwarded int
 	l := NewFileLogger(path, &countLogger{&forwarded})
 	l.Logf("step %d", 1)

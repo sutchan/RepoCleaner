@@ -8,8 +8,8 @@
 
 ## 1. 排查前三步
 
-1. **核对版本与构建**：执行 `repo-cleaner -h`，输出含 `Version`（页脚文本 + 7 位 VCS 短提交号）；GUI 版本显示在窗口页脚。
-2. **查看执行日志**：可执行文件同目录下的 `repo-cleaner.log`，追加写入并带时间戳，CLI 与 GUI 均会落盘。
+1. **核对版本与构建**：执行 `repo-manager -h`，输出含 `Version`（页脚文本 + 7 位 VCS 短提交号）；GUI 版本显示在窗口页脚。
+2. **查看执行日志**：可执行文件同目录下的 `repo-manager.log`，追加写入并带时间戳，CLI 与 GUI 均会落盘。
 3. **用预演复现**：加 `-dry-run`（GUI 勾选「预演模式」）可查看将要写入 / 删除 / 安装的操作，不修改任何文件与环境变量，也不执行 `npm install`；预演下危险操作跳过二次确认。
 
 ---
@@ -20,8 +20,8 @@
 |------|------|------|
 | 本机 `go build` 报 OpenGL / C 工具链相关错误 | Fyne GUI 需要 CGO、系统 OpenGL、X11 与 Wayland 开发库 | 完整 GUI 构建需 C 工具链；无工具链时用 `go build -tags nogui ./...` 只编译非 GUI 部分（**不会产出可用 GUI**）。CI 的 `gui-build` job 在 Ubuntu 安装开发库后验证完整编译 |
 | Linux 编译报 `wayland-client-core.h: No such file or directory` | `go-gl/glfw v3.4` 在 Linux 默认标签同时编译 X11 与 Wayland 后端，只装了 X11 开发库 | 安装 `libwayland-dev` 与 `libxkbcommon-dev`（CI 的 `gui-build` 已内置）；或改用 `-tags x11` 只编 X11 后端（产物不支持 Wayland，**不用于发布**） |
-| 找不到 Release 资产 | 资产按 `repo-cleaner-<goos>-<goarch>[.exe]` 命名（Windows 带 `.exe`），另附 `SHA256SUMS.txt` | 按 OS / 架构选择对应文件并用校验和核对；`windows/arm64` 暂不产出（托管 runner 缺交叉工具链），可在本机用 `scripts/build.ps1` 补齐 |
-| 启动后是 GUI 而不是预期的命令行操作 | 只有给出功能号 `1`–`7` 才进入非交互 CLI | 写成 `repo-cleaner <功能号> <路径>`；单独给路径会启动 GUI 并忽略该路径 |
+| 找不到 Release 资产 | 资产按 `repo-manager-<goos>-<goarch>[.exe]` 命名（Windows 带 `.exe`），另附 `SHA256SUMS.txt` | 按 OS / 架构选择对应文件并用校验和核对；`windows/arm64` 暂不产出（托管 runner 缺交叉工具链），可在本机用 `scripts/build.ps1` 补齐 |
+| 启动后是 GUI 而不是预期的命令行操作 | 只有给出功能号 `1`–`7` 才进入非交互 CLI | 写成 `repo-manager <功能号> <路径>`；单独给路径会启动 GUI 并忽略该路径 |
 
 > 前置要求：Windows / macOS / Linux；功能 1 / 5 需要 Node.js ≥ 18 与 npm；源码构建需 Go ≥ 1.25。
 
@@ -45,7 +45,7 @@
 | 症状 | 原因 | 处理 |
 |------|------|------|
 | monorepo 深层项目没被清理 | 默认只枚举 `REPO_ROOT` 的直接子目录 | 启用 `-recursive`、GUI「递归扫描」复选框或 `RECURSIVE=true|1|yes`；递归深度 3 层，跳过 `node_modules` / `.next` / `.git` 等依赖与产物目录 |
-| 帮助里的递归深度与规格不一致 | `-h` 帮助文本写「depth 2」，实际调用为 3 层 | **以 3 层为准**（见 [OPENSPEC.md §3.0](./OPENSPEC.md)）；文本与注释待统一，已登记 [tasks.md](./tasks.md) |
+| 帮助里的递归深度与规格不一致（v2.3.2 前） | `-h` 帮助文本曾写「depth 2」，实际调用为 3 层 | v2.3.3 已统一为 3 层（帮助、执行日志、代码与测试注释），见 [OPENSPEC.md §3.0](./OPENSPEC.md)；帮助固定英文，不随 `-lang` 切换 |
 | 自定义目录没有被清理 | `EXTRA_CLEAN_DIRS` 只追加**目录名**（逗号分隔），且仅匹配项目目录内部 | 不要写路径或 `REPO_ROOT` 顶层目录名；留空表示无自定义项 |
 | 功能 6 / 7 清掉的项不完全一致 | 两者白名单不同且有重叠（`dist`、`build`、`.nuxt`） | 属预期设计：功能 6 面向全量清理、功能 7 面向构建缓存，清单见 [OPENSPEC.md §3.6 / §3.7](./OPENSPEC.md) |
 | Next.js 热更新变慢 | 功能 3 会生成带隐藏属性的 `.next` 文件阻止缓存生成 | 开发完成后运行功能 4 恢复 |
@@ -81,6 +81,6 @@ CI 命令清单见 [OPENSPEC.md §9.1](./OPENSPEC.md) 与 [`.github/workflows/ci
 
 ## 7. 报问题前
 
-请在 [SUPPORT.md](../.github/SUPPORT.md) 的指引下提供：OS 与架构、`repo-cleaner -h` 的版本与 build 信息、复现命令、**脱敏后**的 `config.ini` 键与 `repo-cleaner.log` 片段。日志可能包含本机绝对路径，公开提交前务必脱敏。
+请在 [SUPPORT.md](../.github/SUPPORT.md) 的指引下提供：OS 与架构、`repo-manager -h` 的版本与 build 信息、复现命令、**脱敏后**的 `config.ini` 键与 `repo-manager.log` 片段。日志可能包含本机绝对路径，公开提交前务必脱敏。
 
-安全漏洞（删除越界、绕过二次确认、路径穿越）走 [SECURITY.md](../.github/SECURITY.md) 的私密报告渠道；一般缺陷与建议走 [Issue 模板](https://github.com/sutchan/RepoCleaner/issues/new/choose)。
+安全漏洞（删除越界、绕过二次确认、路径穿越）走 [SECURITY.md](../.github/SECURITY.md) 的私密报告渠道；一般缺陷与建议走 [Issue 模板](https://github.com/sutchan/RepoManager/issues/new/choose)。

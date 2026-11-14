@@ -74,4 +74,4 @@ jobs:
             libwayland-dev libxkbcommon-dev
 
       - name: go build (default tags, Fyne GUI)
-        run: mkdir -p .tmp && go build -trimpath -o .tmp/repo-cleaner ./cmd/repo-cleaner
+        run: mkdir -p .tmp && go build -trimpath -o .tmp/repo-manager ./cmd/repo-manager

@@ -48,7 +48,7 @@ GitHub 会自动识别仓库根、`docs/` 与 `.github/` 下的特定文件。�
 
 ### 1.2 命名与仓库现状
 
-产品名是 `Repo Manager`，Go 模块 / 二进制是 `repo-cleaner`，Git 远程是 `sutchan/RepoCleaner`；本机目录名 `RepoManager` 与工作区文件 `RepoManager.code-workspace` 与产品名对应，但远程与代码标识符仍沿用旧名。完整对照、技术标识同步清单与决策见 [MAINTAINERS.md §1](./MAINTAINERS.md)。文档标题与正文一律按产品名 `Repo Manager` 书写，命令、路径与链接按实况保留。
+产品名是 `Repo Manager`，Go 模块 / 二进制是 `repo-manager`，Git 远程是 `sutchan/RepoManager`；本机目录名 `RepoManager` 与工作区文件 `RepoManager.code-workspace` 与产品名对应，但远程与代码标识符仍沿用旧名。完整对照、技术标识同步清单与决策见 [MAINTAINERS.md §1](./MAINTAINERS.md)。文档标题与正文一律按产品名 `Repo Manager` 书写，命令、路径与链接按实况保留。
 
 ---
 
@@ -65,7 +65,7 @@ GitHub 会自动识别仓库根、`docs/` 与 `.github/` 下的特定文件。�
 | 维护仓库设置 / 查命名与已知差距 | [MAINTAINERS.md](./MAINTAINERS.md) §1 / §2 / §6 |
 | 新增或归档任务 | [tasks.md](./tasks.md)（唯一未完成来源）→ [tasks-done.md](./tasks-done.md) |
 | 审查 PR | [.github/PULL_REQUEST_TEMPLATE.md](../.github/PULL_REQUEST_TEMPLATE.md) + [CONTRIBUTING.md](./CONTRIBUTING.md) §9.2 |
-| 报缺陷 / 提建议 | [SUPPORT.md](../.github/SUPPORT.md) → 用 [Issue 模板](https://github.com/sutchan/RepoCleaner/issues/new/choose) 提交 |
+| 报缺陷 / 提建议 | [SUPPORT.md](../.github/SUPPORT.md) → 用 [Issue 模板](https://github.com/sutchan/RepoManager/issues/new/choose) 提交 |
 | 报告安全漏洞 | [SECURITY.md](../.github/SECURITY.md)，走私密渠道，**不要公开提 Issue** |
 | 社区行为问题 | [CODE_OF_CONDUCT.md](../.github/CODE_OF_CONDUCT.md) |
 
@@ -76,7 +76,7 @@ GitHub 会自动识别仓库根、`docs/` 与 `.github/` 下的特定文件。�
 ```
 RepoManager/
 ├── README.MD / CHANGELOG.MD / LICENSE          # 入口、变更历史、许可证
-├── cmd/repo-cleaner/                           # 产品本体入口（Go）
+├── cmd/repo-manager/                           # 产品本体入口（Go）
 ├── internal/                                   # Go 实现：buildinfo / config / engine / i18n / logs / platform / ui
 ├── go.mod / go.sum                             # Go 模块定义与依赖锁定
 ├── RepoCleaner.bat / lang.ini                  # v1.x 旧版 Windows 脚本与文案参考（已弃用，保留兼容）
@@ -177,7 +177,7 @@ CI 实际执行的门禁命令以 [`.github/workflows/ci.yml`](../.github/workfl
 | 项目根目录（单个项目，`REPO_ROOT` 的直接子目录） | — |
 | 参考界面应用（根 `src/`） | prototype 应用、前端工程 |
 | 批处理脚本（`RepoCleaner.bat`） | bat 脚本、主程序 |
-| 产品名 `Repo Manager` / 模块与二进制 `repo-cleaner` | 把本地目录名或 Git 远程写成产品名（见 [MAINTAINERS.md §1](./MAINTAINERS.md)） |
+| 产品名 `Repo Manager` / 模块与二进制 `repo-manager` | 把本地目录名或 Git 远程写成产品名（见 [MAINTAINERS.md §1](./MAINTAINERS.md)） |
 | 功能 1 ～ 功能 7（名称见 OPENSPEC §3.0） | 功能一、F1 |
 
 完整术语表见 [CONTRIBUTING.md §5](./CONTRIBUTING.md)。

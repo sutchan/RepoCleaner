@@ -5,8 +5,8 @@ package engine
 import (
 	"fmt"
 
-	"repo-cleaner/internal/i18n"
-	"repo-cleaner/internal/platform"
+	"repo-manager/internal/i18n"
+	"repo-manager/internal/platform"
 )
 
 // Options 功能执行选项。
@@ -14,7 +14,7 @@ type Options struct {
 	// DryRun 预演模式：仅输出将要执行的操作，不修改任何文件与环境变量
 	// （对齐 OPENSPEC §4.7）；危险操作在预演下跳过二次确认。
 	DryRun bool
-	// Recursive 递归扫描 monorepo 深层项目（V1，2 层深度，默认关闭；
+	// Recursive 递归扫描 monorepo 深层项目（V1，3 层深度，默认关闭；
 	// 对齐 OPENSPEC §3.0）。
 	Recursive bool
 	// ExtraCleanDirs 自定义清理目录名（V3，仅限项目目录内部匹配，

@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"repo-cleaner/internal/i18n"
+	"repo-manager/internal/i18n"
 )
 
 func TestCleanAllCaches(t *testing.T) {

@@ -21,7 +21,7 @@ Repo Manager 是一个会**删除文件与目录**的跨平台工具（Go 编译
 请使用 GitHub 的私密报告渠道提交：
 
 ```
-https://github.com/sutchan/RepoCleaner/security/advisories/new
+https://github.com/sutchan/RepoManager/security/advisories/new
 ```
 
 若该入口不可用，请通过 GitHub 向维护者 [@sutchan](https://github.com/sutchan) 发起私密联系，**不要**在公开场合张贴可复现的攻击细节。

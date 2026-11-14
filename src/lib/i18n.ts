@@ -19,7 +19,7 @@ export type Dict = {
 
 export const i18n: Record<Lang, Dict> = {
   zh: {
-    appTitle: "RepoCleaner 项目清洁助手",
+    appTitle: "Repo Manager 项目清洁助手",
     language: "语言",
     statTotal: "扫描仓库",
     statSafe: "安全项",
@@ -31,10 +31,10 @@ export const i18n: Record<Lang, Dict> = {
     safe: "安全",
     warning: "需注意",
     clean: "清理",
-    footer: "RepoCleaner 项目清洁助手",
+    footer: "Repo Manager 项目清洁助手",
   },
   en: {
-    appTitle: "RepoCleaner",
+    appTitle: "Repo Manager",
     language: "Language",
     statTotal: "Scanned",
     statSafe: "Safe",
@@ -46,6 +46,6 @@ export const i18n: Record<Lang, Dict> = {
     safe: "Safe",
     warning: "Caution",
     clean: "Clean",
-    footer: "RepoCleaner Project Cleaner",
+    footer: "Repo Manager",
   },
 };

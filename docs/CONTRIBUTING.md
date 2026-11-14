@@ -49,7 +49,7 @@
 | 项 | 要求 |
 |----|------|
 | 操作系统 | 产品支持 Windows / macOS / Linux；本仓库在三个平台上均可开发 |
-| Go | **≥ 1.25**（产品本体 `repo-cleaner`，依赖由 `go.mod` 管理） |
+| Go | **≥ 1.25**（产品本体 `repo-manager`，依赖由 `go.mod` 管理） |
 | GUI 框架 | Fyne v2（唯一 UI 依赖；构建需系统 OpenGL / C 工具链，运行为单二进制） |
 | Node.js | ≥ 18（仅**已弃用**的 `src/` 参考 Web 界面需要） |
 
@@ -67,7 +67,7 @@ go vet -tags nogui ./cmd/... ./internal/...
 go test -tags nogui ./cmd/... ./internal/...
 go build -tags nogui ./...
 
-go run ./cmd/repo-cleaner -h                     # 命令行帮助
+go run ./cmd/repo-manager -h                     # 命令行帮助
 ./scripts/build.ps1                             # 交叉编译（Windows / PowerShell）
 ./scripts/build.sh                              # 交叉编译（macOS / Linux）
 ```
@@ -115,7 +115,7 @@ RepoManager/
 ├── .tmp/                        # 会话级临时文件唯一落点（内容不入库，用完即清）
 ├── reports/                     # 工具正式产物目录（报告 / 覆盖率 / 测试结果，内容不入库）
 ├── go.mod / go.sum              # Go 模块定义与依赖锁定（Fyne）
-├── cmd/repo-cleaner/            # 产品本体入口：main.go + gui.go（默认）/ headless.go（nogui）
+├── cmd/repo-manager/            # 产品本体入口：main.go + gui.go（默认）/ headless.go（nogui）
 ├── internal/                    # Go 源码：buildinfo / config / engine / i18n / logs / platform / ui（7 个包）
 ├── src/                         # 已弃用参考界面应用（Next.js App Router，v1.x 遗留）
 │   ├── app/                     # 路由与全局样式：layout.tsx / page.tsx / globals.css / favicon.ico
@@ -144,13 +144,13 @@ RepoManager/
 1. **所有规范 / 规格文档放 `docs/`**；根只保留入口 `README.MD`、`CHANGELOG.MD`、`LICENSE`。**产品代码一律放根 `cmd/` 与 `internal/`（Go）**；`src/` 为已弃用参考界面，禁止新增功能代码；`prototype/` 只放原型说明，禁止再放回可运行代码或规范正文；**Web 展示项目的落地页面放 `landing/`**，其内容约定见 [`landing/README.md`](../landing/README.md)。
 2. **单一数据源**：产品 UI 与执行日志文案只放 `internal/i18n`（界面用 `T()`、日志用 `Logs()`）；`engine` 的业务常量（清理目录清单、依赖包列表、`.npmrc` 模板）集中在其包内定义，禁止散落在 `ui` 层。已弃用的 `src/lib/` 不再新增数据；落地页文案须与 `OPENSPEC.md` 事实一致，禁止虚构数据。
 3. **Go 依赖**：只经 `go.mod` 管理（`go get` / `go mod tidy`），提交 `go.sum`；禁止 vendor 目录与多套依赖清单并存。UI 依赖仅限 `fyne.io/fyne/v2`，不得再引入第二套 GUI 框架。
-4. **新增模块按职责落位**：入口 → `cmd/repo-cleaner/`；OS 差异 → `internal/platform/`；业务功能 → `internal/engine/`；配置读写 → `internal/config/`；文案 → `internal/i18n/`；界面 → `internal/ui/`；落地页 → `landing/`；规范 → `docs/`；工程脚本 → `scripts/`。
+4. **新增模块按职责落位**：入口 → `cmd/repo-manager/`；OS 差异 → `internal/platform/`；业务功能 → `internal/engine/`；配置读写 → `internal/config/`；文案 → `internal/i18n/`；界面 → `internal/ui/`；落地页 → `landing/`；规范 → `docs/`；工程脚本 → `scripts/`。
 5. **文件行数**：所有源代码文件（`.ts/.tsx/.js/.jsx/.vue/.py/.dart/.go/.java` 等）单文件 **≤ 200 行**。超出时按职责拆分为更小模块（组件拆子组件、逻辑抽纯函数/常量/类型），且**不得改变对外导出契约**。
    - **文档文件（`.md/.markdown/.mdx/.rst`）不拆分**，即使超过 200 行也保持单文件完整连贯。
    - `.bat` 为批处理脚本，不纳入源码 200 行规则，但仍须按标签分节、保持可读。
-6. **临时文件统一落固定子目录**：一次性脚本、探针、调试日志、中间产物一律写入 `.tmp/`；工具正式产物（审计报告、覆盖率、`*-result.json` 等）写入 `reports/` / `coverage/` / `test-results/`。写入前先 `mkdir -p`，本轮产生的 `.tmp/` 内容在任务结束前清理；需长期留存的证据改写进 `docs/` 或测试断言。目录忽略规则以 `.gitignore` 实况为准，并在 ESLint / `tsconfig.json` / `check-doc-links.mjs` 中排除，避免临时脚本让门禁假红。**禁止**在仓库根或顶层散落 `.tmp-*.mjs`、`tmp-*.js`、`*.log`、`audit-*.json` 等；根目录白名单由 `scripts/check-root-clean.mjs` 强制校验（CI 首步），新增根目录工程文件须同时核对 `.gitignore` 与白名单。产品运行时的 `config.ini` / `repo-cleaner.log` 属 exe 同目录便携配置，不在此约束内。
+6. **临时文件统一落固定子目录**：一次性脚本、探针、调试日志、中间产物一律写入 `.tmp/`；工具正式产物（审计报告、覆盖率、`*-result.json` 等）写入 `reports/` / `coverage/` / `test-results/`。写入前先 `mkdir -p`，本轮产生的 `.tmp/` 内容在任务结束前清理；需长期留存的证据改写进 `docs/` 或测试断言。目录忽略规则以 `.gitignore` 实况为准，并在 ESLint / `tsconfig.json` / `check-doc-links.mjs` 中排除，避免临时脚本让门禁假红。**禁止**在仓库根或顶层散落 `.tmp-*.mjs`、`tmp-*.js`、`*.log`、`audit-*.json` 等；根目录白名单由 `scripts/check-root-clean.mjs` 强制校验（CI 首步），新增根目录工程文件须同时核对 `.gitignore` 与白名单。产品运行时的 `config.ini` / `repo-manager.log` 属 exe 同目录便携配置，不在此约束内。
 7. **新增 / 删除 / 重命名文档**须同步四处：[`docs/README.md`](./README.md) §1 文档地图与 §3 目录树、根 [`README.MD`](../README.MD) 文档索引与目录树、本文 §3.1、[`MAINTAINERS.md`](./MAINTAINERS.md) §4 变更对照表；新增文档标题带当前版本号，并在 `CHANGELOG.MD` 对应版本的 `Docs` 分组记录。**新增根目录子目录**（如 `landing/`）还须登记 `scripts/check-root-clean.mjs` 的 `ALLOWED_DIRS` 白名单并核对 `.gitignore`。同一事实只在一处维护，其余用链接引用。
-8. **命名层次**：产品名 `Repo Manager`、Go 模块与二进制 `repo-cleaner`、Git 远程 `sutchan/RepoCleaner`；本机目录名 `RepoManager` 与工作区文件 `RepoManager.code-workspace` 与产品名对应，但代码标识符、远程与应用内文案仍沿用旧名。对照、技术标识同步清单与决策见 [`MAINTAINERS.md` §1](./MAINTAINERS.md)，未完成项见 [`tasks.md`](./tasks.md)。
+8. **命名层次**：产品名 `Repo Manager`、Go 模块与二进制 `repo-manager`、Git 远程 `sutchan/RepoManager`；本机目录名 `RepoManager` 与工作区文件 `RepoManager.code-workspace` 与产品名对应，但代码标识符、远程与应用内文案仍沿用旧名。对照、技术标识同步清单与决策见 [`MAINTAINERS.md` §1](./MAINTAINERS.md)，未完成项见 [`tasks.md`](./tasks.md)。
 
 ---
 
@@ -205,7 +205,7 @@ RepoManager/
 - 危险操作（删除 `node_modules`）前必须有 `Y` 二次确认。
 - 写 `config.ini` 用「读旧文件 → 过滤目标键 → 补写 → 回写」方式，**禁止整文件覆盖 `lang.ini`**（会清空 `[en]/[zh]` 文案节）。
 
-### 4.6 Go（`repo-cleaner` 产品本体）
+### 4.6 Go（`repo-manager` 产品本体）
 
 - 一律通过 `gofmt` 格式化、`go vet ./...` 无告警；导出符号必须有中文 doc 注释（`// FuncName ...`）。
 - 错误处理：必须显式处理 `error`，禁止 `_ =` 吞错误；包装错误用 `fmt.Errorf("...: %w", err)`。
@@ -241,8 +241,8 @@ RepoManager/
 | 仓库根目录（`REPO_ROOT`，含多个项目的父目录） | 项目根目录（二者含义不同，禁止混用） |
 | 项目根目录（单个项目，`REPO_ROOT` 的直接子目录） | — |
 | 参考界面应用（根 `src/` 的 Next.js 应用，已弃用） | prototype 应用、前端工程 |
-| 产品名 `Repo Manager` | RepoCleaner / 项目清洁助手（旧名，仅历史条目保留） |
-| 产品本体（`repo-cleaner`，Go 编译的跨平台可执行文件） | Go 版、新版本 |
+| 产品名 `Repo Manager` | Repo Manager / 项目清洁助手（旧名，仅历史条目保留） |
+| 产品本体（`repo-manager`，Go 编译的跨平台可执行文件） | Go 版、新版本 |
 | 规范文档目录（`docs/`） | 原型目录（后者专指 `prototype/`） |
 | 原型目录（`prototype/`，仅说明文件） | 设计规范目录（规范在 `docs/`） |
 | 批处理脚本（`RepoCleaner.bat`，已弃用旧版） | bat 脚本、主程序 |
@@ -334,7 +334,7 @@ npm run check:root-clean       # 根目录清洁度门禁
 1. **禁止直接向 `main` 强推**；禁止 `--force` 覆盖 `main` / `dev` 历史。
 2. 短期分支合并后删除；保留提交历史，**不使用 squash 合并**，便于回滚。
 3. 分支名与提交 type 保持一致语义。
-4. 远程为 `https://github.com/sutchan/RepoCleaner.git`，推送使用 `git push origin <分支>`。
+4. 远程为 `https://github.com/sutchan/RepoManager.git`，推送使用 `git push origin <分支>`。
 5. 单人小改动（≤ 3 个文件、纯文档/拼写）可直接提交到 `main`；涉及 ≥ 5 个文件、新增依赖或架构调整，须走 PR 流程（§9）。
 
 ---
@@ -372,7 +372,7 @@ npm run check:root-clean       # 根目录清洁度门禁
 **页脚版本与 build 编号（强制）**：应用页面的**页脚区**是版本号与 build 编号的唯一展示位置；页眉 / 顶部栏 / 其他区块一律不得出现版本号，页脚若原本展示「更新日期」一律改为 build 编号。
 
 - **格式**：`vX.Y.Z · build yymmddhhmm`（示例 `v1.2.3 · build 2611051259`）。`yymmddhhmm` 是 **10 位**构建时间（2 位年份 + 月 + 日 + 时 + 分，24 小时制），禁止使用 12 位 `yyyymmddhhmm`。
-- **Go 产品本体**：`internal/buildinfo/version.go` 的 `Version` 与 `BuildID`，由 `Footer()` 生成页脚文本；`internal/ui/ui.go` 用 `container.NewBorder` 的 bottom 区渲染（`NewBorder` 底部即页脚，页脚容器在 Web 侧须带 `id="app-footer"`）。`scripts/build.ps1`（`(Get-Date).ToString("yyMMddHHmm")`）/ `scripts/build.sh`（`date +%y%m%d%H%M`）在构建期以 `-ldflags "-X repo-cleaner/internal/buildinfo.BuildID=<10位>"` 注入；未注入时从 `debug.ReadBuildInfo` 的 `vcs.time` 推导本地时间（Go 布局 `0601021504`），仍缺失则回退为仅版本号。CLI `-h` 的 `BuildInfo()` 输出不算页面页眉。
+- **Go 产品本体**：`internal/buildinfo/version.go` 的 `Version` 与 `BuildID`，由 `Footer()` 生成页脚文本；`internal/ui/ui.go` 用 `container.NewBorder` 的 bottom 区渲染（`NewBorder` 底部即页脚，页脚容器在 Web 侧须带 `id="app-footer"`）。`scripts/build.ps1`（`(Get-Date).ToString("yyMMddHHmm")`）/ `scripts/build.sh`（`date +%y%m%d%H%M`）在构建期以 `-ldflags "-X repo-manager/internal/buildinfo.BuildID=<10位>"` 注入；未注入时从 `debug.ReadBuildInfo` 的 `vcs.time` 推导本地时间（Go 布局 `0601021504`），仍缺失则回退为仅版本号。CLI `-h` 的 `BuildInfo()` 输出不算页面页眉。
 - **已弃用 Web 参考界面**：`next.config.ts` 从 `package.json` 读取版本并注入 `NEXT_PUBLIC_APP_VERSION` 与 10 位 `NEXT_PUBLIC_BUILD_ID`，`src/app/page.tsx` 的 `<footer id="app-footer">` 展示，注入缺失时回退仅显示版本号。
 - **禁止**：在页面 / 组件硬编码版本号或 build 编号；禁止运行时用 `new Date()` / `time.Now()` 现场生成（必须构建期注入，保证同一构建内稳定）。
 - **验证**：`go test ./internal/buildinfo`（`Footer` 格式、回退、10 位布局）+ `npm run build`（页脚输出须为 `vX.Y.Z · build <10位数字>`）。
@@ -410,7 +410,7 @@ npm run check:root-clean       # 根目录清洁度门禁
 
 ### 9.1 流程
 
-1. 先用 [Issue 模板](https://github.com/sutchan/RepoCleaner/issues/new/choose) 描述问题或建议并确认未被记录；从目标分支切短期分支（§7.1）。
+1. 先用 [Issue 模板](https://github.com/sutchan/RepoManager/issues/new/choose) 描述问题或建议并确认未被记录；从目标分支切短期分支（§7.1）。
 2. 完成改动，按 §6.3 跑完全部门禁。
 3. `git add` → `git commit`（格式见 §6）→ `git push origin <分支>`。
 4. 在 GitHub 创建 PR 到 `main`（或 `dev`），**PR 标题格式同提交信息**，描述按 `.github/PULL_REQUEST_TEMPLATE.md` 填写。
@@ -437,12 +437,12 @@ npm run check:root-clean       # 根目录清洁度门禁
 
 ### 9.3 功能验证（GUI 手动冒烟，跨平台）
 
-`repo-cleaner` 的 GUI 交互无自动化测试，发版前须在**隔离的临时目录**（放 1～2 个含 `package.json` 的假项目）手动验证：
+`repo-manager` 的 GUI 交互无自动化测试，发版前须在**隔离的临时目录**（放 1～2 个含 `package.json` 的假项目）手动验证：
 
 | 检查项 | 预期 |
 |--------|------|
-| `repo-cleaner -h` | 输出帮助信息后退出 |
-| `repo-cleaner -lang en` | `config.ini` 写入 `LANG=en` 且不产生重复行 |
+| `repo-manager -h` | 输出帮助信息后退出 |
+| `repo-manager -lang en` | `config.ini` 写入 `LANG=en` 且不产生重复行 |
 | GUI 语言按钮 | 中/英切换生效，执行日志同步切换 |
 | GUI 关于按钮 | 弹窗展示功能说明，不出现版本号 |
 | 功能 1（确认） | 生成 `.npmrc`、清理本地 `node_modules`；取消则返回且不删除 |

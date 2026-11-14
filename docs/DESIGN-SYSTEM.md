@@ -137,7 +137,7 @@ Go 版 GUI 位于 `internal/ui`，遵循本文 §2.1 配色与 §4 交互标准�
 
 | 区块 | 语义化 id | 内容 |
 |------|-----------|------|
-| 页面容器 | `repo-cleaner-app`（`main`）、`app-container` | 全屏暗色底，`max-w-5xl` 居中 |
+| 页面容器 | `repo-manager-app`（`main`）、`app-container` | 全屏暗色底，`max-w-5xl` 居中 |
 | 顶部栏 | `app-header`、`app-title`、`lang-switch`、`lang-btn-zh`、`lang-btn-en` | 标题 + 中/英实时切换 |
 | 概览卡片 | `overview`、`stat-total`、`stat-safe`、`stat-tweaks` | 扫描总数 / 安全数 / 优化项数 |
 | 安全提示 | `security-note` | `warning` 级 Alert，提示删除不可逆 |
@@ -217,7 +217,7 @@ Go 版 GUI 位于 `internal/ui`，遵循本文 §2.1 配色与 §4 交互标准�
 | G6 | `lg` 侧栏、1200px 容器为历史设计，实际是 1024px 无侧栏 | §5 | 已按实现修正文档 |
 | G7 | `<html lang>` 不随语言切换、Tabs 缺少完整 ARIA | §6 | 后续补齐 |
 | G8 | ~~清理按钮无 `onClick`，界面为纯展示~~ | §3.2 | **v2.0.0 已解决**：Go + Fyne 版实现真实清理（含二次确认）；Next.js 参考界面保持纯展示并已弃用 |
-| G9 | CLI `-h` 帮助固定英文且递归深度写「depth 2」；`cmd/` 与 `internal/ui` 无自动化测试 | §3.0 / §4.1 | 帮助语言策略与 3 层深度在 [OPENSPEC.md §7.3](./OPENSPEC.md) L6 标注；发版前按 [CONTRIBUTING.md §9.3](./CONTRIBUTING.md) 手动冒烟；待办见 [tasks.md](./tasks.md) D3 / D5 |
+| G9 | CLI `-h` 帮助固定英文（不随 `-lang` 切换），递归深度已统一为 3 层；`cmd/` 与 `internal/ui` 无自动化测试 | §3.0 / §4.1 | v2.3.3 完成深度文本统一；发版前按 [CONTRIBUTING.md §9.3](./CONTRIBUTING.md) 手动冒烟 |
 
 > 本清单是「规范与实现一致」的核对表：修复任一项时，同步更新本文对应章节与本表，并在 `CHANGELOG.MD` 记录。
 

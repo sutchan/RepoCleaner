@@ -10,7 +10,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/theme"
 
-	"repo-cleaner/internal/buildinfo"
+	"repo-manager/internal/buildinfo"
 )
 
 // 设计令牌（对齐 docs/DESIGN-SYSTEM.md §2.1 暗色主题）。

@@ -1,8 +1,8 @@
 @echo off
-:: RepoCleaner v1.2.6 - Windows 项目清理工具
+:: Repo Manager v1.2.6 - Windows 项目清理工具
 chcp 65001 >nul 2>&1
 setlocal enabledelayedexpansion
-title RepoCleaner - Github Project Cleaner
+title Repo Manager
 
 :: ====================== Configuration Files ======================
 set "LANG_FILE=%~dp0lang.ini"
@@ -48,7 +48,7 @@ set "PATH_SAVE=是否保存为默认? [Y/N]:"
 set "PATH_SAVED=配置已保存到 config.ini"
 set "PATH_INPUT=请输入完整路径: "
 
-set "MENU_TITLE=RepoCleaner - 项目清洁助手"
+set "MENU_TITLE=Repo Manager"
 set "MENU_TARGET=目标目录:"
 set "MENU_OPTION1=启用全局 node_modules     - 无需本地 node_modules"
 set "MENU_OPTION2=重置 Node 配置            - 恢复默认设置"
@@ -121,7 +121,7 @@ if /i "!CURRENT_LANG!"=="en" (
     set "PATH_SAVED=Config saved to config.ini"
     set "PATH_INPUT=Enter full path: "
 
-    set "MENU_TITLE=RepoCleaner - Github Project Cleaner"
+    set "MENU_TITLE=Repo Manager"
     set "MENU_TARGET=Target:"
     set "MENU_OPTION1=Enable Global node_modules     - No local node_modules"
     set "MENU_OPTION2=Reset Node Config             - Restore default settings"
@@ -240,7 +240,7 @@ goto :CHECK_CONFIG
 
 :SHOW_HELP
 echo.
-echo RepoCleaner - Project Cleaner
+echo Repo Manager - Project Cleaner
 echo.
 echo Usage: RepoCleaner.bat [options] [function] [path]
 echo.

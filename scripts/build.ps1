@@ -42,9 +42,9 @@ foreach ($t in $targets) {
         $env:CC = $t.cc
     }
     $ext = if ($t.os -eq "windows") { ".exe" } else { "" }
-    $name = "repo-cleaner-$($t.os)-$($t.arch)$ext"
+    $name = "repo-manager-$($t.os)-$($t.arch)$ext"
     Write-Host "build $name (build $buildID)"
-    go build -trimpath -ldflags "-s -w -X repo-cleaner/internal/buildinfo.BuildID=$buildID" -o (Join-Path $out $name) ./cmd/repo-cleaner
+    go build -trimpath -ldflags "-s -w -X repo-manager/internal/buildinfo.BuildID=$buildID" -o (Join-Path $out $name) ./cmd/repo-manager
     if ($LASTEXITCODE -ne 0) { exit 1 }
     $built++
 }
