@@ -123,7 +123,7 @@ RepoManager/
 │   │   ├── icons.tsx            # 内联 SVG 图标（零外部图标依赖）
 │   │   └── ui/                  # 无状态基础组件：alert/badge/button/card/code-block/table/tabs
 │   └── lib/
-│       ├── i18n.ts              # 唯一 UI 文案字典（zh / en）
+│       ├── i18n.ts              # 唯一 UI 文案字典（zh / zh-Hant / en）
 │       ├── utils.ts             # 纯工具函数（cn 等）
 │       └── data/                # 单一数据源：features/project-types/steps/repos + index.ts barrel
 ├── prototype/                   # 原型目录，仅保留 README.md 说明，无代码、无规范正文
@@ -150,7 +150,7 @@ RepoManager/
    - `.bat` 为批处理脚本，不纳入源码 200 行规则，但仍须按标签分节、保持可读。
 6. **临时文件统一落固定子目录**：一次性脚本、探针、调试日志、中间产物一律写入 `.tmp/`；工具正式产物（审计报告、覆盖率、`*-result.json` 等）写入 `reports/` / `coverage/` / `test-results/`。写入前先 `mkdir -p`，本轮产生的 `.tmp/` 内容在任务结束前清理；需长期留存的证据改写进 `docs/` 或测试断言。目录忽略规则以 `.gitignore` 实况为准，并在 ESLint / `tsconfig.json` / `check-doc-links.mjs` 中排除，避免临时脚本让门禁假红。**禁止**在仓库根或顶层散落 `.tmp-*.mjs`、`tmp-*.js`、`*.log`、`audit-*.json` 等；根目录白名单由 `scripts/check-root-clean.mjs` 强制校验（CI 首步），新增根目录工程文件须同时核对 `.gitignore` 与白名单。产品运行时的 `config.ini` / `repo-manager.log` 属 exe 同目录便携配置，不在此约束内。
 7. **新增 / 删除 / 重命名文档**须同步四处：[`docs/README.md`](./README.md) §1 文档地图与 §3 目录树、根 [`README.MD`](../README.MD) 文档索引与目录树、本文 §3.1、[`MAINTAINERS.md`](./MAINTAINERS.md) §4 变更对照表；新增文档标题带当前版本号，并在 `CHANGELOG.MD` 对应版本的 `Docs` 分组记录。**新增根目录子目录**（如 `landing/`）还须登记 `scripts/check-root-clean.mjs` 的 `ALLOWED_DIRS` 白名单并核对 `.gitignore`。同一事实只在一处维护，其余用链接引用。
-8. **命名层次**：产品名 `Repo Manager`、Go 模块与二进制 `repo-manager`、Git 远程 `sutchan/RepoManager`；本机目录名 `RepoManager` 与工作区文件 `RepoManager.code-workspace` 与产品名对应，但代码标识符、远程与应用内文案仍沿用旧名。对照、技术标识同步清单与决策见 [`MAINTAINERS.md` §1](./MAINTAINERS.md)，未完成项见 [`tasks.md`](./tasks.md)。
+8. **命名层次**：产品名 `Repo Manager`、Go 模块与二进制 `repo-manager`、Git 远程 `sutchan/RepoManager`；本机目录名 `RepoManager` 与工作区文件 `RepoManager.code-workspace` 与产品名对应，v2.3.3 已完成技术标识同步。对照与决策见 [`MAINTAINERS.md` §1](./MAINTAINERS.md)；当前无未完成项，见 [`tasks.md`](./tasks.md)。
 
 ---
 
@@ -241,7 +241,7 @@ RepoManager/
 | 仓库根目录（`REPO_ROOT`，含多个项目的父目录） | 项目根目录（二者含义不同，禁止混用） |
 | 项目根目录（单个项目，`REPO_ROOT` 的直接子目录） | — |
 | 参考界面应用（根 `src/` 的 Next.js 应用，已弃用） | prototype 应用、前端工程 |
-| 产品名 `Repo Manager` | Repo Manager / 项目清洁助手（旧名，仅历史条目保留） |
+| 产品名 `Repo Manager` | `RepoCleaner` / `项目清洁助手`（旧名，仅 CHANGELOG 与归档文档的历史条目保留） |
 | 产品本体（`repo-manager`，Go 编译的跨平台可执行文件） | Go 版、新版本 |
 | 规范文档目录（`docs/`） | 原型目录（后者专指 `prototype/`） |
 | 原型目录（`prototype/`，仅说明文件） | 设计规范目录（规范在 `docs/`） |

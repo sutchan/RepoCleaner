@@ -17,9 +17,9 @@
 | Git 远程 | `https://github.com/sutchan/RepoManager.git` | `git remote -v` |
 | 本地目录 / 工作区文件 | 目录名 `RepoManager`、文件 `RepoManager.code-workspace` | 本机磁盘实况，不进入代码与远程 |
 
-**决策（2026-11-14）**：项目显示名统一为 `Repo Manager`，全部文档标题、正文与展示位同步；Git 远程、Go 模块与二进制标识暂沿用旧名，文档中的命令、路径与链接一律按实况书写。应用内文案（GUI 标题、CLI 帮助、i18n 字典、Web 参考界面）仍输出旧名，属代码侧待同步项，见 §6。
+**决策（2026-11-14，v2.3.3 完成）**：项目显示名 `Repo Manager` 与技术标识 `repo-manager`、远程 `sutchan/RepoManager` 已全量统一；应用内文案（GUI 标题、CLI 帮助、i18n 字典、Web 参考界面）与 Release 资产名同步。文档中的命令、路径与链接一律按实况书写；CHANGELOG 与 tasks-done 历史条目保留原貌。
 
-技术标识同步清单（当前未执行，改动代码时须一并处理）：`go.mod` 模块路径与全部 import、`cmd/` 目录、二进制与日志文件名、构建脚本与 Release 资产名、Fyne app ID、`package.json` 的 `name` / `homepage` / `repository` / `bugs`、README 徽章与链接、`.github/` 模板、应用内 i18n 文案与全部 `docs/` 文档标题与术语表，并重新打 tag。未完成前按上表书写。
+技术标识同步清单（v2.3.3 已全部执行，后续改名须按同一清单整体推进）：`go.mod` 模块路径与全部 import、`cmd/` 目录、二进制与日志文件名、构建脚本与 Release 资产名、Fyne app ID、`package.json` 的 `name` / `homepage` / `repository` / `bugs`、README 徽章与链接、`.github/` 模板、应用内 i18n 文案与全部 `docs/` 文档标题与术语表，并重新打 tag。当前按上表书写，历史归档不追溯改写。
 
 > `*.code-workspace` 是工作区配置，**禁止删除**；`scripts/check-root-clean.mjs` 按文件后缀放行，不列入白名单文件名。
 
@@ -73,7 +73,7 @@ frontend
 | 版本权威源 | `internal/buildinfo/version.go` 的 `Version` 常量；同步清单见 [CONTRIBUTING.md §8.2](./CONTRIBUTING.md) |
 | 发布流程 | 见 [CONTRIBUTING.md §8.4](./CONTRIBUTING.md)；工作流实现为 [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) 与 [`.github/workflows/release.yml`](../.github/workflows/release.yml) |
 | 触发与校验 | push `vX.Y.Z` tag；发布前校验 `tag == "v" + Version == package.json.version`，且 [CHANGELOG.MD](../CHANGELOG.MD) 存在 `## [X.Y.Z]` 小节，任一不满足即失败 |
-| Release 资产 | 二进制 `repo-manager-<goos>-<goarch>[.exe]`（Windows 带 `.exe`）与 `SHA256SUMS.txt`；`windows/arm64` 因托管 runner 缺交叉工具链暂不产出 |
+| Release 资产 | `RepoManager-v<版本>-<os>-<arch>.zip / .tar.gz` 归档（Windows/macOS zip、Linux tar.gz）与 `SHA256SUMS.txt`；`windows/arm64` 因托管 runner 缺交叉工具链暂不产出，`linux/arm64` 交叉目标仍需 arm64 架构开发库 |
 | Release 说明 | 从 `CHANGELOG.MD` 对应版本小节提取，标题为 tag 名 |
 | 本机交叉编译 | `scripts/build.ps1` / `scripts/build.sh`，6 目标输出到 `bin/`；缺交叉编译器时跳过并警告 |
 
@@ -126,15 +126,15 @@ grep 'const Version' internal/buildinfo/version.go
 
 ## 6. 已知差距与决策记录
 
-以下均为**当前现状**（不是已完成事项），待办编号见 [tasks.md](./tasks.md)：
+以下为 **v2.3.3 核查后的现状**（含已修复项，不是新的待办）；未完成任务统一见 [tasks.md](./tasks.md)：
 
 | 编号 | 现状 | 目标 / 决策 |
 |------|------|-------------|
-| M1 | Release 直接上传 `dist/*` 二进制 + `SHA256SUMS.txt` | 全局规范：跨平台产物应打包为 `<产品名>-v<版本>-<os>-<arch>.<扩展名>` 归档后上传；需改造 workflow |
-| M2 | `release.yml` 的 `gate` 未包含 `check:root-clean`，且与 `ci.yml` 无跨工作流阻断 | 发布门槛与 CI 一致，见 §3「当前门禁边界」 |
-| M3 | `-h` 帮助写「depth 2」，实际递归深度为 3；部分代码注释写「2 层」；帮助固定英文 | 统一为 3 层；帮助不随语言切换须在规格中写明 |
-| M4 | i18n 仅 `zh` / `en` | 全局语言优先级为简中 → 繁中 → 英文，是否扩展繁中待评估 |
-| M5 | `cmd/` 与 `internal/ui` 无自动化测试 | 发版前按 [CONTRIBUTING.md §9.3](./CONTRIBUTING.md) 手动冒烟 |
-| M6 | 产品名 `Repo Manager` 与 Git 远程 / Go 模块 / 二进制旧标识并存；应用内文案仍为旧名 | 技术标识同步清单见 §1 |
+| M1 | ~~已修复~~ v2.3.3：Release 只上传 `RepoManager-v<版本>-<os>-<arch>.zip / .tar.gz` 归档 | 独立 `version` job + `scripts/package-release.sh`，见 §3 |
+| M2 | ~~已修复~~ v2.3.3：`gate` 含 `check:root-clean`，`release` job 校验同 SHA 的其它工作流全绿 | 跨工作流阻断见 §3 |
+| M3 | ~~已修复~~ v2.3.3：帮助、日志、代码与测试注释统一为 3 层，帮助固定英文 | 见 [OPENSPEC.md §7.3](./OPENSPEC.md) L6 |
+| M4 | ~~已修复~~ v2.3.3：i18n 三语齐全（zh / zh-Hant / en），切换 UI 与持久化覆盖全部语言 | 繁中别名与回退见 `internal/i18n` |
+| M5 | 部分收敛：`internal/ui` 新增 `progress_parse_test.go`，`cmd/` 仍无自动化测试 | 发版前按 [CONTRIBUTING.md §9.3](./CONTRIBUTING.md) 手动冒烟（清单口径已归档 D5） |
+| M6 | ~~已修复~~ v2.3.3：产品名与技术标识、远程、应用内文案全量统一 | 同步清单见 §1 |
 
 > 修复任一项时同步更新本表、[tasks.md](./tasks.md) 与 [CHANGELOG.MD](../CHANGELOG.MD)；本表只记录决策，不替代任务跟踪。

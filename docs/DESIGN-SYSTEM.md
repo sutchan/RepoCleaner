@@ -199,7 +199,7 @@ Go 版 GUI 位于 `internal/ui`，遵循本文 §2.1 配色与 §4 交互标准�
 
 **已知限制 / 待办**
 
-- `<html lang="zh">` 在 `layout.tsx` 中固定，语言切到英文时**不更新**，屏幕阅读器仍按中文朗读。
+- `layout.tsx` 的 `<html lang="zh">` 是 SSR 初始值；客户端 `page.tsx` 于 v2.3.3 起随语言同步为 `zh` / `zh-Hant` / `en`，屏幕阅读器按当前语言朗读。
 - `TabsList` 未加 `role="tablist"`，Tab 之间缺少 `aria-controls` / 方向键导航。
 - `CodeBlock` 复制按钮的 `aria-label="复制代码"` 未随界面语言切换。
 
@@ -215,7 +215,7 @@ Go 版 GUI 位于 `internal/ui`，遵循本文 §2.1 配色与 §4 交互标准�
 | G4 | 成功/失败反馈、加载态、错误态、空状态、删除确认均未实现 | §4.2 | 明确列为规划，禁止写成既有能力 |
 | G5 | `table` / `code-block` 组件已提供但页面未使用 | §3.1 | 保留为组件库能力，或按需接入 |
 | G6 | `lg` 侧栏、1200px 容器为历史设计，实际是 1024px 无侧栏 | §5 | 已按实现修正文档 |
-| G7 | `<html lang>` 不随语言切换、Tabs 缺少完整 ARIA | §6 | 后续补齐 |
+| G7 | Tabs 缺少完整 ARIA（`html lang` 已于 v2.3.3 随语言同步） | §6 | 后续补齐 |
 | G8 | ~~清理按钮无 `onClick`，界面为纯展示~~ | §3.2 | **v2.0.0 已解决**：Go + Fyne 版实现真实清理（含二次确认）；Next.js 参考界面保持纯展示并已弃用 |
 | G9 | CLI `-h` 帮助固定英文（不随 `-lang` 切换），递归深度已统一为 3 层；`cmd/` 与 `internal/ui` 无自动化测试 | §3.0 / §4.1 | v2.3.3 完成深度文本统一；发版前按 [CONTRIBUTING.md §9.3](./CONTRIBUTING.md) 手动冒烟 |
 

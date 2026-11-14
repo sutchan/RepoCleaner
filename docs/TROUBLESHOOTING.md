@@ -20,7 +20,7 @@
 |------|------|------|
 | 本机 `go build` 报 OpenGL / C 工具链相关错误 | Fyne GUI 需要 CGO、系统 OpenGL、X11 与 Wayland 开发库 | 完整 GUI 构建需 C 工具链；无工具链时用 `go build -tags nogui ./...` 只编译非 GUI 部分（**不会产出可用 GUI**）。CI 的 `gui-build` job 在 Ubuntu 安装开发库后验证完整编译 |
 | Linux 编译报 `wayland-client-core.h: No such file or directory` | `go-gl/glfw v3.4` 在 Linux 默认标签同时编译 X11 与 Wayland 后端，只装了 X11 开发库 | 安装 `libwayland-dev` 与 `libxkbcommon-dev`（CI 的 `gui-build` 已内置）；或改用 `-tags x11` 只编 X11 后端（产物不支持 Wayland，**不用于发布**） |
-| 找不到 Release 资产 | 资产按 `repo-manager-<goos>-<goarch>[.exe]` 命名（Windows 带 `.exe`），另附 `SHA256SUMS.txt` | 按 OS / 架构选择对应文件并用校验和核对；`windows/arm64` 暂不产出（托管 runner 缺交叉工具链），可在本机用 `scripts/build.ps1` 补齐 |
+| 找不到 Release 资产 | v2.3.3 起资产为 `RepoManager-v<版本>-<os>-<arch>.zip / .tar.gz` 归档（Windows/macOS zip、Linux tar.gz），另附 `SHA256SUMS.txt` | 按 OS / 架构选择归档并用校验和核对；`windows/arm64` 暂不产出（托管 runner 缺交叉工具链），`linux/arm64` 交叉目标仍需 arm64 架构开发库 |
 | 启动后是 GUI 而不是预期的命令行操作 | 只有给出功能号 `1`–`7` 才进入非交互 CLI | 写成 `repo-manager <功能号> <路径>`；单独给路径会启动 GUI 并忽略该路径 |
 
 > 前置要求：Windows / macOS / Linux；功能 1 / 5 需要 Node.js ≥ 18 与 npm；源码构建需 Go ≥ 1.25。
@@ -32,7 +32,7 @@
 | 症状 | 原因 | 处理 |
 |------|------|------|
 | 改了 `config.ini` 却没生效 | 配置文件读取自**可执行文件同目录**，不是仓库根目录 | 复制 [config.example.ini](./config.example.ini) 到 exe 同目录；该文件含本机路径，不入库 |
-| 语言设置不生效 | 语言仅 `zh` / `en`，除 `en` 外的任何值（含空值、非法值）均回落 `zh` | 用 `LANG=en` / `-lang en`；`-lang` 会写回 `config.ini` |
+| 语言设置不生效 | 支持 `zh` / `zh-Hant` / `en`，`tw` / `zh-TW` 等别名归一化为 `zh-Hant`；空值与非法值回落 `zh` | 用 `LANG=en` / `-lang en` / `-lang zh-Hant`；`-lang` 会写回 `config.ini` |
 | 目录没切换 | 优先级为 CLI 位置路径 > `config.ini` 的 `REPO_ROOT` > 平台默认（Windows `E:\Github`、Unix `~/Github`）；无功能号时路径被忽略 | 在 GUI 中选择并「保存」，或与功能号同用 CLI 位置路径 |
 | 提示「路径不存在」/「不是目录」 | `platform.ValidateRoot` 校验失败 | CLI 报错并以非 0 退出；GUI 弹窗后返回目录选择。路径含空格时用引号包裹参数 |
 

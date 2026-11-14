@@ -1,7 +1,7 @@
 # Repo Manager 落地页目录 (landing/) v2.3.3
 
 > **定位**：保存 Web 展示项目的落地页面（landing page）源码与静态资源，是页面内容的唯一落点。
-> 本轮只建立目录与用途说明，**尚未创建任何页面文件**（规划，当前未实现）；规范正文一律放 [`docs/`](../docs/README.md)。
+> 页面已于 v2.3.3 实现（`index.html` + `assets/`）；本文件只保留用途、边界与门禁约定，规范正文一律放 [`docs/`](../docs/README.md)。部署 / 上线方式仍未确定，属规划项。
 
 ---
 
@@ -22,8 +22,8 @@
 1. 页面入口建议 `landing/index.html`，静态资源归入 `landing/assets/`，使用相对路径引用，便于静态托管直接预览。
 2. 页面文案须与 [`OPENSPEC.md`](../docs/OPENSPEC.md) 的功能事实一致，禁止虚构容量、耗时、用户量等数据；产品名用 `Repo Manager`，技术标识（二进制 `repo-manager`、远程 `sutchan/RepoManager`）按实况书写，对照见 [`MAINTAINERS.md` §1](../docs/MAINTAINERS.md)。
 3. 视觉对齐 [`DESIGN-SYSTEM.md`](../docs/DESIGN-SYSTEM.md) 与 [`tokens.json`](../docs/tokens.json)；主要容器与区块加语义化 kebab-case `id`（如 `landing-hero`、`landing-features`、`landing-footer`），便于可访问性关联与测试定位。
-4. 多语言按「简中 → 繁中 → 英文」优先级规划；当前产品仅 `zh` / `en`，页面若先行须显式标注差距（见 [`OPENSPEC.md` §7.3](../docs/OPENSPEC.md) L7），不得写成已支持。
-5. 页脚须展示版本与 build 编号，格式与构建期注入规则按 [`CONTRIBUTING.md` §8.2](../docs/CONTRIBUTING.md) 执行；禁止硬编码版本号或运行时现场生成。
+4. 多语言按「简中 → 繁中 → 英文」优先级落地；页面与产品均支持 `zh` / `zh-Hant` / `en` 三语，词条齐全、切换 UI 覆盖全部语言，偏好持久化到 localStorage 并做枚举校验，`<html lang>` 同步 `zh` / `zh-Hant` / `en`。
+5. 页脚 `#landing-version` 展示 `V{semver}· build yymmddhhmm`（10 位）；版本号取自 `internal/buildinfo/version.go`，build 编号由 `npm run landing:version` 在构建期按本地时间生成并写入 `assets/version.js`，禁止硬编码或运行时现场生成；每次 bump 版本须重跑该脚本，注入缺失时显示降级文案。
 6. 源代码文件单文件 ≤ 200 行（按职责拆分），文档文件不拆分；新增 JS / TS 须通过 `npm run lint` 与 `npm run type-check`，改动文档后跑 `npm run check:docs`。
 7. 构建产物写 `landing/dist/` 或 `landing/out/`（已被 `.gitignore` 忽略）；一次性脚本、探针与中间产物写仓库根 `.tmp/`，不得散落在仓库根或本目录。
 

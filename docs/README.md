@@ -48,7 +48,7 @@ GitHub 会自动识别仓库根、`docs/` 与 `.github/` 下的特定文件。�
 
 ### 1.2 命名与仓库现状
 
-产品名是 `Repo Manager`，Go 模块 / 二进制是 `repo-manager`，Git 远程是 `sutchan/RepoManager`；本机目录名 `RepoManager` 与工作区文件 `RepoManager.code-workspace` 与产品名对应，但远程与代码标识符仍沿用旧名。完整对照、技术标识同步清单与决策见 [MAINTAINERS.md §1](./MAINTAINERS.md)。文档标题与正文一律按产品名 `Repo Manager` 书写，命令、路径与链接按实况保留。
+产品名是 `Repo Manager`，Go 模块 / 二进制是 `repo-manager`，Git 远程是 `sutchan/RepoManager`；本机目录名 `RepoManager` 与工作区文件 `RepoManager.code-workspace` 与产品名对应，v2.3.3 已完成技术标识同步（模块 / import / 命令 / 日志 / 远程 / 应用内文案）。完整对照与决策见 [MAINTAINERS.md §1](./MAINTAINERS.md)。文档标题与正文一律按产品名 `Repo Manager` 书写，命令、路径与链接按实况书写。
 
 ---
 

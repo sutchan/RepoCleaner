@@ -49,7 +49,7 @@
 |------|------|----------|
 | 平台差异全部收口到 `internal/platform` | 避免业务 / UI 散落 `runtime.GOOS` 分支 | 接口 + 按 `build tag` 的 Windows / Unix 实现 |
 | 业务与平台解耦 | 跨平台复用同一份功能逻辑 | `engine` 只依赖 `platform` 接口 |
-| 语言文案集中在 `internal/i18n` | 单一数据源，避免散落硬编码 | zh / en 字典，GUI 与日志统一引用 |
+| 语言文案集中在 `internal/i18n` | 单一数据源，避免散落硬编码 | zh / zh-Hant / en 三语字典，GUI 与日志统一引用；繁中别名归一化，非法值回落简中 |
 | 危险操作二次确认 | 删除不可逆，防止误删 | 功能 1 / 6 / 7 均需确认：GUI 确认弹窗、CLI 输入 `Y` |
 | UI 选 Fyne（Go + 系统 OpenGL） | 单二进制、跨平台一致 | 构建需 C 工具链；桌面窗口复用既有设计令牌配色 |
 
@@ -163,7 +163,7 @@
 | 项 | 内容 |
 |----|------|
 | 支持语言 | 中文（`zh`）、英文（`en`） |
-| 切换方式 | GUI 顶部语言按钮；命令行 `-lang en\|zh`；`config.ini` 的 `LANG=` |
+| 切换方式 | GUI 语言下拉框（简中 / 繁中 / 英文）；命令行 `-lang zh\|zh-Hant\|en`；`config.ini` 的 `LANG=` |
 | 默认语言 | `zh` |
 | 文案来源 | `internal/i18n`：界面字典 `T()` + 执行日志字典 `Logs()`；`lang.ini` 为 v1.x 历史保留，Go 程序不读取 |
 
@@ -265,7 +265,7 @@ RepoManager/
 │   ├── buildinfo/             # 版本权威源、Footer() / BuildInfo()
 │   ├── config/                # config.ini 读写（4 键，去重并保留未知行）
 │   ├── engine/                # 功能 1～7 平台无关业务、Run 分派、IsDangerous
-│   ├── i18n/                  # zh / en 界面与执行日志字典
+│   ├── i18n/                  # zh / zh-Hant / en 界面与执行日志字典（hant.go）
 │   ├── logs/                  # 执行日志落盘（v2.3.0）
 │   ├── platform/              # OS 差异抽象（build tag 分 Windows / Unix）
 │   └── ui/                    # Fyne GUI（nogui 标签下排除）
@@ -358,7 +358,7 @@ EXTRA_CLEAN_DIRS=
 | L4 | ~~功能 5 不检查 `npm install -g` 的退出码~~ | **v2.1.0 已修复**：逐组检查退出码，结束后汇总失败组并返回错误（CLI 退出码非 0） |
 | L5 | ~~功能 6 / 7 使用 `pause` 而非 `Y/N` 二次确认~~ | **v2.0.0 已修复**：GUI 确认弹窗 + CLI `Y/N` |
 | L6 | v2.3.2 前 `-h` 帮助的 `-recursive` 说明写「depth 2」、部分代码注释写「2 层」 | v2.3.3 已统一为 **3 层**（§3.0）：帮助、执行日志、代码注释与测试注释一致；帮助固定英文，不随 `-lang` 切换 |
-| L7 | 界面与执行日志仅 `zh` / `en`；CLI 帮助与少量错误提示为硬编码文案，不在 `internal/i18n` 字典内 | 非法语言值回落 `zh`；全局语言优先级（简中 → 繁中 → 英文）是否落地待评估，见 [MAINTAINERS.md §6](./MAINTAINERS.md) |
+| L7 | v2.3.2 前界面与执行日志仅 `zh` / `en`；CLI 帮助固定英文，不在 `internal/i18n` 字典内 | v2.3.3 补齐繁中：三语词条齐全、优先级简中 → 繁中 → 英文，非法值回落简中；`tw` / `zh-TW` 归一化为 `zh-Hant` |
 
 > 记录限制是为了让规格与实现一致；修复限制时须同步更新本表与 `CHANGELOG.MD`。
 > 排障处理见 [TROUBLESHOOTING.md](./TROUBLESHOOTING.md)；未完成事项以 [tasks.md](./tasks.md) 为唯一来源。

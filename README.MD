@@ -241,7 +241,7 @@ repo-manager -h                    # 查看帮助与构建信息
 - 提问前自查与有效 Issue 应含信息 → [支持指南](./.github/SUPPORT.md)；报缺陷用 [Issue 模板](https://github.com/sutchan/RepoManager/issues/new/choose)
 - **安全漏洞不要公开提 Issue** → [安全策略](./.github/SECURITY.md)
 - 维护者操作（GitHub About 推荐设置、命名现状、发布校验、文档治理）→ [维护者手册](./docs/MAINTAINERS.md)
-- 应用内（GUI 标题、CLI 帮助）与 Git 远程仍显示旧名 `Repo Manager`，Go 模块 / 可执行文件名为 `repo-manager`；命名对照与同步清单见[维护者手册 §1](./docs/MAINTAINERS.md)
+- 产品名 `Repo Manager` 已统一到 GUI 标题、CLI 帮助、i18n 字典、Go 模块与二进制 `repo-manager`、日志 `repo-manager.log`、Release 资产与 Git 远程 `sutchan/RepoManager`；命名对照与展示位见[维护者手册 §1](./docs/MAINTAINERS.md)
 
 ---
 
@@ -321,7 +321,7 @@ A：可执行文件同目录的 `repo-manager.log`，CLI 与 GUI 均追加写入
 
 根 `src/` 是 v1.x 的 Next.js + React + TypeScript + Tailwind v4 参考界面（纯展示，不执行真实清理；真实清理由 Go 版实现）。自 v2.0.0 起已弃用，仅保留作历史参考：
 
-- **单一数据源** `src/lib/data/`，文案统一经 `src/lib/i18n.ts` 中/英双语切换
+- **单一数据源** `src/lib/data/`，文案统一经 `src/lib/i18n.ts` 简中 / 繁中 / 英文三语切换
 - **设计令牌** `src/app/globals.css` 的 CSS 变量，与 `docs/tokens.json` 对齐
 - **语义化 id** 主要容器/区块均带 `id`（如 `repo-manager-app`、`main-tabs`、`repo-card-<name>`）
 - **页脚** 展示 `vX.Y.Z · build yymmddhhmm`（10 位 build 编号，由 `next.config.ts` 从 `package.json` 注入）
