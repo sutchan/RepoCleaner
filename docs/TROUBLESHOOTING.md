@@ -72,7 +72,7 @@
 | `npm run check:root-clean` | 根目录出现未登记条目：临时文件移入 `.tmp/`、产物移入 `reports/`；确属工程清单的登记 `scripts/check-root-clean.mjs` 白名单并同步 `.gitignore` |
 | `npm run check:docs` | Markdown 相对链接不存在或大小写不符：根文档是 `README.MD` / `CHANGELOG.MD`（大写），`docs/` 下为小写 `.md` |
 | `gofmt -l ./cmd ./internal` | 有输出即格式不合规，对列出的文件执行 `gofmt -w` |
-| `go vet` / `go test` / `go build`（`-tags nogui ./...`） | 按报错包定位；GUI 完整编译另需 C 工具链与 OpenGL / X11 / Wayland 开发库 |
+| `go vet` / `go test` / `go build`（`-tags nogui ./...`）与 `go build -tags ci ./...` | 按报错包定位；`-tags ci` 用 software driver 校验 `internal/ui` 且无需 C 工具链，GUI 完整编译另需 OpenGL / X11 / Wayland 开发库 |
 | 发布校验失败 | tag 必须等于 `v` + `internal/buildinfo/version.go` 的 `Version`，且等于 `package.json.version`；`CHANGELOG.MD` 必须有 `## [X.Y.Z]` 小节。见 [MAINTAINERS.md §3](./MAINTAINERS.md) |
 
 CI 命令清单见 [OPENSPEC.md §9.1](./OPENSPEC.md) 与 [`.github/workflows/ci.yml`](../.github/workflows/ci.yml)；发版顺序见 [CONTRIBUTING.md §8.4](./CONTRIBUTING.md)。

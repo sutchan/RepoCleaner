@@ -25,6 +25,7 @@ All notable changes to this project will be documented in this file.
 
 - **任务治理** - `docs/tasks.md` 于 2026-11-14 17:58 核查归档 D5 / D2a / D3a / W1，剩余 V5、D1–D4、D6、D7 全部完成并归档至 `docs/tasks-done.md` 第九节；`docs/tasks.md` 更新为无待办状态
 - **规范四处同步** - OPENSPEC / CONTRIBUTING / DESIGN-SYSTEM / MAINTAINERS / TROUBLESHOOTING / docs/README / landing/README 与根索引同步命名、三语、Release 归档、落地页与版本展示位；`linux/arm64` 交叉构建仍需 arm64 架构开发库，按实况登记为已知限制
+- **收口复核** - 修复 v2.3.3 收尾遗留漂移：README 版本徽章与 Release 归档下载说明、两处目录树注释、OPENSPEC §9.1 门禁命令与发布边界、MAINTAINERS §3 / §5、CONTRIBUTING §6.3、TROUBLESHOOTING §6 全部同步至 `ci.yml` / `release.yml` 实况
 
 ## [2.3.2] - 2026-11-14
 

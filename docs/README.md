@@ -103,7 +103,7 @@ RepoManager/
 ├── .tmp/                                       # 会话级临时文件唯一落点（内容不入库，用完即清）
 ├── reports/                                    # 工具正式产物目录（内容不入库）
 ├── .github/                                    # Community Health Files
-│   ├── workflows/                             # ci.yml（门禁）+ release.yml（version + gate + build + release，跨工作流阻断）
+│   ├── workflows/                             # ci.yml（门禁）+ release.yml（version + build + package + release，跨工作流全绿阻断）
 │   ├── CODE_OF_CONDUCT.md                     # 行为准则
 │   ├── SECURITY.md                            # 安全策略
 │   ├── SUPPORT.md                             # 支持指南
@@ -144,10 +144,11 @@ gofmt -l ./cmd ./internal          # 格式检查（应无输出）
 go vet -tags nogui ./...           # 静态检查（无 C 工具链时）
 go test -tags nogui -count=1 ./... # 单元测试
 go build -tags nogui ./...         # 编译（GUI 完整构建需 C 工具链）
+go build -tags ci ./...            # 编译 GUI 代码（ci software driver，无需 C 工具链）
 ./scripts/build.ps1                # Windows 交叉编译 6 目标到 bin/
 ```
 
-CI 实际执行的门禁命令以 [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) 为准（另含 `npm ci` 与默认标签的 Fyne GUI 编译验证）；发布流程见 [CONTRIBUTING.md §8.4](./CONTRIBUTING.md) 与 [MAINTAINERS.md §3](./MAINTAINERS.md)。门禁失败处理见 [TROUBLESHOOTING.md §6](./TROUBLESHOOTING.md)。
+CI 实际执行的门禁命令以 [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) 为准（另含 `npm ci`、`windows-smoke` 的 Windows runner 冒烟与默认标签的 Fyne GUI 编译验证）；发布流程见 [CONTRIBUTING.md §8.4](./CONTRIBUTING.md) 与 [MAINTAINERS.md §3](./MAINTAINERS.md)。门禁失败处理见 [TROUBLESHOOTING.md §6](./TROUBLESHOOTING.md)。
 
 ---
 

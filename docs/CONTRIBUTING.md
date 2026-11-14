@@ -310,6 +310,7 @@ npm run check:docs
 npm run check:root-clean       # 根目录清洁度门禁
 
 # 无 OpenGL C 工具链时，Go 命令统一改用 -tags nogui（含 go build -tags nogui ./...）
+go build -tags ci ./...            # 无需 C 工具链即可编译 internal/ui（ci software driver，与 ci.yml 对齐）
 ```
 
 ---

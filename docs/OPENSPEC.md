@@ -385,15 +385,16 @@ gofmt -l ./cmd ./internal                   # 输出应为空（CI 用 test -z "
 go vet -tags nogui ./...                    # 静态检查
 go test -tags nogui -count=1 ./...          # 单元 / 临时目录集成测试
 go build -tags nogui ./...                  # 编译（nogui 标签排除 GUI 包）
+go build -tags ci ./...                     # 编译 GUI 代码（ci software driver，无需 C 工具链）
 npm ci                                      # 安装参考界面依赖（CI）
 npm run check:docs                          # 校验所有 Markdown 相对链接（含大小写）
 ```
 
 预期：根目录无未登记条目、`gofmt` 无输出、`go vet` 无告警、`go test` 全部通过、`go build` 编译成功、`check:docs` 报告失效链接 0 个。Windows 本机可直接看 `gofmt -l ./cmd ./internal` 的输出，无需 `test -z` 包装。
 
-`-tags nogui` 用于无 OpenGL / C 工具链的环境；CI 另有 `gui-build` job，在 Ubuntu 安装 OpenGL / X11 / Wayland 开发库后以**默认标签**完整编译 Fyne GUI（`go build -trimpath -o .tmp/repo-manager ./cmd/repo-manager`）。`go-gl/glfw v3.4` 在 Linux 默认同时启用 X11 与 Wayland 后端，缺 `libwayland-dev` / `libxkbcommon-dev` 会在 `wl_platform.h` 处编译失败；`-tags x11` 虽可绕过，但产物不支持 Wayland，不用于发布。不得以「本机无 C 工具链」为由跳过 nogui 门禁。
+`-tags nogui` 用于无 OpenGL / C 工具链的环境；CI 另有 `gui-build` job，在 Ubuntu 安装 OpenGL / X11 / Wayland 开发库后以**默认标签**完整编译 Fyne GUI（`go build -trimpath -o .tmp/repo-manager ./cmd/repo-manager`）。`go-gl/glfw v3.4` 在 Linux 默认同时启用 X11 与 Wayland 后端，缺 `libwayland-dev` / `libxkbcommon-dev` 会在 `wl_platform.h` 处编译失败；`-tags x11` 虽可绕过，但产物不支持 Wayland，不用于发布。不得以「本机无 C 工具链」为由跳过 nogui 门禁。`windows-smoke` job 另在 Windows runner 补跑 `go test -tags nogui` 与 `go build -tags ci`；本机可用后者无需 C 工具链验证 `internal/ui`。
 
-`ci.yml` 与 [`release.yml`](../.github/workflows/release.yml) 由同一 tag push 各自触发；`release` job 以 `needs: [gate, build]` 保证发布工作流自身全绿，**ci 工作流不阻断 release**。两条工作流均通过才算完整发布闭环，详见 [MAINTAINERS.md §3](./MAINTAINERS.md) 与 [`CONTRIBUTING.md` §8.4](./CONTRIBUTING.md)。门禁失败定位见 [TROUBLESHOOTING.md §6](./TROUBLESHOOTING.md)。
+`ci.yml` 与 [`release.yml`](../.github/workflows/release.yml) 由同一 tag push 各自触发；`release` job 以 `needs: [version, build, package]` 保证发布工作流自身全绿，并在发布前用 `gh api` 校验同 SHA 的其它工作流（含 `ci.yml` 与今后新增的工作流）全部 `completed|success`，缺失、失败或超时即阻断发布。详见 [MAINTAINERS.md §3](./MAINTAINERS.md) 与 [`CONTRIBUTING.md` §8.4](./CONTRIBUTING.md)。门禁失败定位见 [TROUBLESHOOTING.md §6](./TROUBLESHOOTING.md)。
 
 > 删除类行为通过临时目录集成测试覆盖（`internal/engine` / `internal/platform` 的 `*_test.go`）；`RepoCleaner.bat` 为已弃用旧版，不再纳入自动门禁。
 

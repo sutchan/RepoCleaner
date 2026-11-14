@@ -114,5 +114,6 @@
 | D6 | 产品名同步到应用内文案与技术标识 | 高 | 已完成 | `go.mod` / import / `cmd/repo-manager/` / 二进制与日志名 / Fyne app ID / `package.json` / GitHub 链接 / Release 资产 / i18n 与 GUI/CLI 文案统一；CHANGELOG 与归档历史条目按 §8.3 保留原貌 |
 | D7 | 实现 Web 展示落地页 | 低 | 已完成 | `landing/index.html` + `assets/styles.css` / `app.js` / `version.js`（`npm run landing:version` 构建期注入 `V{semver}· build yymmddhhmm`）；语义化 kebab-case id、三语切换、响应式与深色偏好、设计令牌对齐；部署 / 上线方式仍为规划项 |
 | R7 | 版本与文档同步 | 中 | 已完成 | bump 至 2.3.3 并同步 `package.json` / `package-lock.json` / README 徽章与页脚 / `tokens.json` / 被改文件头注释；`CHANGELOG.MD` 新增 `[2.3.3]`；OPENSPEC / CONTRIBUTING / DESIGN-SYSTEM / MAINTAINERS / TROUBLESHOOTING / docs/README / landing/README 四处登记同步 |
+| R8 | v2.3.3 收口复核 | 中 | 已完成 | 修复 README 版本徽章（2.3.2 → 2.3.3）、Release 资产下载说明与目录树、docs/README 目录树；OPENSPEC §9.1 补 `go build -tags ci ./...` 并改写发布门禁边界；MAINTAINERS §3 / §5、CONTRIBUTING §6.3、TROUBLESHOOTING §6 同步 `version / build / package / release` 与 `gh api` 跨工作流阻断实况；`CHANGELOG.MD` `[2.3.3]` Docs 段补记 |
 
 > 本节按 2026-11-14 18:21 的代码与 workflow 实况归档；`docs/tasks.md` 已更新为无待办状态。已知限制（`windows/arm64` 无交叉工具链、`linux/arm64` 缺 arm64 架构开发库）登记于 [MAINTAINERS.md §6](./MAINTAINERS.md) 与 [CONTRIBUTING.md §8.4](./CONTRIBUTING.md)，不属待办。

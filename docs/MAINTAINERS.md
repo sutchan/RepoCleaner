@@ -86,7 +86,7 @@ node -p "require('./package.json').version"
 grep 'const Version' internal/buildinfo/version.go
 ```
 
-**当前门禁边界**：`release.yml` 的 `release` job 以 `needs: [gate, build]` 保证发布工作流自身全绿；`ci.yml` 由同一 tag push 独立触发，**不阻断** `release`。tag 推送后应确认两条工作流均为绿色，再对外宣布发布。
+**当前门禁边界（v2.3.3）**：`release.yml` 的 `release` job 以 `needs: [version, build, package]` 保证发布工作流自身全绿，并用 `gh api` 校验同 SHA 的其它工作流（含 `ci.yml`）全部 `completed|success`，运行中轮询等待，失败或超时即阻断；门禁由 `ci.yml` 在同 SHA 运行，不在 `release.yml` 重复执行。详见 [CONTRIBUTING.md §8.4](./CONTRIBUTING.md)。
 
 ---
 
@@ -117,7 +117,7 @@ grep 'const Version' internal/buildinfo/version.go
 
 ## 5. 门禁与目录卫生
 
-- 自动门禁命令以 [ci.yml](../.github/workflows/ci.yml) 为准（含 `check:root-clean`、`gofmt`、`go vet` / `go test` / `go build` 的 `nogui` 标签、`npm ci`、`check:docs`），完整说明见 [CONTRIBUTING.md §6.3](./CONTRIBUTING.md) 与 [OPENSPEC.md §9.1](./OPENSPEC.md)。发布侧另有 `scripts/package-release.sh`（归档）与 `npm run landing:version`（落地页版本注入，每次 bump 版本须重跑并同步 `landing/assets/version.js`）。
+- 自动门禁命令以 [ci.yml](../.github/workflows/ci.yml) 为准（含 `check:root-clean`、`gofmt`、`go vet` / `go test` / `go build` 的 `nogui` 标签、`go build -tags ci ./...` 的 GUI 代码编译、`npm ci`、`check:docs`；`windows-smoke` 另在 Windows runner 冒烟），完整说明见 [CONTRIBUTING.md §6.3](./CONTRIBUTING.md) 与 [OPENSPEC.md §9.1](./OPENSPEC.md)。发布侧另有 `scripts/package-release.sh`（归档）与 `npm run landing:version`（落地页版本注入，每次 bump 版本须重跑并同步 `landing/assets/version.js`）。
 - 一次性脚本、探针、日志、中间产物写 `.tmp/`；工具正式产物写 `reports/` / `coverage/` / `test-results/`；`*.code-workspace` 按后缀放行。
 - 新增根目录工程文件 / 子目录必须同时登记 `scripts/check-root-clean.mjs` 的 `ALLOWED_DIRS` 白名单，并核对 `.gitignore` 的忽略规则，二者不可脱节；`landing/` 已按此登记。落地页构建产物写 `landing/dist/` 或 `landing/out/`（由 `.gitignore` 忽略）。
 - 产品运行时生成的 `config.ini` / `repo-manager.log` 位于可执行文件同目录，不属仓库根目录卫生约束。

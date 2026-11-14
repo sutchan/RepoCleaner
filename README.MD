@@ -4,10 +4,10 @@
 
 [![Platform](https://img.shields.io/badge/Platform-Win%20%7C%20macOS%20%7C%20Linux-blue?style=flat)](https://github.com/sutchan/RepoManager)
 [![Go](https://img.shields.io/badge/Go-1.25%2B-00ADD8?style=flat&logo=go&logoColor=white)](https://go.dev)
-[![Version](https://img.shields.io/badge/Version-2.3.2-green?style=flat)](https://github.com/sutchan/RepoManager)
+[![Version](https://img.shields.io/badge/Version-2.3.3-green?style=flat)](https://github.com/sutchan/RepoManager)
 [![License](https://img.shields.io/badge/License-MIT-orange?style=flat)](https://github.com/sutchan/RepoManager)
 [![Node](https://img.shields.io/badge/Node.js-18%2B-339933?style=flat&logo=node.js&logoColor=white)](https://nodejs.org)
-[![i18n](https://img.shields.io/badge/i18n-中文%2FEnglish-9C27B0?style=flat)](https://github.com/sutchan/RepoManager)
+[![i18n](https://img.shields.io/badge/i18n-简中%2F繁中%2FEnglish-9C27B0?style=flat)](https://github.com/sutchan/RepoManager)
 
 </div>
 
@@ -71,7 +71,7 @@
 
 ### 使用步骤
 
-1. **获取 `repo-manager` 可执行文件**：从 GitHub Release 下载 `repo-manager-<os>-<arch>[.exe]`（Windows 带 `.exe`），用随附的 `SHA256SUMS.txt` 校验；或源码构建（`./scripts/build.ps1` / `./scripts/build.sh` 交叉编译到 `bin/`；本机快速构建 `go build -o .tmp/repo-manager ./cmd/repo-manager`，临时产物统一进 `.tmp/`，Fyne GUI 需 C 工具链）
+1. **获取 `repo-manager` 可执行文件**：从 GitHub Release 下载对应平台的 `RepoManager-v<版本>-<os>-<arch>.zip`（Windows / macOS）或 `.tar.gz`（Linux）归档，解压取得 `repo-manager[.exe]`（Windows 带 `.exe`），用随附的 `SHA256SUMS.txt` 校验；或源码构建（`./scripts/build.ps1` / `./scripts/build.sh` 交叉编译到 `bin/`；本机快速构建 `go build -o .tmp/repo-manager ./cmd/repo-manager`，临时产物统一进 `.tmp/`，Fyne GUI 需 C 工具链）
 2. **运行**：不带参数启动 GUI（Windows 双击，macOS/Linux 命令行执行）；带功能号 `1`–`7` 则直接进入命令行模式
 3. **选择仓库根目录**（GUI 输入框 / 目录选择按钮，可保存到 `config.ini`；CLI 用位置路径）
 4. **按功能按钮（GUI）或功能号（CLI）选择功能**
@@ -335,7 +335,7 @@ A：可执行文件同目录的 `repo-manager.log`，CLI 与 GUI 均追加写入
 ```
 RepoManager/
 ├── .github/                           # Community Health Files
-│   ├── workflows/                     # ci.yml（门禁）+ release.yml（push vX.Y.Z tag 触发，release job 依赖 gate + build）
+│   ├── workflows/                     # ci.yml（门禁）+ release.yml（push vX.Y.Z tag 触发，version + build + package + release，跨工作流全绿阻断）
 │   ├── CODE_OF_CONDUCT.md / SECURITY.md / SUPPORT.md
 │   ├── FUNDING.yml / CODEOWNERS / PULL_REQUEST_TEMPLATE.md
 │   └── ISSUE_TEMPLATE/                # config.yml + bug_report.yml + feature_request.yml
