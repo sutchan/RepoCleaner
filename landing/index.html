@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh" id="landing-html">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Repo Manager — 7 项功能管理全局依赖与前端项目缓存，支持 Windows / macOS / Linux。">
+  <title>Repo Manager · 前端项目清理工具</title>
+  <link rel="stylesheet" href="assets/styles.css">
+  <script src="assets/version.js"></script>
+  <script src="assets/app.js" defer></script>
+</head>
+<body id="landing-body">
+  <a class="skip-link" href="#landing-main">跳到主要内容</a>
+
+  <header id="landing-header" class="site-header">
+    <a class="brand" href="#landing-hero">Repo Manager</a>
+    <nav id="landing-nav" aria-label="主导航">
+      <a href="#landing-features" data-i18n="navFeatures">功能</a>
+      <a href="#landing-workflow" data-i18n="navWorkflow">使用步骤</a>
+      <a href="#landing-faq" data-i18n="navFaq">常见问题</a>
+    </nav>
+    <div id="landing-lang-switch" role="group" aria-label="语言切换">
+      <button type="button" data-lang="zh" id="landing-lang-zh">简体中文</button>
+      <button type="button" data-lang="zh-Hant" id="landing-lang-zh-hant">繁體中文</button>
+      <button type="button" data-lang="en" id="landing-lang-en">English</button>
+    </div>
+  </header>
+
+  <main id="landing-main">
+    <section id="landing-hero" class="hero">
+      <p class="eyebrow" data-i18n="heroEyebrow">跨平台 · 本地优先</p>
+      <h1 data-i18n="heroTitle">让前端项目保持干净</h1>
+      <p class="hero-desc" data-i18n="heroDesc">7 项功能统一管理全局 node_modules 与前端项目缓存；危险操作执行前二次确认，支持预演模式与执行日志。</p>
+      <div id="landing-cta" class="cta-row">
+        <a class="btn btn-primary" href="https://github.com/sutchan/RepoManager/releases" data-i18n="ctaDownload">下载 Release</a>
+        <a class="btn btn-outline" href="https://github.com/sutchan/RepoManager/blob/main/docs/README.md" data-i18n="ctaDocs">阅读文档</a>
+      </div>
+      <ul class="hero-facts">
+        <li data-i18n="fact1">7 项功能</li>
+        <li data-i18n="fact2">简中 / 繁中 / 英文</li>
+        <li data-i18n="fact3">Windows / macOS / Linux</li>
+      </ul>
+    </section>
+
+    <section id="landing-features" class="section">
+      <h2 data-i18n="featuresTitle">七项功能</h2>
+      <p class="section-lead" data-i18n="featuresLead">功能编号与命令行参数一致，可直接调用。</p>
+      <div id="landing-feature-grid" class="card-grid">
+        <article class="card"><span class="card-no">01</span><h3 data-i18n="f1">启用全局 node_modules</h3><p data-i18n="d1">配置 NODE_PATH 并清理项目内本地依赖。</p></article>
+        <article class="card"><span class="card-no">02</span><h3 data-i18n="f2">重置 Node 配置</h3><p data-i18n="d2">移除环境变量与项目 .npmrc。</p></article>
+        <article class="card"><span class="card-no">03</span><h3 data-i18n="f3">清理 .next 缓存</h3><p data-i18n="d3">写入同名文件以停止 Next.js 缓存写入。</p></article>
+        <article class="card"><span class="card-no">04</span><h3 data-i18n="f4">恢复 Next.js 缓存</h3><p data-i18n="d4">清除隐藏属性并删除占位文件。</p></article>
+        <article class="card"><span class="card-no">05</span><h3 data-i18n="f5">安装全局依赖</h3><p data-i18n="d5">分五组安装常用前端工具链。</p></article>
+        <article class="card"><span class="card-no">06</span><h3 data-i18n="f6">清理所有项目缓存</h3><p data-i18n="d6">按白名单清理缓存目录与本地依赖。</p></article>
+        <article class="card"><span class="card-no">07</span><h3 data-i18n="f7">清理 Vite / 构建缓存</h3><p data-i18n="d7">清理 .vite / .turbo / .angular 等目录。</p></article>
+      </div>
+    </section>
+
+    <section id="landing-workflow" class="section section-alt">
+      <h2 data-i18n="workflowTitle">三步开始</h2>
+      <div id="landing-steps" class="steps">
+        <article class="step"><span class="step-no">1</span><h3 data-i18n="w1t">取得程序</h3><p data-i18n="w1d">从 Release 下载对应平台归档，或用 Go 构建 repo-manager。</p></article>
+        <article class="step"><span class="step-no">2</span><h3 data-i18n="w2t">选择目录</h3><p data-i18n="w2d">GUI 选择目录或 CLI 传入路径，config.ini 可保存默认目录。</p></article>
+        <article class="step"><span class="step-no">3</span><h3 data-i18n="w3t">执行功能</h3><p data-i18n="w3d">点击功能按钮 1–7，或用 repo-manager &lt;1-7&gt; [路径]。</p></article>
+      </div>
+    </section>
+
+    <section id="landing-safety" class="section">
+      <h2 data-i18n="safetyTitle">安全设计</h2>
+      <ul id="landing-safety-list" class="safety-list">
+        <li data-i18n="s1">危险功能（1 / 6 / 7）执行前二次确认。</li>
+        <li data-i18n="s2">预演模式只显示将执行的操作，不修改文件。</li>
+        <li data-i18n="s3">递归扫描限制为 3 层，自定义清理目录名经安全校验。</li>
+        <li data-i18n="s4">执行日志同步写入可执行文件同目录的日志文件。</li>
+      </ul>
+    </section>
+
+    <section id="landing-faq" class="section section-alt">
+      <h2 data-i18n="faqTitle">常见问题</h2>
+      <details class="faq-item">
+        <summary data-i18n="q1">是否需要联网或上传项目数据？</summary>
+        <p data-i18n="a1">不需要。工具在本地运行，不上传仓库内容；联网仅发生在功能 5 安装全局依赖时。</p>
+      </details>
+      <details class="faq-item">
+        <summary data-i18n="q2">支持哪些操作系统？</summary>
+        <p data-i18n="a2">Go 版支持 Windows、macOS 与 Linux 单二进制；GUI 运行需要系统 OpenGL，纯命令行可用 nogui 构建。</p>
+      </details>
+      <details class="faq-item">
+        <summary data-i18n="q3">界面语言可以切换吗？</summary>
+        <p data-i18n="a3">支持简体中文、繁体中文与英文；CLI 帮助固定为英文，不随语言切换。</p>
+      </details>
+    </section>
+  </main>
+
+  <footer id="landing-footer">
+    <p id="landing-footer-line"><span id="landing-version">载入版本信息…</span></p>
+    <p class="footer-note" data-i18n="footerNote">开源 · MIT 许可 · 内容以仓库文档与 Release 说明为准</p>
+  </footer>
+</body>
+</html>

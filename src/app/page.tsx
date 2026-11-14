@@ -1,9 +1,9 @@
-// src/app/page.tsx v2.0.1
+// src/app/page.tsx v2.3.3
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { scanResults, tweaks } from "@/lib/data";
-import { i18n, type Lang } from "@/lib/i18n";
+import { HTML_LANG, SUPPORTED_LANGS, i18n, type Lang } from "@/lib/i18n";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,9 +17,26 @@ import { AlertCircle, CheckCircle2, FolderTree, ScanLine, ShieldCheck, Trash2 } 
 const APP_VERSION = process.env.NEXT_PUBLIC_APP_VERSION ?? "0.0.0";
 const BUILD_ID = process.env.NEXT_PUBLIC_BUILD_ID ?? "";
 
+const LANG_STORAGE_KEY = "repo-manager-lang";
+
 export default function Home() {
   const [lang, setLang] = useState<Lang>("zh");
   const t = i18n[lang];
+
+  // 挂载后恢复语言偏好（避免 SSR hydration 不一致），并做枚举校验
+  useEffect(() => {
+    const stored = window.localStorage.getItem(LANG_STORAGE_KEY);
+    if (stored && SUPPORTED_LANGS.includes(stored as Lang)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setLang(stored as Lang);
+    }
+  }, []);
+
+  // 同步 html lang 与持久化偏好；三语词条齐全，繁中缺失由字典保证回退
+  useEffect(() => {
+    document.documentElement.lang = HTML_LANG[lang];
+    window.localStorage.setItem(LANG_STORAGE_KEY, lang);
+  }, [lang]);
 
   const totalScan = scanResults.length;
   const safeCount = scanResults.filter((r) => r.risk === "safe").length;
@@ -40,7 +57,15 @@ export default function Home() {
               size="sm"
               onClick={() => setLang("zh")}
             >
-              中文
+              简体中文
+            </Button>
+            <Button
+              id="lang-btn-zh-hant"
+              variant={lang === "zh-Hant" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setLang("zh-Hant")}
+            >
+              繁體中文
             </Button>
             <Button
               id="lang-btn-en"
