@@ -1,4 +1,4 @@
-# RepoCleaner 维护者手册 (Maintainers) v2.3.1
+# Repo Manager 维护者手册 (Maintainers) v2.3.1
 
 > **定位**：仓库维护者的操作与决策记录——命名现状、GitHub 仓库设置、发版校验、文档治理、门禁与目录卫生。
 > 使用者请从 [README.MD](../README.MD) 开始；功能行为以 [OPENSPEC.md](./OPENSPEC.md) 为准；编码 / 提交 / 审查规范以 [CONTRIBUTING.md](./CONTRIBUTING.md) 为准；未完成的任务以 [tasks.md](./tasks.md) 为唯一来源。
@@ -12,14 +12,14 @@
 
 | 层次 | 当前值 | 依据 |
 |------|--------|------|
-| 产品展示名 | `RepoCleaner`（项目清洁助手） | 根 `README.MD`、GUI 标题、`-h` 帮助 |
+| 产品展示名 | `Repo Manager` | 根 `README.MD`、全部 `docs/` 文档标题与术语表 |
 | Go 模块 / 可执行文件 / 日志 | `repo-cleaner` / `repo-cleaner.log` | `go.mod`、`cmd/repo-cleaner/`、`scripts/build.*`、`internal/logs` |
 | Git 远程 | `https://github.com/sutchan/RepoCleaner.git` | `git remote -v` |
 | 本地目录 / 工作区文件 | 目录名 `RepoManager`、文件 `RepoManager.code-workspace` | 本机磁盘实况，不进入代码与远程 |
 
-**决策（v2.3.1）**：维持产品标识 `RepoCleaner` 不变。本地目录名与工作区文件名只影响开发机，不是产品名，也不是仓库名；文档不得把 `RepoManager` 写成产品名或远程名。
+**决策（2026-11-14）**：项目显示名统一为 `Repo Manager`，全部文档标题、正文与展示位同步；Git 远程、Go 模块与二进制标识暂沿用旧名，文档中的命令、路径与链接一律按实况书写。应用内文案（GUI 标题、CLI 帮助、i18n 字典、Web 参考界面）仍输出旧名，属代码侧待同步项，见 §6。
 
-若未来正式改名，须一次性同步：`go.mod` 模块路径与全部 import、`cmd/` 目录、二进制与日志文件名、构建脚本与 Release 资产名、Fyne app ID、`package.json` 的 `name` / `homepage` / `repository` / `bugs`、README 徽章与链接、`.github/` 模板、全部 `docs/` 文档标题与术语表，并重新打 tag。未完成前按上表书写。
+技术标识同步清单（当前未执行，改动代码时须一并处理）：`go.mod` 模块路径与全部 import、`cmd/` 目录、二进制与日志文件名、构建脚本与 Release 资产名、Fyne app ID、`package.json` 的 `name` / `homepage` / `repository` / `bugs`、README 徽章与链接、`.github/` 模板、应用内 i18n 文案与全部 `docs/` 文档标题与术语表，并重新打 tag。未完成前按上表书写。
 
 > `*.code-workspace` 是工作区配置，**禁止删除**；`scripts/check-root-clean.mjs` 按文件后缀放行，不列入白名单文件名。
 
@@ -134,6 +134,6 @@ grep 'const Version' internal/buildinfo/version.go
 | M3 | `-h` 帮助写「depth 2」，实际递归深度为 3；部分代码注释写「2 层」；帮助固定英文 | 统一为 3 层；帮助不随语言切换须在规格中写明 |
 | M4 | i18n 仅 `zh` / `en` | 全局语言优先级为简中 → 繁中 → 英文，是否扩展繁中待评估 |
 | M5 | `cmd/` 与 `internal/ui` 无自动化测试 | 发版前按 [CONTRIBUTING.md §9.3](./CONTRIBUTING.md) 手动冒烟 |
-| M6 | 本地目录名 `RepoManager` 与产品名 `RepoCleaner` 并存 | 维持现状，见 §1 |
+| M6 | 产品名 `Repo Manager` 与 Git 远程 / Go 模块 / 二进制旧标识并存；应用内文案仍为旧名 | 技术标识同步清单见 §1 |
 
 > 修复任一项时同步更新本表、[tasks.md](./tasks.md) 与 [CHANGELOG.MD](../CHANGELOG.MD)；本表只记录决策，不替代任务跟踪。

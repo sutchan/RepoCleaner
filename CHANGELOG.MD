@@ -17,6 +17,9 @@ All notable changes to this project will be documented in this file.
 
 ### Docs
 - **开发规范补充** - `CONTRIBUTING.md` §3.2 新增临时文件统一目录约定，§6.3 / §9.2 补门禁检查；`README.MD` / `docs/README.md` 目录树与常用命令同步
+- **项目更名** - 产品显示名统一为「Repo Manager」（旧名 RepoCleaner），全部文档标题、正文、术语表与维护者手册 §1 决策同步；GitHub 仓库地址、Go 模块 / 二进制 / 命令路径按实况保留，待同步清单见 [MAINTAINERS.md §1](./docs/MAINTAINERS.md)
+- **文档体系重新规划** - 新增 `docs/TROUBLESHOOTING.md`（症状 → 原因 → 处理）与 `docs/MAINTAINERS.md`（命名 / 仓库设置 / 发布 / 治理 / 已知差距）；`docs/README.md` 文档地图、四处登记规则、版本同步清单与审查清单补齐；根 `README.MD` 移除维护者专属章节并补排障入口
+- **文档事实校验** - 修正递归扫描（默认直接子目录、开启后 3 层）、`internal/` 7 个包、`config.ini` 4 键与日志落盘、CLI 单独路径、发布 `needs` 关系、测试覆盖（10 文件 / 31 函数 / 6 包）、门禁命令与 `ci.yml` 对齐；移除无依据的 `Saves 10GB+` / `Auto-Clean` 徽章；代码侧差距登记为 `docs/tasks.md` D1–D6，完成项归档至 `docs/tasks-done.md` 第六节
 
 ---
 

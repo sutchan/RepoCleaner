@@ -1,6 +1,6 @@
-# RepoCleaner 文档中心 v2.3.1
+# Repo Manager 文档中心 v2.3.1
 
-> 本目录是 RepoCleaner **所有规范与规格文档的唯一归档位置**。
+> 本目录是 Repo Manager **所有规范与规格文档的唯一归档位置**。
 > 仓库根只保留面向使用者的入口 [README.MD](../README.MD)、变更历史 [CHANGELOG.MD](../CHANGELOG.MD) 与 [LICENSE](../LICENSE)。
 > `prototype/` 仅保存原型说明（见 [prototype/README.md](../prototype/README.md)），不再存放可运行代码或规范正文。
 
@@ -16,11 +16,14 @@
 | [docs/DESIGN-SYSTEM.md](./DESIGN-SYSTEM.md) | UI 设计规范（**唯一来源**） | 设计令牌、组件库、交互、响应式、a11y、规范与实现差距清单 | 业务功能、开发流程 |
 | [docs/tokens.json](./tokens.json) | 机器可读设计令牌 | 与 DESIGN-SYSTEM.md §2 对齐的颜色/字体/间距/圆角/动效值 | 不作为产品版本号来源 |
 | [docs/config.example.ini](./config.example.ini) | 运行配置示例模板 | `config.ini`（本机生成、不入库）的起点，见 `OPENSPEC.md` §5.3 | 不含真实本机路径 |
+| [docs/TROUBLESHOOTING.md](./TROUBLESHOOTING.md) | 使用与构建排障 | 症状 → 原因 → 处理；启动、配置、清理结果、依赖、门禁失败定位 | 功能规格、版本历史 |
+| [docs/MAINTAINERS.md](./MAINTAINERS.md) | 维护者手册 | 命名现状、GitHub About 设置、发布校验、文档治理、门禁与已知差距 | 功能介绍、规范正文 |
+| [docs/tasks.md](./tasks.md) / [tasks-done.md](./tasks-done.md) | 任务单一来源 / 归档 | 未完成与进行中任务 / 已完成任务归档 | 功能规格、流程规范 |
 | [CHANGELOG.MD](../CHANGELOG.MD) | 唯一版本历史 | 按版本倒序的变更明细 | 功能规格、规范正文 |
 | [prototype/README.md](../prototype/README.md) | 原型目录说明 | 原型现状与本目录用途 | 不复述设计规范正文 |
 | [.github/PULL_REQUEST_TEMPLATE.md](../.github/PULL_REQUEST_TEMPLATE.md) | PR 审查清单 | 提交 PR 时逐项勾选 | — |
 
-**单一来源原则**：同一事实只在一处维护。需要版本历史 → `CHANGELOG.MD`；需要功能行为 → `OPENSPEC.md`；需要协作流程 → `CONTRIBUTING.md`；需要视觉/组件规范 → `DESIGN-SYSTEM.md`。禁止跨文档复制正文。
+**单一来源原则**：同一事实只在一处维护，其他位置用链接引用。需要版本历史 → `CHANGELOG.MD`；需要功能行为 → `OPENSPEC.md`；需要协作流程 → `CONTRIBUTING.md`；需要视觉/组件规范 → `DESIGN-SYSTEM.md`；需要排障 → `TROUBLESHOOTING.md`；需要维护动作与决策 → `MAINTAINERS.md`；需要未完成事项 → `tasks.md`。禁止跨文档复制正文。
 
 ### 1.1 Community Health Files（`.github/`）
 
@@ -42,6 +45,10 @@ GitHub 会自动识别仓库根、`docs/` 与 `.github/` 下的特定文件。�
 
 **决策**：规范正文只留在 `docs/`，`.github/` 只放 GitHub 平台需要的入口与模板，避免同一规范两处维护。查看文件清单见 [docs/CONTRIBUTING.md §3.1](./CONTRIBUTING.md)。
 
+### 1.2 命名与仓库现状
+
+产品名是 `Repo Manager`，Go 模块 / 二进制是 `repo-cleaner`，Git 远程是 `sutchan/RepoCleaner`；本机目录名 `RepoManager` 与工作区文件 `RepoManager.code-workspace` 与产品名对应，但远程与代码标识符仍沿用旧名。完整对照、技术标识同步清单与决策见 [MAINTAINERS.md §1](./MAINTAINERS.md)。文档标题与正文一律按产品名 `Repo Manager` 书写，命令、路径与链接按实况保留。
+
 ---
 
 ## 2. 按角色阅读
@@ -49,10 +56,13 @@ GitHub 会自动识别仓库根、`docs/` 与 `.github/` 下的特定文件。�
 | 你是… | 建议路径 |
 |-------|----------|
 | 使用者，想快速用起来 | [README.MD](../README.MD)「快速开始」→「功能详解」→「常见问题 FAQ」 |
+| 使用中遇到问题 / 门禁失败 | [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) 按症状定位 → 仍无法解决再看 [SUPPORT.md](../.github/SUPPORT.md) |
 | 贡献者，准备改代码 | [CONTRIBUTING.md](./CONTRIBUTING.md) §2 环境 → §3 目录 → §4～§5 编码与命名 → §6～§9 提交/分支/审查 |
 | 想确认某项功能的行为 | [OPENSPEC.md](./OPENSPEC.md) §3 功能规格 → §7 已知限制 |
 | 改 UI / 加组件 | [DESIGN-SYSTEM.md](./DESIGN-SYSTEM.md) §2 令牌 → §3 组件库 → §7 差距清单；令牌值见 [tokens.json](./tokens.json) |
-| 发版 / bump 版本 | [CONTRIBUTING.md](./CONTRIBUTING.md) §8 → [CHANGELOG.MD](../CHANGELOG.MD) |
+| 发版 / bump 版本 | [CONTRIBUTING.md](./CONTRIBUTING.md) §8 → [MAINTAINERS.md §3](./MAINTAINERS.md) → [CHANGELOG.MD](../CHANGELOG.MD) |
+| 维护仓库设置 / 查命名与已知差距 | [MAINTAINERS.md](./MAINTAINERS.md) §1 / §2 / §6 |
+| 新增或归档任务 | [tasks.md](./tasks.md)（唯一未完成来源）→ [tasks-done.md](./tasks-done.md) |
 | 审查 PR | [.github/PULL_REQUEST_TEMPLATE.md](../.github/PULL_REQUEST_TEMPLATE.md) + [CONTRIBUTING.md](./CONTRIBUTING.md) §9.2 |
 | 报缺陷 / 提建议 | [SUPPORT.md](../.github/SUPPORT.md) → 用 [Issue 模板](https://github.com/sutchan/RepoCleaner/issues/new/choose) 提交 |
 | 报告安全漏洞 | [SECURITY.md](../.github/SECURITY.md)，走私密渠道，**不要公开提 Issue** |
@@ -63,20 +73,24 @@ GitHub 会自动识别仓库根、`docs/` 与 `.github/` 下的特定文件。�
 ## 3. 仓库结构速览
 
 ```
-RepoCleaner/
+RepoManager/
 ├── README.MD / CHANGELOG.MD / LICENSE          # 入口、变更历史、许可证
 ├── cmd/repo-cleaner/                           # 产品本体入口（Go）
 ├── internal/                                   # Go 实现：buildinfo / config / engine / i18n / logs / platform / ui
 ├── go.mod / go.sum                             # Go 模块定义与依赖锁定
 ├── RepoCleaner.bat / lang.ini                  # v1.x 旧版 Windows 脚本与文案参考（已弃用，保留兼容）
-├── config.ini                                  # 运行配置（本机生成不入库；示例见 docs/config.example.ini）
+├── config.ini                                  # 运行配置（4 键，本机生成不入库；示例见 docs/config.example.ini）
+├── .nvmdrc / RepoManager.code-workspace       # 本机 Node 版本标记 / VS Code 工作区配置（禁止删除）
 ├── docs/                                       # 本目录：所有规范与规格
 │   ├── README.md          # 文档中心（本文）
 │   ├── OPENSPEC.md        # 产品功能规格
 │   ├── CONTRIBUTING.md    # 开发规范
 │   ├── DESIGN-SYSTEM.md   # UI 设计规范
+│   ├── TROUBLESHOOTING.md # 使用与构建排障
+│   ├── MAINTAINERS.md     # 维护者手册
 │   ├── config.example.ini # 运行配置示例模板
-│   └── tokens.json        # 设计令牌
+│   ├── tokens.json        # 设计令牌
+│   └── tasks.md / tasks-done.md  # 任务清单与完成归档
 ├── prototype/README.md                         # 原型目录说明（无规范正文、无代码）
 ├── src/                                        # 参考界面应用（Next.js App Router，v2.0.0 起已弃用）
 │   ├── app/               # layout.tsx / page.tsx / globals.css
@@ -87,7 +101,7 @@ RepoCleaner/
 ├── .tmp/                                       # 会话级临时文件唯一落点（内容不入库，用完即清）
 ├── reports/                                    # 工具正式产物目录（内容不入库）
 ├── .github/                                    # Community Health Files
-│   ├── workflows/                             # ci.yml（门禁）+ release.yml（全绿后自动发布 Release）
+│   ├── workflows/                             # ci.yml（门禁）+ release.yml（tag 触发，release job 依赖 gate + build）
 │   ├── CODE_OF_CONDUCT.md                     # 行为准则
 │   ├── SECURITY.md                            # 安全策略
 │   ├── SUPPORT.md                             # 支持指南
@@ -130,7 +144,7 @@ go build -tags nogui ./...         # 编译（GUI 完整构建需 C 工具链）
 ./scripts/build.ps1                # Windows 交叉编译 6 目标到 bin/
 ```
 
-同一组门禁在 GitHub Actions 执行（`.github/workflows/ci.yml`）；发布流程见 `CONTRIBUTING.md` §8.4。
+CI 实际执行的门禁命令以 [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) 为准（另含 `npm ci` 与默认标签的 Fyne GUI 编译验证）；发布流程见 [CONTRIBUTING.md §8.4](./CONTRIBUTING.md) 与 [MAINTAINERS.md §3](./MAINTAINERS.md)。门禁失败处理见 [TROUBLESHOOTING.md §6](./TROUBLESHOOTING.md)。
 
 ---
 
@@ -142,9 +156,13 @@ go build -tags nogui ./...         # 编译（GUI 完整构建需 C 工具链）
 4. 「规划但未实现」的内容必须显式标注，或记入 `DESIGN-SYSTEM.md` §7 差距清单，不得写成既成事实。
 5. 文档文件**不拆分**（即使超过 200 行也保持单文件完整）；源代码文件单文件 ≤ 200 行须按职责拆分。
 6. 每次文件改动至少 bump 一次 patch 版本，并同步 [CONTRIBUTING.md §8.2](./CONTRIBUTING.md) 列出的全部展示位。
-7. 禁止创建 `.github/readme.md`（与根 README 重复）；`RepoCleaner.code-workspace` 禁止删除。
+7. 禁止创建 `.github/readme.md`（与根 README 重复）；`*.code-workspace` 是工作区配置，禁止删除（当前文件名为 `RepoManager.code-workspace`）。
 8. GitHub 平台入口（行为准则、安全、支持、Issue/PR 模板、CODEOWNERS）放 `.github/`，规范正文放 `docs/`；改动社区健康文件时同步本页 §1.1 与 [CONTRIBUTING.md §3.1](./CONTRIBUTING.md) 的文件清单。禁止在 `.github/` 复制 `docs/CONTRIBUTING.md` 正文。
 9. `.github/*.yml`（FUNDING / Issue Forms / config）改动后须验证 YAML 可解析，且不得填写未经核实的账号、邮箱或承诺响应时间。
+10. **新增 / 删除 / 重命名文档**须同时更新：本页 §1 文档地图、§3 目录树、根 `README.MD` 文档索引与目录树、[MAINTAINERS.md §4](./MAINTAINERS.md) 变更对照表；新增文档标题带当前版本号，并在 `CHANGELOG.MD` 对应版本的 `Docs` 分组记录。
+11. **任务单一来源**：未完成 / 进行中任务只写 [tasks.md](./tasks.md)，完成后归档到 [tasks-done.md](./tasks-done.md)；禁止在其他文档维护待办清单或把「规划」写成既成事实。
+12. **数据真实性**：文档中的数量、行数、命令数、容量、耗时等数据须实算或有可核实来源，禁止估算、虚构；发现代码与文档冲突时以代码为准，并同步修文档或登记到 [tasks.md](./tasks.md)。
+13. **目录卫生**：新增根目录工程文件须同时核对 `.gitignore` 与 `scripts/check-root-clean.mjs` 白名单；每次改动文档后跑 `npm run check:docs` 与 `npm run check:root-clean`。
 
 ---
 
@@ -157,6 +175,7 @@ go build -tags nogui ./...         # 编译（GUI 完整构建需 C 工具链）
 | 项目根目录（单个项目，`REPO_ROOT` 的直接子目录） | — |
 | 参考界面应用（根 `src/`） | prototype 应用、前端工程 |
 | 批处理脚本（`RepoCleaner.bat`） | bat 脚本、主程序 |
+| 产品名 `Repo Manager` / 模块与二进制 `repo-cleaner` | 把本地目录名或 Git 远程写成产品名（见 [MAINTAINERS.md §1](./MAINTAINERS.md)） |
 | 功能 1 ～ 功能 7（名称见 OPENSPEC §3.0） | 功能一、F1 |
 
 完整术语表见 [CONTRIBUTING.md §5](./CONTRIBUTING.md)。

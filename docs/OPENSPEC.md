@@ -1,4 +1,4 @@
-# RepoCleaner 开放规格说明书 (OpenSpec) v2.3.1
+# Repo Manager 开放规格说明书 (OpenSpec) v2.3.1
 
 > **本文定位**：产品功能规格，定义「做什么」——7 项功能的行为契约、交互方式、环境与兼容性。
 > 开发规范（编码 / 提交 / 分支 / 审查）见 [CONTRIBUTING.md](./CONTRIBUTING.md)；UI 设计规范见 [DESIGN-SYSTEM.md](./DESIGN-SYSTEM.md)；变更历史见 [CHANGELOG.MD](../CHANGELOG.MD)；文档导航见 [docs/README.md](./README.md)。
@@ -10,7 +10,8 @@
 
 | 项 | 内容 |
 |----|------|
-| 项目名称 | RepoCleaner - 项目清洁助手 |
+| 项目名称 | Repo Manager |
+| 命名层次 | 产品名 `Repo Manager` / Go 模块与二进制 `repo-cleaner` / 本机目录名 `RepoManager`；对照与改名清单见 [MAINTAINERS.md §1](./MAINTAINERS.md) |
 | 产品本体 | `repo-cleaner`（Go 编译的跨平台可执行文件，Windows / macOS / Linux 单二进制；构建需 C 工具链，运行依赖系统 OpenGL）；`RepoCleaner.bat` 为 Windows 旧版兼容脚本（**已弃用**） |
 | 参考界面应用 | 仓库根 `src/` 的 Next.js 应用为 **v1.x 遗留、已弃用的参考界面**（纯展示，不执行真实清理）；v2.0.0 起实际 UI 为 **Go + Fyne 桌面 GUI** |
 | 核心功能 | 一键管理仓库根目录下的多个前端项目：清理冗余缓存、统一管理全局 `node_modules`、节省磁盘空间 |
@@ -181,10 +182,13 @@ GUI 提供 3 种目录来源：使用当前目录、手动输入完整路径（�
 | `-lang en\|zh` | 设置语言并写入 `config.ini` | `repo-cleaner -lang en` |
 | `-dry-run` | 预演模式：仅显示将要执行的操作，不修改任何文件（见 §4.7） | `repo-cleaner -dry-run 6` |
 | `-recursive` | 递归扫描 monorepo 深层项目（深度 3 层，见 §3.0；优先级高于 `config.ini`） | `repo-cleaner -recursive 6` |
-| `-h` / `--help` | 显示帮助信息 | `repo-cleaner -h` |
+| `-h` / `-help` / `--help` | 显示帮助信息（固定英文，含版本与 build 信息） | `repo-cleaner -h` |
 | `1`-`7` | 直接运行对应功能（命令行模式，跳过 GUI） | `repo-cleaner 1` |
-| 路径 | 指定仓库根目录（支持含空格路径，需引号包裹） | `repo-cleaner "D:\My Projects"` |
+| 路径 | 指定仓库根目录（支持含空格路径，需引号包裹）；**仅在给出功能号时生效** | `repo-cleaner 6 "D:\My Projects"` |
 | 数字 + 路径 | 为指定目录直接运行功能 | `repo-cleaner 5 E:\Projects` |
+
+> 不带功能号时启动 GUI 并忽略位置路径；`repo-cleaner` 未注册 `-root` / `-version` 标志，也没有交互式文本菜单。
+> CLI 与 GUI 的执行日志同步追加写入可执行文件同目录的 `repo-cleaner.log`（v2.3.0，见 §6.2）。
 
 ### 4.4 主菜单
 
@@ -194,7 +198,7 @@ GUI 提供 3 种目录来源：使用当前目录、手动输入完整路径（�
 
 ```
 ======================================================================
-               RepoCleaner - 项目清洁助手
+               Repo Manager
 ======================================================================
 
             目标目录: E:\Github
@@ -252,37 +256,27 @@ GUI 提供 3 种目录来源：使用当前目录、手动输入完整路径（�
 
 ### 5.2 文件结构
 
+> 完整目录树与职责边界见 [docs/README.md §3](./README.md) 与 [CONTRIBUTING.md §3.1](./CONTRIBUTING.md)；此处只列产品运行相关路径，避免多处重复维护。
+
 ```
-RepoCleaner/
-├── .github/                           # Community Health Files
-│   ├── CODE_OF_CONDUCT.md / SECURITY.md / SUPPORT.md
-│   ├── FUNDING.yml / CODEOWNERS / PULL_REQUEST_TEMPLATE.md
-│   └── ISSUE_TEMPLATE/                # config.yml + bug_report.yml + feature_request.yml
-├── docs/                              # 所有规范与规格文档归档
-│   ├── README.md                      # 文档中心（导航 + 职责边界）
-│   ├── OPENSPEC.md                    # 本文：产品功能规格
-│   ├── CONTRIBUTING.md                # 开发规范
-│   ├── DESIGN-SYSTEM.md               # UI 设计规范
-│   └── tokens.json                    # 设计令牌
-├── public/                            # 参考界面应用静态资源
-├── scripts/check-doc-links.mjs        # 文档链接校验（npm run check:docs）
-├── src/                               # 参考界面应用代码
-│   ├── app/                           # layout.tsx / page.tsx / globals.css / favicon.ico
-│   ├── components/                    # icons.tsx + ui/
-│   └── lib/                           # i18n.ts / utils.ts / data/
-├── prototype/README.md                # 原型目录说明（无代码、无规范正文）
-├── go.mod / go.sum                    # Go 模块定义与依赖锁定（Fyne）
-├── cmd/repo-cleaner/main.go           # 程序入口
-├── internal/                          # Go 源码：platform / engine / config / i18n / ui
-├── scripts/build.ps1 / build.sh       # 跨平台交叉编译脚本
-├── RepoCleaner.bat                    # v1.x 旧版 Windows 脚本（已弃用，保留兼容）
-├── config.ini                         # REPO_ROOT / LANG（本机生成，v2.2.0 起不入库；示例见 docs/config.example.ini）
-├── lang.ini                           # [en] / [zh] 文案参考节（历史保留）
-├── README.MD / CHANGELOG.MD / LICENSE # 入口、变更历史、许可证
-├── RepoCleaner.code-workspace
-├── package.json / package-lock.json / tsconfig.json / next.config.ts
-├── postcss.config.mjs / eslint.config.mjs / next-env.d.ts
-└── .gitignore
+RepoManager/
+├── cmd/repo-cleaner/          # main.go（入口）+ gui.go（默认标签）/ headless.go（nogui 占位）
+├── internal/
+│   ├── buildinfo/             # 版本权威源、Footer() / BuildInfo()
+│   ├── config/                # config.ini 读写（4 键，去重并保留未知行）
+│   ├── engine/                # 功能 1～7 平台无关业务、Run 分派、IsDangerous
+│   ├── i18n/                  # zh / en 界面与执行日志字典
+│   ├── logs/                  # 执行日志落盘（v2.3.0）
+│   ├── platform/              # OS 差异抽象（build tag 分 Windows / Unix）
+│   └── ui/                    # Fyne GUI（nogui 标签下排除）
+├── go.mod / go.sum            # Go 模块定义与依赖锁定（Fyne v2）
+├── scripts/                   # build.ps1 / build.sh + check-doc-links.mjs / check-root-clean.mjs
+├── docs/config.example.ini    # config.ini 示例模板（4 键）
+├── config.ini                 # 运行时生成于 exe 同目录，本机配置不入库
+├── repo-cleaner.log           # 运行时生成于 exe 同目录，追加写执行日志，不入库
+├── RepoCleaner.bat / lang.ini # v1.x 旧版批处理与文案（已弃用，Go 不读取 lang.ini）
+├── src/ / public/             # 已弃用的参考界面应用与静态资源
+└── README.MD / CHANGELOG.MD / LICENSE
 ```
 
 ### 5.3 配置文件格式
@@ -328,7 +322,7 @@ EXTRA_CLEAN_DIRS=
 |--------|------|------|
 | `NODE_PATH` | 全局模块路径 | 功能 1 写入用户环境（Windows：`setx`；macOS / Linux：写 shell profile）；功能 2 删除 |
 | `TEMP` | 临时目录 | 系统环境变量，写入 `.npmrc` 的 `tmp=` |
-| `REPO_ROOT` / `LANG` | 脚本内部变量 | 命令行 / `config.ini` / 交互输入 |
+| `REPO_ROOT` / `LANG` / `RECURSIVE` / `EXTRA_CLEAN_DIRS` | **不是环境变量**，是 `config.ini` 的 4 个配置键（见 §5.3） | `config.ini`；`LANG` 可由 `-lang`、`REPO_ROOT` 可由 CLI 位置路径覆盖 |
 
 ### 6.2 生成 / 修改的文件
 
@@ -336,7 +330,8 @@ EXTRA_CLEAN_DIRS=
 |------|------|------|
 | `.npmrc` | 各项目根目录 | 配置 npm 使用全局模块（功能 1 写、功能 2 删） |
 | `.next` | 各 Next.js 项目根目录 | 功能 3 创建为带隐藏属性的**文件**以阻止缓存；功能 4 清除属性后删除（属性操作按平台实现） |
-| `config.ini` | 可执行文件同目录 | 保存 `REPO_ROOT` / `LANG` |
+| `config.ini` | 可执行文件同目录 | 保存 `REPO_ROOT` / `LANG` / `RECURSIVE` / `EXTRA_CLEAN_DIRS`（4 键；保存时去重并保留注释与未知行） |
+| `repo-cleaner.log` | 可执行文件同目录 | v2.3.0 起 CLI / GUI 执行日志追加写入，带时间戳；打开失败时降级为仅下游输出，不阻断功能 |
 
 ---
 
@@ -362,8 +357,11 @@ EXTRA_CLEAN_DIRS=
 | L3 | ~~目录扫描仅覆盖 `REPO_ROOT` 的直接子目录，不递归~~ | **v2.3.0 已修复**：`RECURSIVE=true` / `-recursive` 启用 `ListProjectDirsDeep`（深度 3 层，跳过依赖与产物目录）；默认仍为直接子目录，保持安全边界 |
 | L4 | ~~功能 5 不检查 `npm install -g` 的退出码~~ | **v2.1.0 已修复**：逐组检查退出码，结束后汇总失败组并返回错误（CLI 退出码非 0） |
 | L5 | ~~功能 6 / 7 使用 `pause` 而非 `Y/N` 二次确认~~ | **v2.0.0 已修复**：GUI 确认弹窗 + CLI `Y/N` |
+| L6 | `-h` 帮助固定英文，且 `-recursive` 说明写「depth 2」；部分代码注释写「2 层」 | 实际递归深度为 **3 层**（§3.0）；文档以 3 层为准，文本与注释统一已登记 [tasks.md](./tasks.md)。帮助不随 `-lang` 切换 |
+| L7 | 界面与执行日志仅 `zh` / `en`；CLI 帮助与少量错误提示为硬编码文案，不在 `internal/i18n` 字典内 | 非法语言值回落 `zh`；全局语言优先级（简中 → 繁中 → 英文）是否落地待评估，见 [MAINTAINERS.md §6](./MAINTAINERS.md) |
 
 > 记录限制是为了让规格与实现一致；修复限制时须同步更新本表与 `CHANGELOG.MD`。
+> 排障处理见 [TROUBLESHOOTING.md](./TROUBLESHOOTING.md)；未完成事项以 [tasks.md](./tasks.md) 为唯一来源。
 
 ---
 
@@ -379,21 +377,23 @@ EXTRA_CLEAN_DIRS=
 
 ### 9.1 仓库级自动门禁（可在任意平台执行）
 
-在仓库根目录依次执行，四项全部通过方可合并：
+在仓库根目录依次执行；命令与 [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) 的 `check` job 对齐：
 
 ```bash
-gofmt -l .                                  # 输出应为空
-go vet ./cmd/... ./internal/...             # 静态检查
-go test ./cmd/... ./internal/...            # 单元 / 临时目录集成测试
-go build ./cmd/...                          # 编译产品（需 OpenGL C 工具链）
+npm run check:root-clean                    # 根目录清洁度（CI 首步）
+gofmt -l ./cmd ./internal                   # 输出应为空（CI 用 test -z "$(...)" 判定）
+go vet -tags nogui ./...                    # 静态检查
+go test -tags nogui -count=1 ./...          # 单元 / 临时目录集成测试
+go build -tags nogui ./...                  # 编译（nogui 标签排除 GUI 包）
+npm ci                                      # 安装参考界面依赖（CI）
 npm run check:docs                          # 校验所有 Markdown 相对链接（含大小写）
 ```
 
-预期：`gofmt` 无输出、`go vet` 无告警、`go test` 全部通过、`go build` 编译成功、`check:docs` 报告失效链接 0 个。
+预期：根目录无未登记条目、`gofmt` 无输出、`go vet` 无告警、`go test` 全部通过、`go build` 编译成功、`check:docs` 报告失效链接 0 个。Windows 本机可直接看 `gofmt -l ./cmd ./internal` 的输出，无需 `test -z` 包装。
 
-无 OpenGL C 工具链时，上述 Go 命令统一加 `-tags nogui`（`go build -tags nogui ./...`），GUI 包按 build tag 排除；不得以此为由跳过门禁。
+`-tags nogui` 用于无 OpenGL / C 工具链的环境；CI 另有 `gui-build` job，在 Ubuntu 安装 OpenGL / X11 开发库后以**默认标签**完整编译 Fyne GUI（`go build -trimpath -o .tmp/repo-cleaner ./cmd/repo-cleaner`）。不得以「本机无 C 工具链」为由跳过 nogui 门禁。
 
-同一组门禁在 GitHub Actions 执行（`.github/workflows/ci.yml`，另含默认标签的 Fyne GUI 编译验证）；发布流程见 [`CONTRIBUTING.md` §8.4](./CONTRIBUTING.md)：所有工作流全绿后自动发布 Release。
+`ci.yml` 与 [`release.yml`](../.github/workflows/release.yml) 由同一 tag push 各自触发；`release` job 以 `needs: [gate, build]` 保证发布工作流自身全绿，**ci 工作流不阻断 release**。两条工作流均通过才算完整发布闭环，详见 [MAINTAINERS.md §3](./MAINTAINERS.md) 与 [`CONTRIBUTING.md` §8.4](./CONTRIBUTING.md)。门禁失败定位见 [TROUBLESHOOTING.md §6](./TROUBLESHOOTING.md)。
 
 > 删除类行为通过临时目录集成测试覆盖（`internal/engine` / `internal/platform` 的 `*_test.go`）；`RepoCleaner.bat` 为已弃用旧版，不再纳入自动门禁。
 
@@ -410,7 +410,8 @@ npm run check:docs                          # 校验所有 Markdown 相对链接
 
 ### 9.3 覆盖范围说明
 
-- Go 模块已配置 `go test ./...`，覆盖 `internal/engine`、`internal/config`、`internal/i18n` 的纯逻辑与 `internal/platform` 的临时目录集成测试；这是当前的全部自动检查。
+- 当前共 **10 个 `*_test.go`**（其中 1 个为测试辅助文件）、**31 个 `Test*` 函数**，覆盖 6 个包：`internal/buildinfo`（页脚格式）、`internal/config`（配置读写与新键）、`internal/engine`（功能 1～7、预演、递归与自定义目录）、`internal/i18n`（字典完整性）、`internal/logs`（日志落盘）、`internal/platform`（目录枚举与路径校验）。CI 以 `-tags nogui` 运行 `go test`。
+- `cmd/repo-cleaner` 与 `internal/ui` **无自动化测试**，依赖 [§9.2](./CONTRIBUTING.md) 的手动冒烟清单；数据按当前仓库实算，新增测试后须同步本段。
 - 历史版本文档中的「功能 1～7 ✅ 通过」是当时的手工验证结论，不作为当前自动化覆盖证据。
 
 ---

@@ -1,6 +1,6 @@
-# RepoCleaner 开发规范与贡献指南 v2.3.1
+# Repo Manager 开发规范与贡献指南 v2.3.1
 
-> 本文是 RepoCleaner 仓库的**唯一开发规范来源**，规定「如何改代码、如何写文档、如何提交与评审」。
+> 本文是 Repo Manager 仓库的**唯一开发规范来源**，规定「如何改代码、如何写文档、如何提交与评审」。
 > 本文存放于 `docs/`；所有贡献者（含 AI 协作会话）在动手前必须阅读本文。
 > 文档导航见 [docs/README.md](./README.md)；若本文与代码实现冲突，以代码为准并及时修正本文。
 
@@ -81,9 +81,9 @@ go run ./cmd/repo-cleaner -h                     # 命令行帮助
 ### 3.1 根目录布局
 
 ```
-RepoCleaner/
+RepoManager/
 ├── .github/                     # Community Health Files（禁止创建 .github/readme.md）
-│   ├── workflows/               # ci.yml（门禁）+ release.yml（全绿后自动发布 Release，见 §8.4）
+│   ├── workflows/               # ci.yml（门禁）+ release.yml（tag 触发，门禁边界见 §8.4）
 │   ├── CODE_OF_CONDUCT.md       # 行为准则
 │   ├── SECURITY.md              # 安全策略与私密漏洞报告
 │   ├── SUPPORT.md               # 支持指南
@@ -95,11 +95,15 @@ RepoCleaner/
 │       ├── bug_report.yml       # 缺陷报告表单
 │       └── feature_request.yml  # 功能建议表单
 ├── docs/                        # 所有规范与规格文档归档
-│   ├── README.md                # 文档中心
+│   ├── README.md                # 文档中心（文档地图、职责边界、阅读路径）
 │   ├── OPENSPEC.md              # 产品功能规格
 │   ├── CONTRIBUTING.md          # 本文：开发规范
 │   ├── DESIGN-SYSTEM.md         # UI 设计规范
-│   └── tokens.json              # 设计令牌
+│   ├── TROUBLESHOOTING.md       # 使用与构建排障
+│   ├── MAINTAINERS.md           # 维护者手册（命名 / 仓库设置 / 发布 / 文档治理）
+│   ├── tokens.json              # 设计令牌
+│   ├── config.example.ini       # 运行配置示例模板（4 键）
+│   └── tasks.md / tasks-done.md # 任务单一来源与完成归档
 ├── public/                      # 参考界面应用静态资源（SVG）
 ├── scripts/                     # 工程脚本
 │   ├── check-doc-links.mjs      # 文档相对链接校验（npm run check:docs）
@@ -109,8 +113,8 @@ RepoCleaner/
 ├── .tmp/                        # 会话级临时文件唯一落点（内容不入库，用完即清）
 ├── reports/                     # 工具正式产物目录（报告 / 覆盖率 / 测试结果，内容不入库）
 ├── go.mod / go.sum              # Go 模块定义与依赖锁定（Fyne）
-├── cmd/repo-cleaner/main.go     # 产品本体入口（参数解析 / OS 分发 / 启动 GUI）
-├── internal/                    # Go 源码：platform / engine / config / i18n / ui
+├── cmd/repo-cleaner/            # 产品本体入口：main.go + gui.go（默认）/ headless.go（nogui）
+├── internal/                    # Go 源码：buildinfo / config / engine / i18n / logs / platform / ui（7 个包）
 ├── src/                         # 已弃用参考界面应用（Next.js App Router，v1.x 遗留）
 │   ├── app/                     # 路由与全局样式：layout.tsx / page.tsx / globals.css / favicon.ico
 │   ├── components/
@@ -123,10 +127,11 @@ RepoCleaner/
 ├── prototype/                   # 原型目录，仅保留 README.md 说明，无代码、无规范正文
 │   └── README.md
 ├── RepoCleaner.bat              # v1.x 旧版 Windows 脚本（已弃用，保留兼容）
-├── config.ini                   # 运行配置：REPO_ROOT / LANG（本机生成，v2.2.0 起不入库，示例见 docs/config.example.ini）
-├── lang.ini                     # 语言文案参考节 [en] / [zh]
+├── config.ini                   # 运行配置：4 键（本机生成，v2.2.0 起不入库，示例见 docs/config.example.ini）
+├── lang.ini                     # 语言文案参考节 [en] / [zh]（v1.x 历史保留，Go 不读取）
 ├── README.MD / CHANGELOG.MD / LICENSE     # 入口、变更历史、许可证
-├── RepoCleaner.code-workspace   # VS Code 工作区配置，禁止删除
+├── RepoManager.code-workspace   # VS Code 工作区配置，禁止删除（本地目录名非产品名，见 MAINTAINERS.md §1）
+├── .nvmdrc                      # 本机 Node 版本标记
 ├── package.json / package-lock.json / tsconfig.json / next.config.ts
 ├── postcss.config.mjs / eslint.config.mjs / next-env.d.ts
 └── .gitignore
@@ -141,7 +146,9 @@ RepoCleaner/
 5. **文件行数**：所有源代码文件（`.ts/.tsx/.js/.jsx/.vue/.py/.dart/.go/.java` 等）单文件 **≤ 200 行**。超出时按职责拆分为更小模块（组件拆子组件、逻辑抽纯函数/常量/类型），且**不得改变对外导出契约**。
    - **文档文件（`.md/.markdown/.mdx/.rst`）不拆分**，即使超过 200 行也保持单文件完整连贯。
    - `.bat` 为批处理脚本，不纳入源码 200 行规则，但仍须按标签分节、保持可读。
-6. **临时文件统一落固定子目录**：一次性脚本、探针、调试日志、中间产物一律写入 `.tmp/`；工具正式产物（审计报告、覆盖率、`*-result.json` 等）写入 `reports/` / `coverage/` / `test-results/`。写入前先 `mkdir -p`，本轮产生的 `.tmp/` 内容在任务结束前清理；需长期留存的证据改写进 `docs/` 或测试断言。两类目录均已在 `.gitignore` 忽略，并在 ESLint / `tsconfig.json` / `check-doc-links.mjs` 中排除，避免临时脚本让门禁假红。**禁止**在仓库根或顶层散落 `.tmp-*.mjs`、`tmp-*.js`、`*.log`、`audit-*.json` 等；根目录白名单由 `scripts/check-root-clean.mjs` 强制校验（CI 首步）。产品运行时的 `config.ini` / `repo-cleaner.log` 属 exe 同目录便携配置，不在此约束内。
+6. **临时文件统一落固定子目录**：一次性脚本、探针、调试日志、中间产物一律写入 `.tmp/`；工具正式产物（审计报告、覆盖率、`*-result.json` 等）写入 `reports/` / `coverage/` / `test-results/`。写入前先 `mkdir -p`，本轮产生的 `.tmp/` 内容在任务结束前清理；需长期留存的证据改写进 `docs/` 或测试断言。目录忽略规则以 `.gitignore` 实况为准，并在 ESLint / `tsconfig.json` / `check-doc-links.mjs` 中排除，避免临时脚本让门禁假红。**禁止**在仓库根或顶层散落 `.tmp-*.mjs`、`tmp-*.js`、`*.log`、`audit-*.json` 等；根目录白名单由 `scripts/check-root-clean.mjs` 强制校验（CI 首步），新增根目录工程文件须同时核对 `.gitignore` 与白名单。产品运行时的 `config.ini` / `repo-cleaner.log` 属 exe 同目录便携配置，不在此约束内。
+7. **新增 / 删除 / 重命名文档**须同步四处：[`docs/README.md`](./README.md) §1 文档地图与 §3 目录树、根 [`README.MD`](../README.MD) 文档索引与目录树、本文 §3.1、[`MAINTAINERS.md`](./MAINTAINERS.md) §4 变更对照表；新增文档标题带当前版本号，并在 `CHANGELOG.MD` 对应版本的 `Docs` 分组记录。同一事实只在一处维护，其余用链接引用。
+8. **命名层次**：产品名 `Repo Manager`、Go 模块与二进制 `repo-cleaner`、Git 远程 `sutchan/RepoCleaner`；本机目录名 `RepoManager` 与工作区文件 `RepoManager.code-workspace` 与产品名对应，但代码标识符、远程与应用内文案仍沿用旧名。对照、技术标识同步清单与决策见 [`MAINTAINERS.md` §1](./MAINTAINERS.md)，未完成项见 [`tasks.md`](./tasks.md)。
 
 ---
 
@@ -232,6 +239,7 @@ RepoCleaner/
 | 仓库根目录（`REPO_ROOT`，含多个项目的父目录） | 项目根目录（二者含义不同，禁止混用） |
 | 项目根目录（单个项目，`REPO_ROOT` 的直接子目录） | — |
 | 参考界面应用（根 `src/` 的 Next.js 应用，已弃用） | prototype 应用、前端工程 |
+| 产品名 `Repo Manager` | RepoCleaner / 项目清洁助手（旧名，仅历史条目保留） |
 | 产品本体（`repo-cleaner`，Go 编译的跨平台可执行文件） | Go 版、新版本 |
 | 规范文档目录（`docs/`） | 原型目录（后者专指 `prototype/`） |
 | 原型目录（`prototype/`，仅说明文件） | 设计规范目录（规范在 `docs/`） |
@@ -352,7 +360,8 @@ npm run check:root-clean       # 根目录清洁度门禁
 - `README.MD`（根） → 版本徽章 `Version-X.Y.Z` 与页脚版本号
 - `CHANGELOG.MD`（根） → 新增对应版本小节（置于最上方）
 - `docs/tokens.json` → `version`
-- `docs/DESIGN-SYSTEM.md`、`docs/README.md`、`docs/OPENSPEC.md`、`docs/CONTRIBUTING.md`、`prototype/README.md` → 标题版本
+- `docs/DESIGN-SYSTEM.md`、`docs/README.md`、`docs/OPENSPEC.md`、`docs/CONTRIBUTING.md`、`docs/TROUBLESHOOTING.md`、`docs/MAINTAINERS.md`、`prototype/README.md` → 标题版本
+- `docs/tasks.md` → 头部「当前版本」说明
 - `.github/` 下新增的 Community Health 文件 → 标题或首行注释版本
 - 被改动**代码文件**的头注释版本号
 
@@ -374,15 +383,17 @@ npm run check:root-clean       # 根目录清洁度门禁
 
 ### 8.4 发布流程与 Release 自动化
 
-**规则（强制）**：GitHub Actions **所有工作流全部通过**是发布 Release 的前置条件；全绿后由发布工作流自动创建 GitHub Release 并上传产物。禁止在 CI 未全绿时手动上传或跳过 CI 发版。
+**规则（目标）**：GitHub Actions **所有工作流全部通过**才算完整发布闭环；禁止在门禁未全绿时手动上传或跳过 CI 发版。
+
+**当前实现边界（v2.3.1 实况）**：`release.yml` 的 `release` job 以 `needs: [gate, build]` 阻断，只保证发布工作流自身全绿；`ci.yml` 由同一 tag push 独立触发，**不阻断** release。tag 推送后须人工确认两条工作流均绿再对外宣布发布。后续新增任何工作流时必须确保失败可阻断 release job（如经 `workflow_run` 汇总），才能把「所有工作流全绿」变为强制门槛；该差距已登记 [`docs/tasks.md`](./tasks.md)。
 
 | 项 | 约定 |
 |----|------|
 | 触发 | push 符合 `vX.Y.Z` 的 tag（必须与 §8.2 权威源 `Version` 一致） |
-| 全绿门槛 | 仓库内**每一个**工作流（门禁、发布及后续新增的任何 workflow）在本次运行中全部成功 |
-| 发布动作 | 全部工作流成功后，发布 job 以该 tag 创建 Release：标题 `vX.Y.Z`，说明取 `CHANGELOG.MD` 对应版本小节，附件为 6 目标二进制 + SHA256 校验和（目标矩阵与 `scripts/build.ps1` / `build.sh` 一致，build 号按 §8.2 在构建期 `-ldflags` 注入） |
+| 全绿门槛（当前） | `release.yml` 的 `gate` + `build` 全部成功；另需确认 `ci.yml` 同次运行为绿（非自动阻断） |
+| 发布动作 | 发布 job 以该 tag 创建 Release：标题 `vX.Y.Z`，说明取 `CHANGELOG.MD` 对应版本小节，附件为矩阵实际产出的二进制 + `SHA256SUMS.txt`（build 号按 §8.2 在构建期 `-ldflags` 注入） |
 | 一致性校验 | 发布前校验 tag == `internal/buildinfo/version.go` 的 `Version` == `package.json`；不一致即失败，不得发布 |
-| 失败处理 | 任一工作流失败则本次不发布；修复后删除并重新打同一 tag 重跑，禁止在失败状态下手工发版 |
+| 失败处理 | 发布工作流自身任一步失败则不发布；修复后删除并重新打同一 tag 重跑，禁止在失败状态下手工发版 |
 
 **当前状态：已落地（v2.2.0）**——实现为两个工作流：
 
@@ -417,7 +428,9 @@ npm run check:root-clean       # 根目录清洁度门禁
 - [ ] 版本号已 bump，`package.json` / README 徽章 / CHANGELOG / 展示位一致
 - [ ] `CHANGELOG.MD` 已新增对应小节；`README.MD` / `docs/OPENSPEC.md` 使用说明随功能变化更新
 - [ ] 文档链接按实际大小写与相对层级书写，新增文档归入 `docs/`
-- [ ] GitHub Actions 所有工作流全绿；发布类变更已按 §8.4 校验 tag 与版本权威源一致性
+- [ ] 新增 / 删除 / 重命名文档已同步 `docs/README.md` §1 / §3、根 `README.MD` 索引与目录树、本文 §3.1、`docs/MAINTAINERS.md` §4；排障类变更同步 `docs/TROUBLESHOOTING.md`
+- [ ] 未完成事项只记入 `docs/tasks.md`，完成后归档到 `docs/tasks-done.md`；无「规划写成既成事实」的表述
+- [ ] `npm run check:docs` 与 `npm run check:root-clean` 均通过；GitHub Actions 各工作流为绿；发布类变更已按 §8.4 校验 tag 与版本权威源一致性
 - [ ] 无密钥 / Token / 真实用户数据入库；`node_modules`、`.next`、`*.log`、`*.tsbuildinfo` 未被跟踪；`npm run check:root-clean` 通过，临时文件统一在 `.tmp/` / `reports/`
 
 ### 9.3 功能验证（GUI 手动冒烟，跨平台）
@@ -441,13 +454,16 @@ npm run check:root-clean       # 根目录清洁度门禁
 
 ## 10. 文档维护约定
 
-1. 改功能 → 同步 `docs/OPENSPEC.md` + 根 `README.MD`；改 UI → 同步 `docs/DESIGN-SYSTEM.md` + `docs/tokens.json`；改流程 → 同步本文；改文档结构 → 同步 `docs/README.md`。
-2. 文档中的**路径、命令、文件名、版本号必须与仓库实况一致**；写文档前先 `git log -1` 与 `node -p "require('./package.json').version"` 实查，禁止凭记忆填写。
-3. 禁止在文档中保留「规划中但未实现」的内容而不加标注；要么删除，要么明确写「规划，当前未实现」，或记入 `docs/DESIGN-SYSTEM.md` §7 差距清单。
-4. 数据型描述（数量、行数、命令数）须实算或引用唯一来源，禁止估算。
+1. 改功能 → 同步 `docs/OPENSPEC.md` + 根 `README.MD`；改 UI → 同步 `docs/DESIGN-SYSTEM.md` + `docs/tokens.json`；改流程 → 同步本文；改文档结构 → 同步 `docs/README.md`；维护者信息与发布校验 → 同步 `docs/MAINTAINERS.md`；症状处理 → 同步 `docs/TROUBLESHOOTING.md`。完整对照见 [`MAINTAINERS.md` §4](./MAINTAINERS.md)。
+2. 文档中的**路径、命令、文件名、版本号必须与仓库实况一致**；写文档前先 `git log -1` 与 `node -p "require('./package.json').version"` 实查，禁止凭记忆填写；本文档与代码冲突时以代码为准。
+3. 禁止在文档中保留「规划中但未实现」的内容而不加标注；要么删除，要么明确写「规划，当前未实现」，或记入 `docs/DESIGN-SYSTEM.md` §7 差距清单 / `docs/MAINTAINERS.md` §6 已知差距。
+4. 数据型描述（数量、行数、命令数）须实算或引用唯一来源，禁止估算或虚构；历史归档（`CHANGELOG.MD` 旧版本段等）不追溯改写。
 5. 文档文件不拆分；超长文档保持单文件完整。
-6. 禁止创建 `.github/readme.md`；`RepoCleaner.code-workspace` 是工作区配置，禁止删除。
-7. 改动文档后必须执行 `npm run check:docs` 校验所有 Markdown 相对链接可达（含大小写），校验方法见 `docs/README.md` §5。
+6. 禁止创建 `.github/readme.md`；`*.code-workspace` 是工作区配置，禁止删除（当前文件名 `RepoManager.code-workspace`）。
+7. 改动文档后必须执行 `npm run check:docs`（相对链接含大小写）与 `npm run check:root-clean`（根目录无散落条目），校验方法见 [`docs/README.md` §5](./README.md)。
+8. **任务单一来源**：未完成 / 进行中事项只写 `docs/tasks.md`，完成后归档到 `docs/tasks-done.md`；其他文档不得另建待办清单。
+9. **新增 / 删除 / 重命名文档**按 §3.2 规则 7 同步四处登记，并在 `CHANGELOG.MD` 对应版本的 `Docs` 分组记录。
+10. 版本同步清单按 §8.2 执行，含 `docs/TROUBLESHOOTING.md` / `docs/MAINTAINERS.md` 标题与 `docs/tasks.md` 头部版本说明。
 
 ---
 

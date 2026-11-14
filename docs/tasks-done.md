@@ -1,7 +1,8 @@
-# RepoCleaner 已完成任务 (docs/tasks-done.md)
+# Repo Manager 已完成任务 (docs/tasks-done.md)
 
-> 最后更新：2026-11-06
-> 本文件归档已完成的任务（来源：用户初始 8 项综合审查任务 + 后续 v1.2.3–v1.2.6 演进 + 本轮剩余任务 + v2.0.0 Go 迁移清单）。
+> 最后更新：**2026-11-14**
+> 本文件归档已完成的任务（来源：用户初始 8 项综合审查任务 + 后续 v1.2.3–v1.2.6 演进 + 本轮剩余任务 + v2.0.0 Go 迁移清单 + v2.3.1 文档体系重新规划）。
+> 未完成事项只在 [tasks.md](./tasks.md) 维护。
 
 ## 一、初始综合审查任务（用户首条指令）
 
@@ -71,3 +72,15 @@
 | V3 | 支持自定义清理规则 | 低 | 已完成 | `config.ini` 新增 `EXTRA_CLEAN_DIRS`（逗号分隔），并入功能 6 / 7 白名单，仅限项目目录内部匹配 |
 | V4 | 添加日志记录功能 | 低 | 已完成 | 新增 `internal/logs` 文件日志器，CLI / GUI 执行日志同步追加写入 `repo-cleaner.log` |
 | R0 | v2.3.0 收尾 | 高 | 已完成 | 版本单一来源 bump 至 2.3.0 并同步全部展示位；CHANGELOG 补 `[2.3.0]`；`gofmt` / `go vet` / `go test` / `go build`（`-tags nogui`）门禁复跑通过；提交并推送 |
+
+## 六、v2.3.1 文档体系重新规划（2026-11-14 完成）
+
+| ID | 任务 | 优先级 | 状态 | 结果 |
+|----|------|--------|------|------|
+| DOC1 | 重新规划文档信息架构 | 高 | 已完成 | 新增 [`docs/TROUBLESHOOTING.md`](./TROUBLESHOOTING.md)（症状 → 原因 → 处理）与 [`docs/MAINTAINERS.md`](./MAINTAINERS.md)（命名 / 仓库设置 / 发布 / 治理 / 差距）；[`docs/README.md`](./README.md) §1 文档地图补齐全部文档并明确单一来源；根 `README.MD` 移除维护者专属的 GitHub 设置章节 |
+| DOC2 | 修正文档与代码失真 | 高 | 已完成 | 递归扫描（默认直接子目录、开启后 3 层）、`internal/` 7 个包、`config.ini` 4 键与 `repo-cleaner.log`、单独路径被忽略、帮助参数与深度 2/3、`release.yml` 的 `needs` 关系、测试覆盖（10 文件 / 31 函数 / 6 包）、门禁命令与 `ci.yml` 对齐、目录树与工作区文件名 |
+| DOC3 | 数据真实性与可读性 | 中 | 已完成 | 移除无依据的 `Saves 10GB+` / `Auto-Clean` 徽章；补 Release 资产命名与 `SHA256SUMS.txt` 校验、预演与日志 FAQ、排障入口；根 README 命令块改为引用文档中心 |
+| DOC4 | 治理规则闭环 | 中 | 已完成 | `CONTRIBUTING.md` §3.2 / §9.2 / §10 与 `docs/README.md` §5 新增「新增文档四处登记」「任务单一来源」「数据真实性」「`check:docs` + `check:root-clean` 双门禁」；§8.2 版本同步清单补新增文档 |
+| DOC5 | 差距与待办登记 | 中 | 已完成 | `MAINTAINERS.md` §6 记录 M1–M6 现状与决策，`tasks.md` 对应登记 D1–D6 代码侧待办，`CHANGELOG.MD` 补 Docs 条目 |
+
+> 本节只归档**文档侧**成果；D1–D6 涉及代码 / workflow 改动，仍保留在 [tasks.md](./tasks.md)。

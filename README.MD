@@ -1,4 +1,4 @@
-# 🧰 项目清洁助手 (RepoCleaner)
+# 🧰 Repo Manager
 
 <div align="center">
 
@@ -241,6 +241,7 @@ repo-cleaner -h                    # 查看帮助与构建信息
 - 提问前自查与有效 Issue 应含信息 → [支持指南](./.github/SUPPORT.md)；报缺陷用 [Issue 模板](https://github.com/sutchan/RepoCleaner/issues/new/choose)
 - **安全漏洞不要公开提 Issue** → [安全策略](./.github/SECURITY.md)
 - 维护者操作（GitHub About 推荐设置、命名现状、发布校验、文档治理）→ [维护者手册](./docs/MAINTAINERS.md)
+- 应用内（GUI 标题、CLI 帮助）与 Git 远程仍显示旧名 `RepoCleaner`，Go 模块 / 可执行文件名为 `repo-cleaner`；命名对照与同步清单见[维护者手册 §1](./docs/MAINTAINERS.md)
 
 ---
 
@@ -331,7 +332,7 @@ A：可执行文件同目录的 `repo-cleaner.log`，CLI 与 GUI 均追加写入
 ## 📂 目录结构
 
 ```
-RepoCleaner/
+RepoManager/
 ├── .github/                           # Community Health Files
 │   ├── workflows/                     # ci.yml（门禁）+ release.yml（push vX.Y.Z tag 触发，release job 依赖 gate + build）
 │   ├── CODE_OF_CONDUCT.md / SECURITY.md / SUPPORT.md
@@ -357,7 +358,7 @@ RepoCleaner/
 ├── config.ini                         # 运行配置（REPO_ROOT / LANG / RECURSIVE / EXTRA_CLEAN_DIRS，exe 同目录、本机生成不入库）
 ├── lang.ini                           # v1.x 批处理语言文案（历史保留，Go 程序不读取）
 ├── README.MD / CHANGELOG.MD / LICENSE # 入口 / 变更历史 / 许可证
-├── RepoManager.code-workspace          # VS Code 工作区配置（禁止删除；本地目录名与产品名不同，见 docs/MAINTAINERS.md §1）
+├── RepoManager.code-workspace          # VS Code 工作区配置（禁止删除；命名现状见 docs/MAINTAINERS.md §1）
 ├── .nvmdrc                            # 本机 Node 版本标记
 ├── package.json                       # 参考界面依赖与版本同步位（产品唯一权威源在 internal/buildinfo/version.go）
 ├── next.config.ts                     # 参考界面 Next.js 配置（注入版本 + 10 位 build 编号）
@@ -391,6 +392,6 @@ RepoCleaner/
 
 <div align="center">
 
-RepoCleaner v2.3.1 · MIT License · [文档中心](./docs/README.md)
+Repo Manager v2.3.1 · MIT License · [文档中心](./docs/README.md)
 
 </div>
