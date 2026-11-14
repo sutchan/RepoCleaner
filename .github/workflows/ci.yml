@@ -64,10 +64,14 @@ jobs:
         with:
           go-version: '1.25'
 
-      - name: Install OpenGL / X11 dev libraries
+      - name: Install OpenGL / X11 / Wayland dev libraries
         run: |
           sudo apt-get update
-          sudo apt-get install -y libgl1-mesa-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libxxf86vm-dev
+          # go-gl/glfw v3.4 在 Linux 默认标签同时编译 X11 与 Wayland 后端，
+          # 缺 libwayland-dev / libxkbcommon-dev 会在 wl_platform.h 处直接编译失败。
+          sudo apt-get install -y \
+            libgl1-mesa-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libxxf86vm-dev \
+            libwayland-dev libxkbcommon-dev
 
       - name: go build (default tags, Fyne GUI)
         run: mkdir -p .tmp && go build -trimpath -o .tmp/repo-cleaner ./cmd/repo-cleaner

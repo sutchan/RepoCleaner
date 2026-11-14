@@ -399,7 +399,7 @@ npm run check:root-clean       # 根目录清洁度门禁
 
 **当前状态：已落地（v2.2.0）**——实现为两个工作流：
 
-- [`.github/workflows/ci.yml`](../.github/workflows/ci.yml)：`push`（`main` 与 `v*` tag）与 `pull_request` 触发；`check` job 执行 §9.1 全部仓库级门禁（nogui），`gui-build` job 在 ubuntu 安装 OpenGL / X11 开发库后以**默认构建标签**完整编译 Fyne GUI（补齐本机无 C 工具链的验证缺口）。
+- [`.github/workflows/ci.yml`](../.github/workflows/ci.yml)：`push`（`main` 与 `v*` tag）与 `pull_request` 触发；`check` job 执行 §9.1 全部仓库级门禁（nogui），`gui-build` job 在 ubuntu 安装 OpenGL / X11 / Wayland 开发库后以**默认构建标签**完整编译 Fyne GUI（补齐本机无 C 工具链的验证缺口）。`go-gl/glfw v3.4` 在 Linux 默认双后端，缺 `libwayland-dev` / `libxkbcommon-dev` 会在 `wl_platform.h` 处编译失败，排障见 [TROUBLESHOOTING.md §2](./TROUBLESHOOTING.md)。
 - [`.github/workflows/release.yml`](../.github/workflows/release.yml)：`push` `vX.Y.Z` tag 触发；`gate` job 重跑同一套门禁，`build` job 按三平台矩阵产出二进制（ubuntu：linux/amd64、linux/arm64、windows/amd64；macos：darwin/amd64、darwin/arm64；windows：windows/amd64），`release` job 校验 tag == 版本权威源 == `package.json`、生成 `SHA256SUMS.txt`、从 `CHANGELOG.MD` 提取对应小节作 Release 说明，全部成功后 `gh release create` 自动发布。
 - **全绿语义**：发布 job 以 `needs: [gate, build]` 保证发布工作流自身全绿；tag push 同时触发 `ci.yml`，同一提交上两工作流均绿才完成发布闭环。**后续新增任何工作流时，必须确保失败可阻断 release job**（如经 `workflow_run` 汇总），维持「所有工作流全绿」门槛。
 - **已知缺口**：GitHub 托管 runner 无 `aarch64-w64-mingw32-gcc`，CI 不产出 `windows/arm64`（本地 `scripts/build.ps1` 具备该交叉工具链时可补齐）；产物缺失不阻断发布，`SHA256SUMS.txt` 仅覆盖实际产出文件。

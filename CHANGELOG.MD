@@ -19,6 +19,7 @@ All notable changes to this project will be documented in this file.
 - **Release artifact 重名冲突** - `release.yml` 移除重复的 `windows/amd64` 交叉编译矩阵项（保留 windows-latest 原生构建），避免 `upload-artifact@v4` 同名失败导致 release job 被跳过
 - **Release 门禁缺项** - `release.yml` 的 `gate` 补 `npm run check:root-clean`，与 `ci.yml` 对齐
 - **自定义清理目录路径穿越** - 新增 `internal/platform/dirs.go` 的 `IsSafeCleanDirName`，在 `config.parseDirList` 与 `engine.cleanByWhitelist` 双重校验，拒绝 `..`、绝对路径、路径分隔符、盘符与 Windows 保留设备名，防止 `EXTRA_CLEAN_DIRS=..` 删除整个 `REPO_ROOT`；非法项输出双语警告
+- **CI GUI 构建缺 Wayland 依赖** - `go-gl/glfw v3.4` 在 Linux 默认标签同时编译 X11 与 Wayland 后端，缺 `libwayland-dev` / `libxkbcommon-dev` 会在 `wl_platform.h` 处失败；`ci.yml` 的 `gui-build` 与 `release.yml` 的 linux/amd64 构建补齐依赖，`TROUBLESHOOTING.md` / `OPENSPEC.md` §9.1 / `CONTRIBUTING.md` §8.4 同步说明
 
 ### Docs
 - **四处登记同步** - `docs/README.md` §1 / §3、根 `README.MD` 索引与目录树、`CONTRIBUTING.md` §3.1 / §3.2、`MAINTAINERS.md` §4 / §5 同步；`prototype/README.md` 补落地页边界

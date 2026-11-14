@@ -75,6 +75,15 @@ jobs:
         with:
           go-version: '1.25'
 
+      # linux/amd64 默认标签需 X11 + Wayland 开发库；arm64 交叉目标还需 arm64 架构的同套库，当前未配置多架构 apt 源
+      - name: Install Linux GUI dev libraries (amd64)
+        if: runner.os == 'Linux' && matrix.goarch == 'amd64'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libgl1-mesa-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libxxf86vm-dev \
+            libwayland-dev libxkbcommon-dev
+
       - name: Install cross toolchain
         if: matrix.apt != ''
         run: |

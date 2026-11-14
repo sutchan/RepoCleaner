@@ -18,7 +18,8 @@
 
 | 症状 | 原因 | 处理 |
 |------|------|------|
-| 本机 `go build` 报 OpenGL / C 工具链相关错误 | Fyne GUI 需要 CGO、系统 OpenGL 与 X11 开发库 | 完整 GUI 构建需 C 工具链；无工具链时用 `go build -tags nogui ./...` 只编译非 GUI 部分（**不会产出可用 GUI**）。CI 的 `gui-build` job 在 Ubuntu 安装开发库后验证完整编译 |
+| 本机 `go build` 报 OpenGL / C 工具链相关错误 | Fyne GUI 需要 CGO、系统 OpenGL、X11 与 Wayland 开发库 | 完整 GUI 构建需 C 工具链；无工具链时用 `go build -tags nogui ./...` 只编译非 GUI 部分（**不会产出可用 GUI**）。CI 的 `gui-build` job 在 Ubuntu 安装开发库后验证完整编译 |
+| Linux 编译报 `wayland-client-core.h: No such file or directory` | `go-gl/glfw v3.4` 在 Linux 默认标签同时编译 X11 与 Wayland 后端，只装了 X11 开发库 | 安装 `libwayland-dev` 与 `libxkbcommon-dev`（CI 的 `gui-build` 已内置）；或改用 `-tags x11` 只编 X11 后端（产物不支持 Wayland，**不用于发布**） |
 | 找不到 Release 资产 | 资产按 `repo-cleaner-<goos>-<goarch>[.exe]` 命名（Windows 带 `.exe`），另附 `SHA256SUMS.txt` | 按 OS / 架构选择对应文件并用校验和核对；`windows/arm64` 暂不产出（托管 runner 缺交叉工具链），可在本机用 `scripts/build.ps1` 补齐 |
 | 启动后是 GUI 而不是预期的命令行操作 | 只有给出功能号 `1`–`7` 才进入非交互 CLI | 写成 `repo-cleaner <功能号> <路径>`；单独给路径会启动 GUI 并忽略该路径 |
 
@@ -71,7 +72,7 @@
 | `npm run check:root-clean` | 根目录出现未登记条目：临时文件移入 `.tmp/`、产物移入 `reports/`；确属工程清单的登记 `scripts/check-root-clean.mjs` 白名单并同步 `.gitignore` |
 | `npm run check:docs` | Markdown 相对链接不存在或大小写不符：根文档是 `README.MD` / `CHANGELOG.MD`（大写），`docs/` 下为小写 `.md` |
 | `gofmt -l ./cmd ./internal` | 有输出即格式不合规，对列出的文件执行 `gofmt -w` |
-| `go vet` / `go test` / `go build`（`-tags nogui ./...`） | 按报错包定位；GUI 完整编译另需 C 工具链与 OpenGL / X11 开发库 |
+| `go vet` / `go test` / `go build`（`-tags nogui ./...`） | 按报错包定位；GUI 完整编译另需 C 工具链与 OpenGL / X11 / Wayland 开发库 |
 | 发布校验失败 | tag 必须等于 `v` + `internal/buildinfo/version.go` 的 `Version`，且等于 `package.json.version`；`CHANGELOG.MD` 必须有 `## [X.Y.Z]` 小节。见 [MAINTAINERS.md §3](./MAINTAINERS.md) |
 
 CI 命令清单见 [OPENSPEC.md §9.1](./OPENSPEC.md) 与 [`.github/workflows/ci.yml`](../.github/workflows/ci.yml)；发版顺序见 [CONTRIBUTING.md §8.4](./CONTRIBUTING.md)。
