@@ -1,4 +1,4 @@
-// internal/engine/clean.go v2.3.0
+// internal/engine/clean.go v2.3.2
 
 package engine
 
@@ -107,8 +107,15 @@ func cleanByWhitelist(p platform.Platform, repoRoot string, dirNames, fileNames 
 		return err
 	}
 	if len(opts.ExtraCleanDirs) > 0 {
-		// V3：自定义清理目录仅限项目目录内部匹配，并入白名单（对齐 OPENSPEC §3.6 / §3.7）。
-		dirNames = append(append([]string{}, dirNames...), opts.ExtraCleanDirs...)
+		// V3：自定义清理目录仅限项目目录内部；逐项校验，拒绝路径穿越。
+		dirNames = append([]string{}, dirNames...)
+		for _, name := range opts.ExtraCleanDirs {
+			if !platform.IsSafeCleanDirName(name) {
+				log.Logf(d.UnsafeCleanDir, name)
+				continue
+			}
+			dirNames = append(dirNames, name)
+		}
 	}
 	for _, project := range projects {
 		if opts.DryRun {

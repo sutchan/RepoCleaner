@@ -1,6 +1,6 @@
 //go:build !nogui
 
-// internal/ui/theme.go v2.0.1
+// internal/ui/theme.go v2.3.2
 
 package ui
 
@@ -30,7 +30,8 @@ type darkTheme struct{ fyne.Theme }
 func newTheme() fyne.Theme { return &darkTheme{Theme: theme.DefaultTheme()} }
 
 // Color 覆盖品牌令牌，其余回落 Fyne 默认。
-func (t *darkTheme) Color(name fyne.ThemeColorName) fyne.Color {
+// Fyne v2.8.2 的 Theme 接口为 Color(ThemeColorName, ThemeVariant) color.Color。
+func (t *darkTheme) Color(name fyne.ThemeColorName, variant fyne.ThemeVariant) color.Color {
 	switch name {
 	case theme.ColorNameBackground:
 		return colorBackground
@@ -47,7 +48,7 @@ func (t *darkTheme) Color(name fyne.ThemeColorName) fyne.Color {
 	case theme.ColorNameSeparator:
 		return colorBorder
 	default:
-		return t.Theme.Color(name)
+		return t.Theme.Color(name, variant)
 	}
 }
 

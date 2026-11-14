@@ -1,4 +1,4 @@
-# .github/workflows/release.yml v2.2.0
+# .github/workflows/release.yml v2.3.2
 # 发布工作流（行为契约见 docs/CONTRIBUTING.md §8.4）：
 # push vX.Y.Z tag 触发 → gate 重跑全部门禁 → 三平台矩阵构建产物
 # → 全部成功且 tag 与版本权威源一致后，自动创建 GitHub Release 并上传二进制 + SHA256SUMS。
@@ -16,7 +16,7 @@ permissions:
 
 jobs:
   gate:
-    name: gate (nogui + docs)
+    name: gate (nogui + ci + docs)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -30,6 +30,9 @@ jobs:
           node-version: 20
           cache: npm
 
+      - name: check:root-clean
+        run: npm run check:root-clean
+
       - name: gofmt
         run: test -z "$(gofmt -l ./cmd ./internal)"
 
@@ -41,6 +44,9 @@ jobs:
 
       - name: go build (nogui)
         run: go build -tags nogui ./...
+
+      - name: go build (ci tags, GUI code)
+        run: go build -tags ci ./...
 
       - name: npm ci
         run: npm ci
@@ -56,7 +62,6 @@ jobs:
         include:
           - { os: ubuntu-latest,  goos: linux,   goarch: amd64, cc: '',                       apt: '' }
           - { os: ubuntu-latest,  goos: linux,   goarch: arm64, cc: aarch64-linux-gnu-gcc,    apt: gcc-aarch64-linux-gnu }
-          - { os: ubuntu-latest,  goos: windows, goarch: amd64, cc: x86_64-w64-mingw32-gcc,   apt: gcc-mingw-w64-x86-64 }
           - { os: macos-latest,   goos: darwin,  goarch: amd64, cc: '',                       apt: '' }
           - { os: macos-latest,   goos: darwin,  goarch: arm64, cc: '',                       apt: '' }
           - { os: windows-latest, goos: windows, goarch: amd64, cc: '',                       apt: '' }

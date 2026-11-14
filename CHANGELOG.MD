@@ -11,6 +11,14 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 - **根目录白名单** - `scripts/check-root-clean.mjs` 的 `ALLOWED_DIRS` 登记 `landing/`，保证 `npm run check:root-clean` 与 CI 首步通过
+- **CLI 交互健壮性** - 非交互环境（stdin 关闭 / EOF）下危险操作不再静默当作「用户取消」，改为输出双语提示并以非零码退出；`-h` 递归深度文案由 2 层更正为 3 层
+
+### Fixed
+- **GUI 默认标签编译阻断** - 修复 `internal/ui` 全量编译错误：`ui.go` 局部变量 `logs` 遮蔽 `internal/logs` 导入包（改名 `d`）、`dialog.ShowFolderOpen` 回调按 Fyne v2.8.2 改为 `fyne.ListableURI` + `uri.Path()`、`langSelect.PlaceHolder` 由方法调用改为字段赋值、`theme.go` 的 `Theme.Color` 对齐 `(ThemeColorName, ThemeVariant) color.Color` 双参数签名；`-tags ci`（software driver，无需 C 工具链）已实测 `internal/ui` 可编译
+- **GUI 代码编译门禁** - `ci.yml` / `release.yml` 新增 `go build -tags ci ./...`，无需 OpenGL / C 工具链即可拦截 GUI 层 API 漂移
+- **Release artifact 重名冲突** - `release.yml` 移除重复的 `windows/amd64` 交叉编译矩阵项（保留 windows-latest 原生构建），避免 `upload-artifact@v4` 同名失败导致 release job 被跳过
+- **Release 门禁缺项** - `release.yml` 的 `gate` 补 `npm run check:root-clean`，与 `ci.yml` 对齐
+- **自定义清理目录路径穿越** - 新增 `internal/platform/dirs.go` 的 `IsSafeCleanDirName`，在 `config.parseDirList` 与 `engine.cleanByWhitelist` 双重校验，拒绝 `..`、绝对路径、路径分隔符、盘符与 Windows 保留设备名，防止 `EXTRA_CLEAN_DIRS=..` 删除整个 `REPO_ROOT`；非法项输出双语警告
 
 ### Docs
 - **四处登记同步** - `docs/README.md` §1 / §3、根 `README.MD` 索引与目录树、`CONTRIBUTING.md` §3.1 / §3.2、`MAINTAINERS.md` §4 / §5 同步；`prototype/README.md` 补落地页边界

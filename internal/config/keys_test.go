@@ -1,4 +1,4 @@
-// internal/config/keys_test.go v2.3.0
+// internal/config/keys_test.go v2.3.2
 
 package config
 
@@ -59,5 +59,21 @@ func TestSaveRoundTrip(t *testing.T) {
 	data, _ := os.ReadFile(path)
 	if !strings.Contains(string(data), "; comment kept") {
 		t.Fatal("comments and unknown lines should be preserved")
+	}
+}
+
+// TestParseDirListRejectsUnsafeNames 配置层第一道防线：非法目录名不得进入 Config。
+func TestParseDirListRejectsUnsafeNames(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.ini")
+	content := "EXTRA_CLEAN_DIRS=custom-out, .., ../escape, C:\\Temp, .cache, CON, sub/dir\n"
+	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	cfg, err := Load(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(cfg.ExtraCleanDirs) != 2 || cfg.ExtraCleanDirs[0] != "custom-out" || cfg.ExtraCleanDirs[1] != ".cache" {
+		t.Fatalf("应仅保留安全的目录名，得到 %v", cfg.ExtraCleanDirs)
 	}
 }

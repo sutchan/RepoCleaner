@@ -1,4 +1,4 @@
-// internal/engine/recursive_extra_test.go v2.3.0
+// internal/engine/recursive_extra_test.go v2.3.2
 
 package engine
 
@@ -65,5 +65,32 @@ func TestExtraCleanDirs(t *testing.T) {
 	}
 	if !exists(t, filepath.Join(proj, "src", "main.js")) {
 		t.Fatal("白名单之外的文件必须保留")
+	}
+}
+
+// TestExtraCleanDirsRejectsTraversal engine 层第二道防线：直接构造 Options 也不允许删除 project/..。
+func TestExtraCleanDirsRejectsTraversal(t *testing.T) {
+	s := newStub(t)
+	root := s.DefaultRepoRoot()
+	proj := newProject(t, root, "app", map[string][]byte{
+		"package.json":    []byte("{}"),
+		"keep/marker.txt": []byte("keep"),
+		"custom/out.js":   []byte("x"),
+	})
+	sibling := newProject(t, root, "sibling", map[string][]byte{"package.json": []byte("{}")})
+
+	var log captureLogger
+	opts := Options{ExtraCleanDirs: []string{"..", "custom"}}
+	if err := CleanAllCaches(s, root, i18n.Zh, opts, &log); err != nil {
+		t.Fatal(err)
+	}
+	if !exists(t, root) || !exists(t, sibling) || !exists(t, filepath.Join(proj, "keep", "marker.txt")) {
+		t.Fatal("发生路径穿越或越界删除：仓库根目录 / 兄弟项目 / 白名单外文件被误删")
+	}
+	if exists(t, filepath.Join(proj, "custom")) {
+		t.Fatal("合法的自定义目录仍应被清理")
+	}
+	if !strings.Contains(strings.Join(log.lines, "\n"), "不安全") {
+		t.Fatalf("拒绝非法目录名时应输出警告，得到 %v", log.lines)
 	}
 }

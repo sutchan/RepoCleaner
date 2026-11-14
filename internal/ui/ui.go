@@ -1,6 +1,6 @@
 //go:build !nogui
 
-// internal/ui/ui.go v2.3.0
+// internal/ui/ui.go v2.3.2
 
 // Package ui 实现 Fyne 桌面 GUI（对齐 docs/DESIGN-SYSTEM.md §3.0）。
 // 本包需要 C 工具链编译（Fyne 依赖 OpenGL）；无 C 工具链环境用 `go build -tags nogui` 校验。
@@ -41,7 +41,7 @@ func Run(cfg config.Config) {
 	render = func() {
 		lang := i18n.Lang(cfg.Lang)
 		dict := i18n.T(lang)
-		logs := i18n.Logs(lang)
+		d := i18n.Logs(lang)
 		w.SetTitle(dict.AppTitle)
 
 		output := widget.NewMultiLineEntry()
@@ -67,14 +67,14 @@ func Run(cfg config.Config) {
 			}
 			render()
 		})
-		langSelect.PlaceHolder(dict.LangLabel)
+		langSelect.PlaceHolder = dict.LangLabel
 
 		browse := widget.NewButton(dict.ChooseDir, func() {
-			dialog.ShowFolderOpen(func(uri fyne.URIReadCloser, err error) {
+			dialog.ShowFolderOpen(func(uri fyne.ListableURI, err error) {
 				if err != nil || uri == nil {
 					return
 				}
-				dirEntry.SetText(uri.URI().Path())
+				dirEntry.SetText(uri.Path())
 			}, w)
 		})
 
@@ -100,7 +100,7 @@ func Run(cfg config.Config) {
 		dryRunCheck := widget.NewCheck(dict.DryRunLabel, nil)
 		dryRunCheck.SetChecked(false)
 
-		// 递归扫描复选框：会话级选择（V1 monorepo，深度 2 层）。
+		// 递归扫描复选框：会话级选择（V1 monorepo，深度 3 层）。
 		recursiveCheck := widget.NewCheck(dict.RecursiveLabel, nil)
 		recursiveCheck.SetChecked(cfg.Recursive)
 
@@ -126,7 +126,7 @@ func Run(cfg config.Config) {
 					fileLog := logs.NewFileLogger(logs.DefaultPath(), logger)
 					defer fileLog.Close()
 					if err := engine.Run(p, fn, root, lang, opts, fileLog); err != nil {
-						fileLog.Logf(logs.ErrorPrefix, err)
+						fileLog.Logf(d.ErrorPrefix, err)
 					}
 				}()
 			}

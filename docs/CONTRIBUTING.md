@@ -387,7 +387,7 @@ npm run check:root-clean       # 根目录清洁度门禁
 
 **规则（目标）**：GitHub Actions **所有工作流全部通过**才算完整发布闭环；禁止在门禁未全绿时手动上传或跳过 CI 发版。
 
-**当前实现边界（v2.3.1 实况）**：`release.yml` 的 `release` job 以 `needs: [gate, build]` 阻断，只保证发布工作流自身全绿；`ci.yml` 由同一 tag push 独立触发，**不阻断** release。tag 推送后须人工确认两条工作流均绿再对外宣布发布。后续新增任何工作流时必须确保失败可阻断 release job（如经 `workflow_run` 汇总），才能把「所有工作流全绿」变为强制门槛；该差距已登记 [`docs/tasks.md`](./tasks.md)。
+**当前实现边界（workflow 实况）**：`release.yml` 的 `release` job 以 `needs: [gate, build]` 阻断，只保证发布工作流自身全绿；`ci.yml` 由同一 tag push 独立触发，**不阻断** release。tag 推送后须人工确认两条工作流均绿再对外宣布发布。后续新增任何工作流时必须确保失败可阻断 release job（如经 `workflow_run` 汇总），才能把「所有工作流全绿」变为强制门槛；该差距已登记 [`docs/tasks.md`](./tasks.md)。
 
 | 项 | 约定 |
 |----|------|

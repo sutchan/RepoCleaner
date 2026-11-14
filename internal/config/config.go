@@ -1,4 +1,4 @@
-// internal/config/config.go v2.3.0
+// internal/config/config.go v2.3.2
 
 // Package config 负责 config.ini 的读写：读旧 → 过滤目标键 → 补写 → 回写，
 // 保留注释与未知行（对齐 OPENSPEC §5.3 与 CONTRIBUTING.md §4.5 约定）。
@@ -9,6 +9,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"repo-cleaner/internal/platform"
 )
 
 // Config 产品运行配置。
@@ -68,13 +70,16 @@ func Load(path string) (Config, error) {
 	return cfg, nil
 }
 
-// parseDirList 解析逗号分隔的目录名列表（去空白、去空项）。
+// parseDirList 解析逗号分隔的目录名列表（去空白、去空项），
+// 并丢弃会造成路径穿越的非法目录名，避免清理目标指向项目目录之外。
 func parseDirList(value string) []string {
 	var names []string
 	for _, part := range strings.Split(value, ",") {
-		if name := strings.TrimSpace(part); name != "" {
-			names = append(names, name)
+		name := strings.TrimSpace(part)
+		if !platform.IsSafeCleanDirName(name) {
+			continue
 		}
+		names = append(names, name)
 	}
 	return names
 }

@@ -1,7 +1,8 @@
-# .github/workflows/ci.yml v2.3.1
+# .github/workflows/ci.yml v2.3.2
 # 仓库级自动门禁（行为契约见 docs/CONTRIBUTING.md §8.4 / §9.1）：
-# check:root-clean + gofmt + go vet + go test + go build + npm run check:docs，
+# check:root-clean + gofmt + go vet + go test + go build（nogui / ci）+ npm run check:docs，
 # 另含 Fyne GUI（默认构建标签，需 OpenGL / C 工具链）编译验证。
+# -tags ci 使用 Fyne software driver，无需 C 工具链即可验证 internal/ui 代码可编译。
 name: ci
 
 on:
@@ -15,7 +16,7 @@ permissions:
 
 jobs:
   check:
-    name: gate (nogui + docs)
+    name: gate (nogui + ci + docs)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -43,6 +44,9 @@ jobs:
 
       - name: go build (nogui)
         run: go build -tags nogui ./...
+
+      - name: go build (ci tags, GUI code)
+        run: go build -tags ci ./...
 
       - name: npm ci
         run: npm ci

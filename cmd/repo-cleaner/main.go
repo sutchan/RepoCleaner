@@ -1,4 +1,4 @@
-// cmd/repo-cleaner/main.go v2.3.0
+// cmd/repo-cleaner/main.go v2.3.2
 
 // 命令 repo-cleaner 是产品入口：解析参数后分流到命令行模式或 Fyne GUI。
 package main
@@ -98,8 +98,13 @@ func runCLI(p platform.Platform, cfgPath string, cfg *config.Config, fn int, roo
 	if engine.IsDangerous(fn) && !opts.DryRun {
 		fmt.Print(d.ConfirmCLI)
 		reader := bufio.NewReader(os.Stdin)
-		answer, _ := reader.ReadString('\n')
+		answer, readErr := reader.ReadString('\n')
 		if !strings.EqualFold(strings.TrimSpace(answer), "Y") {
+			// 非交互环境（stdin 关闭 / EOF）不能静默当作「用户取消」，否则脚本会误判成功。
+			if readErr != nil {
+				fmt.Fprintln(os.Stderr, d.ConfirmUnavailable)
+				os.Exit(1)
+			}
 			fmt.Println(d.Cancelled)
 			return
 		}
@@ -130,7 +135,7 @@ func printHelp() {
 	fmt.Println("  -lang en  Set language to English")
 	fmt.Println("  -lang zh  Set language to Chinese")
 	fmt.Println("  -dry-run  Preview actions without modifying anything")
-	fmt.Println("  -recursive  Recursive scan (monorepo, depth 2)")
+	fmt.Println("  -recursive  Recursive scan (monorepo, depth 3)")
 	fmt.Println("  -h        Show this help")
 	fmt.Println()
 	fmt.Println("Examples:")
